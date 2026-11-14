@@ -1,39 +1,38 @@
-# Prüfung für 0.2.0-preview.1
+# Validation for 0.2.0-preview.1
 
-Geprüft am 14. November 2026 auf dem Windows-Build-PC.
+Verified on 14 November 2026 on the Windows build PC.
 
-| Prüfung | Ergebnis |
+| Check | Result |
 | --- | --- |
-| Quellen und Abhängigkeiten in frischer Kopie vorbereitet | bestanden |
-| Windows-GNU-Releasebuild in neuem Buildordner | bestanden |
-| Engine-Bibliothekstests | 141 bestanden, 2 vorhandene Tests ignoriert |
-| Windows-Starter und Paketprüfungen | 28 bestanden |
-| Frischer Android-ARM64-Releasebuild | bestanden |
-| Android-Robolectric/JUnit-Prüfungen auf API 26 und 35 | 36 bestanden |
-| APK-Signatur, ARM64 und 16-KiB-Ausrichtung | bestanden |
-| Windows-AppContainer und Titelbild aus ZIP | bestanden |
+| Sources and dependencies prepared in a fresh copy | Passed |
+| Windows GNU release build in a fresh output directory | Passed |
+| Engine library tests | 141 passed, 2 existing tests ignored |
+| Windows launcher and package checks | 28 passed |
+| Fresh Android ARM64 release build | Passed |
+| Android Robolectric/JUnit tests on API 26 and 35 | 36 passed |
+| APK signature, ARM64 and 16-KiB alignment | Passed |
+| Windows AppContainer and title screen from ZIP | Passed |
 
-Windows wurde mit einem separaten Testprofil und einer lokal bereitgestellten
-IPA gestartet. Das Titelbild war bei 1024 × 768 sichtbar. Der begrenzte
-25-Sekunden-Test wurde absichtlich durch sein Zeitlimit beendet.
-Private Testprofile und Bilder liegen außerhalb dieses Repositorys.
+Windows was started with a separate test profile and a locally supplied IPA.
+The title screen was visible at 1024 × 768. The bounded 25-second test was
+deliberately stopped by its time limit.
+Private test profiles and images are outside this repository.
 
-23 Quellarchive und 9.974 Dateien aus 148 Rust-Paketen wurden gegen die
-bereitgestellten Prüfsummen geprüft. Die zugehörigen Quellen und
-kontrollierenden Buildskripte sind in den Source-Assets enthalten.
+23 source archives and 9,974 files from 148 Rust packages were checked against
+the supplied checksums. Matching sources and controlling build scripts are
+included in the source assets.
 
-Die Code-Dateien in emulator/src und die Android-App-Quellen stimmen mit den
-Eingaben der frischen Builds überein. Die Prüfsummen der aktuellen Runtime
-stehen in validation.json sowie in den Release-Inventaren.
+Files in emulator/src and the Android app sources match the fresh build inputs.
+Current runtime hashes are recorded in validation.json and the release
+inventories.
 
-## Grenzen
+## Limits
 
-Die neue APK wurde in dieser Prüfung nicht auf einem Handy ausgeführt.
-Das Pixel war nicht per ADB verfügbar. Frühere Pixel-Tests gelten für die
-jeweils damaligen APKs.
+The new APK was not executed on a phone during this review. The Pixel was not
+available through ADB. Earlier Pixel tests apply to their respective APKs.
 
-Der vollständige Spielverlauf, sämtliche Monsterfähigkeiten, alle GPUs und
-lange Sitzungen sind nicht verifiziert. Historische Apple-Gastbibliotheken
-wurden nicht unabhängig bytegleich neu gebaut. LICENSE_REVIEW.md beschreibt
-diese Herkunftsgrenze. Erfolgreiche Builds belegen die dokumentierte
-Rebuild-Route, keine plattformübergreifende Bytegleichheit.
+The full story, all combat effects, all GPUs and long sessions remain unverified.
+Historical Apple guest libraries have not been independently rebuilt byte for
+byte. LICENSE_REVIEW.md describes this provenance limit.
+Successful builds verify the documented rebuild route; they do not establish
+cross-platform byte-identical output.

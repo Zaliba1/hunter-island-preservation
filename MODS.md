@@ -1,42 +1,43 @@
-# Optionale Spielregeln
+# Optional gameplay rules
 
-Alle drei Mods sind beim ersten Start ausgeschaltet. Windows und Android merken
-sich die Auswahl. Ein geänderter Schalter wirkt beim nächsten Spielstart.
-Die Änderungen sind für Hunter Island 2.02 vorgesehen.
+All three mods are disabled on first launch. Windows and Android remember your
+choices. Changes take effect the next time you start the game.
+The modifications target Hunter Island 2.02.
 
-| Option | Wirkung |
+| Option | Effect |
 | --- | --- |
-| Seltene Startdrachen häufiger finden | 5 % Chance pro gewöhnlichem Wildkampf auf den vier ursprünglichen Fundfeldern |
-| Silber gegen Gold tauschen | Schaltfläche im Shop, 50 Silber für 1 Gold |
-| Kolosseum ohne 12-Stunden-Wartezeit | Der nächste lokale Arenakampf kann sofort starten |
+| More frequent starter dragons | 5% chance per ordinary wild encounter on the four original encounter tiles |
+| Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
+| No 12-hour colosseum cooldown | The next local arena battle can start immediately |
 
-## Startdrachen
+## Starter dragons
 
-| Feld auf der Originalkarte | Fangbare Grundform | Spätere Endform |
+| Original map tile | Catchable base form | Later final form |
 | --- | --- | --- |
 | over-28x92 | Leafy | Gaiawyrm |
 | over-30x91 | Ashie | Pyrowyrm |
 | over-31x89 | Bluey | Hydrowyrm |
 | over-32x87 | Galey | Ventowyrm |
 
-Der Mod entscheidet beim ersten Monster einer regulären Gruppe mit 5 %
-Wahrscheinlichkeit für den jeweiligen Drachen. Weitere Gruppenplätze werden
-aus den drei normalen Begleitern besetzt. Die Chance gilt pro Wildkampf
-auch bei unterschiedlicher Gruppengröße.
+For the first monster in an ordinary wild encounter group, the mod selects
+the corresponding dragon with a 5% probability. Remaining group slots are
+filled from the three normal companions. The probability applies per wild
+encounter, including encounters with different group sizes.
 
-## Silbertausch
+## Silver exchange
 
-Im Shop **Silber tauschen** wählen. Der Dialog bietet abhängig vom Guthaben
-1, 10 oder 100 Gold für 50, 500 oder 5.000 Silber an. Die Auswahl führt den
-angezeigten Tausch aus. **Abbrechen** schließt den Dialog.
+In the shop, select **Silber tauschen** (exchange silver). Depending on your
+balance, the dialog offers 1, 10 or 100 gold for 50, 500 or 5,000 silver.
+Selecting an offer performs the displayed exchange.
+**Abbrechen** (cancel) closes the dialog.
 
-Abbuchung und Gutschrift gehen gemeinsam in eine normale Spielstandspeicherung.
-Erfolgreiche Tauschvorgänge und gefangene Monster bleiben im Spielstand,
-wenn der Mod später ausgeschaltet wird.
+Both the debit and credit are committed together through a normal game save.
+Completed exchanges and captured monsters remain in the save after you
+disable the mod.
 
-## Kolosseum
+## Colosseum
 
-Die Option hebt die 12-Stunden-Prüfung zwischen lokalen Turnierrunden auf.
-Das Spiel verarbeitet Rundenergebnisse, Fortschritt und Belohnungen über
-seine vorhandenen Abläufe. Beim Ausschalten gilt wieder die vom Spiel
-gespeicherte Zeit des letzten Arenasieges.
+This option bypasses the 12-hour check between local tournament rounds.
+The game's existing routines handle results, progression and rewards.
+When you disable the option, the game again uses its recorded time of the
+last arena victory.

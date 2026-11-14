@@ -25,7 +25,7 @@ def validate(root):
     if (root/'DO-NOT-PUBLISH.md').exists():raise ValueError('Publication blocked')
     if not re.fullmatch(r'(?:0\.1\.0-android[1-9][0-9]*|0\.2\.0-preview\.1)',version):raise ValueError('Invalid version')
     apk=f'HunterIsland-Android-arm64-{version}.apk';source=f'HunterIsland-Source-{version}.zip';deps=f'HunterIsland-SourceDependencies-{version}.zip'
-    names={apk,source,deps,'android-license-inventory.json','license-review.md','release-checks.json','START-HIER.md'}
+    names={apk,source,deps,'android-license-inventory.json','license-review.md','release-checks.json','SETUP.md'}
     hashes={}
     for line in (root/'SHA256SUMS.txt').read_text().splitlines():
         match=re.fullmatch(r'([0-9a-f]{64})  ([^/\\]+)',line)

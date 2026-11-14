@@ -1,16 +1,16 @@
-# Bekannte Grenzen
+# Known limitations
 
-- Bestätigt geprüft ist Hunter Island 2.02. Weitere Spielversionen sind ungetestet.
-- Der vollständige Spielverlauf und alle Monsterfähigkeiten sind nicht geprüft.
-- Beim Wechsel in und aus Kämpfen können Lade-/Audioaussetzer auftreten.
-- Android iPhone Retina ist experimentell. Andere Grafiktreiber können sich
-  vom bisher verwendeten Pixel 7a unterscheiden.
-- Manche Städte und Menüs benötigen weitere Prüfung ihrer Trefferbereiche.
-- Echtgeldshop und ursprüngliche Onlinefunktionen sind nicht wiederhergestellt.
-  Der optionale Silbertausch bietet einen lokalen Weg zu Gold.
-- Spielstände sind normale Checkpoints. Ein laufender Kampf kann nicht als
-  Emulator-Savestate exportiert werden.
-- Der portable Windows-Starter exportiert Spielstände im Diagnosepaket nach
-  ausdrücklicher Auswahl. Ein Importknopf für Handy-Spielstände fehlt dort.
-- VALIDATION.md nennt den Prüfstand für genau diese Release. Historische
-  Gerätetests belegen keine vollständige Prüfung der aktuellen Binärdatei.
+- Hunter Island 2.02 is the verified game version. Other versions are untested.
+- The full story and every monster ability have not been verified.
+- Loading or audio interruptions may occur when entering or leaving battles.
+- Android iPhone Retina is experimental. Other graphics drivers may behave
+  differently from those used on the Pixel 7a.
+- Some towns and menus need further hit-target testing.
+- The real-money shop and original online features have not been restored.
+  The optional silver exchange provides a local way to obtain gold.
+- Saves are normal checkpoints. An ongoing battle cannot be exported as an
+  emulator savestate.
+- The portable Windows launcher can include saves in a diagnostic export when
+  explicitly selected. It currently has no button for importing phone saves.
+- VALIDATION.md records the scope of verification for this release. Historical
+  device tests do not establish complete testing of the current binary.

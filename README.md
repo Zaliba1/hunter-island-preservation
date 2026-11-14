@@ -1,40 +1,44 @@
 # Hunter Island Preservation
 
-Inoffizielles Projekt zur Offline-Erhaltung von Hunter Island 2.02 auf Windows
-und Android, basierend auf [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
-Die eigene, bereits entschlüsselte 32-Bit-IPA wird lokal importiert.
+An unofficial project for preserving Hunter Island 2.02 offline on Windows
+and Android, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
+Import your own compatible, already decrypted 32-bit IPA locally.
 
-## Spielen
+## Play
 
-Lade aus [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases)
-das Paket für dein Gerät.
+Download the package for your device from
+[Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
 
-| Gerät | Datei | Voraussetzungen |
+| Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows-PC | HunterIsland-Windows-x64-0.2.0-preview.1.zip | Windows 10/11 x64, Python 3.11+ in 64 Bit mit Tcl/Tk, OpenGL-Treiber |
+| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.1.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
 | Android | HunterIsland-Android-arm64-0.2.0-preview.1.apk | Android 8+, ARM64, OpenGL ES 3.0 |
 
-Windows. ZIP vollständig entpacken, Start.cmd öffnen, **Eigene IPA importieren**
-wählen und anschließend **Spiel starten**. Python mit Tcl/Tk gibt es bei
+**Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
+the game. Install Python with Tcl/Tk from
 [python.org](https://www.python.org/downloads/windows/).
 
-Android. APK installieren, App öffnen, **Eigene IPA importieren** wählen und
-anschließend **Spiel starten**. Für den APK-Installer muss Android gegebenenfalls
-die Installation aus der verwendeten Download-App erlauben.
+**Android:** install the APK, open the app, import your IPA and start the game.
+Android may ask you to allow APK installation from your download or file app.
 
-Die ausführliche [Einrichtung](SETUP.md) erklärt Updates, Bildformate,
-Spielstandübertragung und Fehlerberichte. Alle drei [optionalen Mods](MODS.md)
-sind anfangs ausgeschaltet. Die Starter merken sich die gewählten Optionen.
+The [setup guide](SETUP.md) covers installation, updates, display modes,
+save transfer and bug reports. It identifies the current launchers' German
+button labels. All three [optional mods](MODS.md) are disabled initially.
+Both launchers remember your choices.
 
-## Entwickeln
+## Develop
 
-Die gemeinsamen Emulatorquellen liegen in emulator/, der Windows-Starter in
-launcher/, der Android-Starter in emulator/android/app/.
-[BUILD.md](BUILD.md) beschreibt den Neuaufbau aus einer frischen Kopie, die
-benötigten Werkzeuge und das passende Abhängigkeitenpaket.
+The shared emulator source is in emulator/, the Windows launcher in launcher/,
+and the Android launcher in emulator/android/app/.
+[BUILD.md](BUILD.md) explains rebuilding from a fresh source copy, the required
+tools and the matching dependency source archive.
 
-Die Release-Dateien werden von passenden Quellpaketen begleitet.
-[LICENSES.md](LICENSES.md) beschreibt die Lizenzzuordnung,
-[LICENSE_REVIEW.md](LICENSE_REVIEW.md) die Prüfung und ihre Grenzen.
-[VALIDATION.md](VALIDATION.md) nennt tatsächlich ausgeführte Prüfungen.
-Dieses Projekt ist unabhängig von touchHLE, Apple und dem Spieleentwickler.
+Matching source archives accompany the binaries.
+[LICENSES.md](LICENSES.md) maps the licenses;
+[LICENSE_REVIEW.md](LICENSE_REVIEW.md) records the review and its limits.
+[VALIDATION.md](VALIDATION.md) lists the checks actually performed.
+
+This project is independent of touchHLE, Apple and the game's developer.
+Project documentation, release notes and commit messages are maintained in
+English. Game and launcher interface languages are separate from the
+documentation language.

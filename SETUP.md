@@ -1,75 +1,80 @@
-# Einrichtung und Updates
+# Setup and updates
 
-## Eigene Spielkopie
+## Your game copy
 
-Bestätigt unterstützt wird Hunter Island **2.02**, 32-Bit-ARM, als bereits
-entschlüsselte IPA. Der Import prüft Archiv, Bundle und ausführbare Datei.
-Der Starter meldet ungeeignete Dateien beim Import.
+The verified game version is Hunter Island **2.02**, 32-bit ARM, supplied as
+an already decrypted IPA. The importer checks the archive, bundle and executable
+and reports incompatible files.
+
+Project documentation is in English. The current launchers use German button
+labels; the labels below are quoted so you can find the corresponding actions.
 
 ## Windows
 
-1. Windows-x64-ZIP aus Releases herunterladen und vollständig entpacken.
-   Ein kurzer Pfad wie C:/Games/HunterIsland eignet sich.
-2. Python 3.11 oder neuer in 64 Bit mit Tcl/Tk über den offiziellen
-   [Windows-Installer](https://www.python.org/downloads/windows/) installieren.
-3. Start.cmd öffnen und **Eigene IPA importieren** auswählen.
-4. Bildformat und optionale Mods auswählen, dann **Spiel starten** drücken.
-5. Spielfenster schließen, um zum Starter zurückzukehren.
+1. Download the Windows x64 ZIP from Releases and extract it completely.
+   A short path such as C:/Games/HunterIsland is suitable.
+2. Install 64-bit Python 3.11 or later with Tcl/Tk using the official
+   [Windows installer](https://www.python.org/downloads/windows/).
+3. Open Start.cmd and select **Eigene IPA importieren** (import your IPA).
+4. Choose the display mode and optional mods, then select
+   **Spiel starten** (start the game).
+5. Close the game window to return to the launcher.
 
-Zum Spielen werden Python, Grafiktreiber und Windows-Komponenten benötigt.
-Rust und Compiler werden beim Entwickeln benötigt.
-Windows startet das Spiel in einem AppContainer ohne Netzwerkfreigabe.
-Falls die Isolationsprüfung fehlschlägt, zeigt der Starter den Fehler an.
+Playing requires Python, graphics drivers and Windows components.
+Rust and compilers are development requirements.
+Windows runs the game in an AppContainer without network capabilities.
+If the isolation check fails, the launcher displays the error.
 
-Die Windows-Daten liegen standardmäßig unter
+Windows data is stored by default in
 %LOCALAPPDATA%/HunterIslandPreservation.
-Dort befinden sich Importkopie, Einstellungen, normale Spielstände und lokale
-Sicherungen. Beim Update das neue Programmpaket vollständig in einen eigenen
-Ordner entpacken und dessen Start.cmd verwenden. Es greift auf denselben
-lokalen Datenordner zu.
+This directory contains the imported copy, settings, normal game saves and
+local backups. To update, extract the new package into its own directory and
+use its Start.cmd. It uses the same local data directory.
 
 ## Android
 
-1. ARM64-APK aus Releases auf das Handy übertragen oder herunterladen.
-2. APK öffnen und die Installation aus der verwendeten Datei-/Download-App
-   erlauben, falls Android danach fragt.
-3. **Hunter Island · touchHLE** öffnen.
-4. **Eigene IPA importieren** wählen und die eigene Datei im Dateidialog öffnen.
-5. Bildformat und Mod-Schalter wählen, dann **Spiel starten**.
+1. Download or transfer the ARM64 APK to your phone.
+2. Open the APK. If prompted, allow installation from your file/download app.
+3. Open **Hunter Island · touchHLE**.
+4. Select **Eigene IPA importieren** (import your IPA) and choose your file.
+5. Choose the display mode and mod switches, then select
+   **Spiel starten** (start the game).
 
-Updates mit derselben Projektsignatur können über die bestehende App
-installiert werden. Ein eigener Neubau verwendet die eigene Signatur.
-Vor einem Wechsel der Signatur den Spielstand exportieren. Android kann eine
-APK mit anderer Signatur nicht über dieselbe bestehende Installation installieren.
+Updates signed with the same project key can be installed over the existing
+app. A personal build uses your own key. Export your save before switching
+signatures: Android cannot install an APK with a different signature over the
+same existing app.
 
-Android bewahrt Import und Einstellungen im privaten App-Bereich auf.
-Spielstände liegen im app-eigenen externen Dateienbereich. Eine Deinstallation
-kann diese Daten entfernen. **Spielstand exportieren** erzeugt eine vom Nutzer
-gewählte ZIP-Datei.
+Android keeps the import and settings in private app storage. Saves are stored
+in the app-specific external files directory. Uninstalling the app may remove
+this data. **Spielstand exportieren** (export save) writes a ZIP to a location
+you select.
 
-## Bildformate
+## Display modes
 
-Windows bietet iPad in 1024 × 768 und iPhone in 480 × 320, jeweils quer.
-Android bietet zusätzlich experimentelles iPhone Retina in 960 × 640.
-Das Spiel hat ein festes Seitenverhältnis. Breitere Handys zeigen deshalb
-seitliche freie Flächen.
+Windows offers landscape iPad at 1024 × 768 and iPhone at 480 × 320.
+Android also offers experimental iPhone Retina at 960 × 640.
+The game uses a fixed aspect ratio, so wider phones have unused space at
+the sides.
 
-## Spielstände
+## Saves
 
-Das Spiel schreibt normale Checkpoints an seinen vorgesehenen Stellen.
-Beim Neuladen kann es deshalb in einer Stadt fortsetzen. Ein Emulator-Savestate
-für eine laufende Kampfsitzung ist nicht implementiert.
+The game writes normal checkpoints at its intended save points. Reloading may
+therefore resume in a town. Emulator savestates for an ongoing battle are
+not implemented.
 
-Android kann mit **Spielstand importieren** kompatible Sicherungs-ZIPs übernehmen.
-Vor einem Import legt die App eine lokale Sicherung des bisherigen Standes an.
-Sie lässt sich über **Sicherung vor Import exportieren** herauskopieren.
-Der Windows-Diagnoseexport kann den Spielstand auf ausdrückliche Auswahl beilegen
-und erzeugt eine Android-kompatible ZIP. Der portable Windows-Starter bietet
-gegenwärtig keinen Importknopf für Handy-Spielstände.
+Android accepts compatible backup ZIPs through **Spielstand importieren**
+(import save). Before importing, the app backs up the existing save locally.
+Use **Sicherung vor Import exportieren** (export pre-import backup) to copy
+that backup out of the app.
 
-## Fehlerberichte
+The Windows diagnostic export can include saves when you explicitly select
+that option; it produces an Android-compatible ZIP. The portable Windows
+launcher currently has no button for importing phone saves.
 
-Version, Betriebssystem/Gerät, Bildformat, aktivierte Mods und die genauen
-Schritte angeben. Diagnosepakete vor dem Teilen ansehen.
-Android exportiert Diagnoseinformationen und Spielstand-ZIPs über getrennte
-Schaltflächen. Windows kann auf ausdrückliche Auswahl Spielstände beilegen.
+## Bug reports
+
+Include the version, operating system/device, display mode, enabled mods and
+exact reproduction steps. Review diagnostic packages before sharing them.
+Android exports diagnostics and saves through separate actions.
+Windows can include saves only when explicitly selected.

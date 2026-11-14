@@ -1,38 +1,40 @@
-# Neubau und Quellenpakete
+# Rebuilding and source archives
 
-## Eingaben
+## Inputs
 
-Verwende Source-ZIP und SourceDependencies-ZIP derselben Release.
-Eine Git-Kopie desselben Release-Tags kann anstelle des Source-ZIPs verwendet
-werden. Zum Bauen werden Spielkopie und Spielstände nicht benötigt.
+Use the Source and SourceDependencies ZIPs from the same release.
+A Git checkout of the source commit recorded in release-checks.json can replace
+the Source ZIP. No game copy or saves are required to build.
 
-Source enthält Engine- und Starteränderungen, Buildskripte, Tests, Lizenztexte
-und Herkunftsnachweise. SourceDependencies enthält gepinnte native Archive,
-vollständige Cargo-Pakete, Boost und die veröffentlichten Quellfreigaben der
-historischen Gastbibliotheken.
+Source includes engine and launcher changes, build scripts, tests, license
+texts and provenance. SourceDependencies includes pinned native archives,
+complete Cargo packages, Boost and published source releases for the historical
+guest libraries.
 
-| Werkzeug | Geprüfte Version |
+| Tool | Verified version |
 | --- | --- |
 | Python | 3.11+ |
 | Rust GNU Windows | 1.90.0-x86_64-pc-windows-gnu |
 | Winlibs GNU | GCC 15.2.0 / MinGW-w64 13.0.0 UCRT r3 |
-| Boost | 1.81.0, im SourceDependencies-ZIP |
+| Boost | 1.81.0, included in SourceDependencies |
 | Android JDK | Eclipse Temurin 17 |
 | Gradle | 8.11.1 |
 | Android Gradle Plugin | 8.10.1 |
-| Android SDK | Plattform 35, Build Tools 35.0.0 |
+| Android SDK | Platform 35, Build Tools 35.0.0 |
 | Android NDK | 28.2.13676358 |
 | Android CMake | 3.22.1 |
 
-Werkzeuge aus ihren offiziellen Projekten installieren.
-toolchain-provenance.json enthält die Winlibs-Quelle und Prüfsumme.
-Visual Studio wird für diesen GNU-Buildweg nicht benötigt.
-Die Windows-Isolationsprobe baut der .NET-Framework-C#-Compiler.
+Install tools from their official projects.
+toolchain-provenance.json records the Winlibs download and checksum.
+Visual Studio is not required for this GNU build route.
+The Windows isolation probe uses the .NET Framework C# compiler.
 
-## Quellen vorbereiten
+## Prepare sources
 
-Eine frische Kopie nach C:/hi-src entpacken. Für Buildausgaben einen
-separaten leeren Ordner verwenden. Kurze Pfade ohne Leerzeichen verwenden.\nDer Windows-Ausgabeordner darf höchstens 45 Zeichen lang sein. Das vermeidet\nzu lange GCC-Abhängigkeitspfade beim nativen CPU-Kern.
+Extract a fresh source copy to C:/hi-src. Use a separate empty directory for
+build outputs. Keep source and toolchain paths short and free of spaces.
+The Windows output directory must be at most 45 characters long to avoid
+excessively long native CPU-core dependency paths in GCC.
 
 ~~~powershell
 rustup toolchain install 1.90.0-x86_64-pc-windows-gnu --profile minimal
@@ -42,11 +44,11 @@ python -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r requirements-build.txt
 ~~~
 
-Der Vorbereitungsschritt prüft die Archive und erzeugt die lokale
-Cargo-Vendor-Konfiguration. Bereits vorbereitete Herstellerquellen werden
-beim erneuten Aufruf nicht überschrieben.
+Preparation verifies the archives and generates the local Cargo vendor
+configuration. Running it again does not overwrite already prepared vendor
+sources.
 
-## Windows bauen und prüfen
+## Build and check Windows
 
 ~~~powershell
 ./tools/build-emulator.ps1 -BoostRoot ./emulator/vendor/boost -GnuRoot C:/Winlibs/mingw64 -TargetDir C:/hi-build/windows -Offline
@@ -54,44 +56,43 @@ beim erneuten Aufruf nicht überschrieben.
 ./.venv/Scripts/python.exe tools/package_release.py --emulator-exe C:/hi-build/windows/x86_64-pc-windows-gnu/release/touchHLE.exe --dependency-sources .dependencies --out dist/windows
 ~~~
 
-Das Paket enthält portablen Starter, Runtime, Lizenzzuordnung und Manifest.
-Der Build führt Engine-Tests aus. Das Packen prüft Quellen, Lizenzeinträge
-und importierte Systembibliotheken.
+The package contains the portable launcher, runtime, license mapping and
+manifest. The build runs engine tests. Packaging checks sources, license
+entries and imported system libraries.
 
-## Android bauen und prüfen
+## Build and check Android
 
-JDK-/SDK-/Gradle-Pfade an die eigenen Installationen anpassen.
-Der Signaturschlüssel wird außerhalb der Quellen angelegt.
+Adjust the JDK, SDK and Gradle paths to your installations.
+Create the signing key outside the source tree.
 
 ~~~powershell
 python tools/create_android_signing.py --java-home C:/Java17 --directory C:/hi-signing
 ./tools/build-android.ps1 -SdkRoot C:/Android/sdk -JavaHome C:/Java17 -GradleRoot C:/Gradle/gradle-8.11.1 -GnuRoot C:/Winlibs/mingw64 -SigningConfig C:/hi-signing/local-preview-signing.json -TargetDir C:/hi-build/android -Test
 ~~~
 
-APK-Ausgabe unter emulator/android/app/build/outputs/apk/debug/app-debug.apk.
--OfflineGradle verwendet vorhandene Gradle-/Maven-Caches.
-Beim ersten Build lädt Gradle die gepinnten Build- und Testabhängigkeiten
-aus den im Projekt eingetragenen offiziellen Repositories.
-Die nativen Cargo-Builds laufen nach der Quellenvorbereitung mit --frozen.
+The APK is written to emulator/android/app/build/outputs/apk/debug/app-debug.apk.
+-OfflineGradle uses existing Gradle/Maven caches. On the first build, Gradle
+downloads the pinned build and test dependencies from the official repositories
+configured in the project. Native Cargo builds use --frozen after source
+preparation.
 
-Ein eigener Schlüssel ist für eigene Builds ausreichend. Die Projektsignatur
-wird nicht im Repository verteilt. Der Neubau mit eigenem Schlüssel lässt
-sich deshalb nicht als Update über die bestehende Projekt-APK installieren.
+Your own signing key is sufficient for personal builds. The project's private
+key is excluded from the repository. A build signed with your own key cannot
+be installed as an update over the existing project APK.
 
-## OpenAL ändern und neu linken
+## Modify and relink OpenAL
 
-Die Quellen in emulator/vendor/openal-soft bearbeiten.
-Beim jeweiligen Build zusätzlich -RebuildOpenAL angeben. Das bereinigt den
-Wrapper und baut die statisch eingebundene Bibliothek mit dem Projekt neu.
-SDLs Android-Anpassung wendet tools/patch_android_sdl.py an.
+Edit emulator/vendor/openal-soft and pass -RebuildOpenAL to the relevant build.
+This cleans the wrapper and rebuilds the statically linked library with the
+project. tools/patch_android_sdl.py applies SDL's Android compatibility changes.
 
-Ein erfolgreicher Neubau ist eine Buildprüfung. Abweichende Compilerpfade,
-Signaturschlüssel und Build-Zeitpunkte können andere Binärbytes erzeugen.
-VALIDATION.md nennt die tatsächlich ausgeführten Prüfungen.
+A successful rebuild verifies the documented build route. Different compiler
+paths, signing keys and build times may produce different binary bytes.
+VALIDATION.md records the checks actually performed.
 
-## Release prüfen
+## Check a release
 
-Das Android-Paket lässt sich mit den bereitgestellten Werkzeugen prüfen.
+Use the supplied tools to inspect the Android package.
 
 ~~~powershell
 python tools/verify_android_apk.py --apk PATH/TO/app-debug.apk --sdk-root C:/Android/sdk --java-home C:/Java17 --out .build/android-review
@@ -99,7 +100,7 @@ python tools/android_license_inventory.py .build/android-review/HunterIsland-And
 python tools/audit_public.py .
 ~~~
 
-Die Prüfung umfasst Signatur, Versionsangaben, erlaubte APK-Dateien,
-ARM64-/16-KiB-Ausrichtung, Runtime-Abhängigkeiten, eingebettete Lizenztexte und
-bekannte lokale Identitäts-/Pfadmarker. Das Inventar gleicht Quellen und
-APK-Hinweise byteweise ab.
+Checks cover the signature, version fields, allowed APK payloads, ARM64 and
+16-KiB alignment, runtime dependencies, embedded notices, and known local
+identity/path markers. The inventory compares APK notices with source files
+byte for byte.

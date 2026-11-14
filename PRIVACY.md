@@ -1,22 +1,23 @@
-# Lokale Daten und Diagnose
+# Local data and diagnostics
 
-Die Starter importieren eine vom Nutzer ausgewählte IPA lokal.
-Dateiname und ursprünglicher Importpfad werden nicht als Diagnosefeld gespeichert.
-Windows verwendet standardmäßig %LOCALAPPDATA%/HunterIslandPreservation.
-Android verwendet privaten App-Speicher und seinen app-eigenen Dateienbereich.
+The launchers import an IPA selected by the user locally.
+The original filename and import path are not stored as diagnostic fields.
+Windows defaults to %LOCALAPPDATA%/HunterIslandPreservation.
+Android uses private app storage and its app-specific files directory.
 
-Android fordert weder Internetzugriff noch eine allgemeine Speicherfreigabe an.
-Windows startet das Spiel in einem AppContainer ohne Netzwerkfreigabe.
-Daten werden nicht automatisch versendet. Exporte werden im Dateidialog gewählt.
+Android requests neither Internet access nor broad storage access.
+Windows starts the game in an AppContainer without network capabilities.
+Data is not sent automatically. Export destinations are selected through
+file dialogs.
 
-Windows-Diagnosen enthalten technische Angaben und ausgewählte bereinigte
-Fehlerstellen. Spielstände sind nur nach ausdrücklicher Auswahl enthalten.
-Android-Diagnosen und Spielstandexporte sind getrennte Aktionen.
-Spielstanddateien können persönliche Spielfortschritte enthalten.
+Windows diagnostics contain technical details and selected, sanitized error
+locations. Saves are included only when explicitly selected.
+Android diagnostics and save exports are separate actions.
+Save files may contain personal gameplay progress.
 
-Repository und Downloads enthalten Software, Lizenztexte, Herkunftsnachweise
-und Tests mit künstlichen Daten. Die GitHub-Repositoryadresse hat der
-Projektinhaber zur Veröffentlichung gewählt.
-Persönliche lokale Pfade, Importkopien, private Spielstände und der private
-APK-Signaturschlüssel gehören nicht zum Projekt.
-SHA256SUMS.txt enthält die Prüfsummen der veröffentlichten Artefakte.
+The repository and downloads contain software, license texts, provenance and
+tests using synthetic data. The project owner selected the GitHub repository
+address for publication.
+Personal local paths, imported game copies, private saves and the private APK
+signing key are excluded from the project.
+SHA256SUMS.txt lists checksums for the published artifacts.
