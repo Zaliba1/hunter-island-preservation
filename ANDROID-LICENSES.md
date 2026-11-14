@@ -1,0 +1,25 @@
+# Android licenses and acknowledgements — 0.2.0-preview.1
+
+touchHLE © 2023–2026 touchHLE project contributors. Independent modifications are based on touchHLE v0.3.0, commit 8eb3418b3343bc1e3d1a330b55cb1d708a015721. Original authorship and per-file notices are retained. This project is not endorsed by touchHLE, Apple or the game developer.
+
+The combined touchHLE emulator binary is GPL-3.0-or-later, as declared by upstream. Core and launcher source files remain MPL-2.0 with their original notices. Dependencies retain their original licenses; root LICENSE covers project source only. You may use, modify and redistribute the program under those terms. It comes WITHOUT WARRANTY, including merchantability or fitness for a particular purpose. Full GPL and MPL texts are in licenses/GPL-3.0.txt and licenses/MPL-2.0.txt. No private-use-only or noncommercial restriction is added to this free software. The emulator licenses grant no rights to Hunter Island or its artwork. No game, IPA or private save is supplied.
+
+Matching sources: open SOURCE.md in this viewer. Distribute the matching Android Source and SourceDependencies with the APK, or offer them from the same release location. The private project signing key is not needed to modify, rebuild or install your own signed copy.
+
+- SDL: zlib; includes the documented Android NDK sensor polling compatibility change.
+- Dynarmic: 0BSD with the original external MIT/BSD/Boost notices.
+- OpenAL Soft: LGPL-2.0-or-later, statically linked. Matching source and the complete work using it must accompany distribution, with Android rebuild/relink instructions. tools/build-android.ps1 -RebuildOpenAL cleans and rebuilds the wrapper. A changed source marker was retained in a rebuilt/repacked APK; original source was restored and the supplied native library is marker-free. The stock app produced audible music/sound on Pixel 7a, confirmed by the user. Audio execution with a modified QA library remains untested.
+- LLVM libc++_shared: Apache-2.0 with LLVM exception and original notices. NDK/toolchain notices are supplied in licenses/android-ndk. Compiler and SDK binaries are not included in the APK.
+- Robolectric 4.17 (MIT) and JUnit 4.13.2 (EPL-1.0) are host test dependencies only; their resolved test dependencies are not APK assets. Build tools fetch them separately.
+- stb/PVRTC: original MIT/public-domain alternatives and Imagination Technologies MIT notices in licenses/stb.txt and licenses/PVRTDecompress.txt. Full corresponding source is supplied.
+- Boost: BSL-1.0; licenses/Boost.txt and full Boost source in SourceDependencies.
+- Rust crates: per-package terms and original authors in android-rust-dependencies.json and licenses/rust/. This conservative target-filtered resolve closure includes build-only dependencies. Complete package sources accompany it.
+- Rust standard library/runtime: original MIT/Apache and incorporated component terms in licenses/rust-standard-library/COPYRIGHT-library.html. Pinned toolchain: Rust 1.90.0, https://github.com/rust-lang/rust/tree/1.90.0 .
+- ARM guest compatibility libraries: GPL-2.0-or-later with historical runtime/linking exceptions, zlib, public-domain SQLite and libxml2 MIT. Original licenses/copyrights in licenses/touchHLE_dylibs/. Published source releases and build recipes are supplied in SourceDependencies and mapped by guest-library-provenance.json. Historical Apple SDK guest binaries were not independently bit-reproduced; their pinned upstream hashes and source mapping are recorded.
+- Liberation/Noto fonts: SIL OFL-1.1, unchanged fonts, original copyrights/reserved-name notices in licenses/touchHLE_fonts/. Fonts are included in the matching Source archive. Original game artwork is not included.
+
+Full original GPL text and component notices are in the source licenses/ directory and APK preservation-notices/licenses/ assets. The release android-license-inventory.json maps every actual native/guest library, font and DEX file to its component, license, notices, source and hash. Both matching source assets accompany the release at https://github.com/Zaliba1/hunter-island-preservation/releases. VALIDATION.md distinguishes the current build checks from earlier Pixel 7a gameplay tests.
+
+IPA import and diagnostic export use Android's file chooser. The app requests no INTERNET or broad storage permission and opts out of Android cloud backup. Diagnostic JSON excludes the IPA, saves, raw logs, original import URI and local paths. The preview signing key is private build material and is never distributed with sources.
+
+Android platform libraries are dynamically referenced and are not copied into the APK. Only the three native libraries in android-runtime-provenance.json are packaged. Other-platform notices retained in this source set are supplementary material and do not mean those platform binaries are bundled. All local license texts are readable offline through the app license browser. See SOURCE.md for source access and your own rebuild/relink/signing procedure.

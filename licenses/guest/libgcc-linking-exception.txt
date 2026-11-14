@@ -1,0 +1,3 @@
+Original source header: gcc-5664.tar.gz!gcc-gcc-5664/gcc/libgcc2.c
+
+/* More subroutines needed by GCC output code on some machines.  */

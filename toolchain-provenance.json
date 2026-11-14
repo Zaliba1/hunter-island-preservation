@@ -1,0 +1,15 @@
+{
+  "url": "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64ucrt-13.0.0-r3.zip",
+  "sha256": "7190d0a4970877cafb99eca33273a9c8dc1475a88e198d1f78800261d677b206",
+  "release": "15.2.0posix-13.0.0-ucrt-r3",
+  "compiler": "GCC 15.2.0",
+  "mingw_w64": "13.0.0 UCRT",
+  "cmake": "4.1.2",
+  "ninja": "1.13.1",
+  "rust": "1.90.0-x86_64-pc-windows-gnu",
+  "compiler_redistributed": false,
+  "python_bundled": false,
+  "microsoft_vc_runtime_bundled": false,
+  "gnu_runtime_linkage": "static in emulator executable",
+  "extra_host_runtime_dlls_shipped": false
+}

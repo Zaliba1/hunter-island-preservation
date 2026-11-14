@@ -1,0 +1,52 @@
+[
+  {
+    "path": "runtime/touchHLE_dylibs/libgcc_s.1.dylib",
+    "sha256": "d758fbf1ac952532955d62866bd02df55315c0599f64bdd978ff941fccbdcf83",
+    "unmodified_from_upstream_commit": "8eb3418b3343bc1e3d1a330b55cb1d708a015721",
+    "source_archive": "guest/gcc-5664.tar.gz",
+    "source_mapping_basis": "Pinned upstream library README",
+    "license": "GPL-2.0-or-later",
+    "exception": "historical libgcc runtime linking exception",
+    "independently_bit_reproduced": false
+  },
+  {
+    "path": "runtime/touchHLE_dylibs/libstdc++.6.0.9.dylib",
+    "sha256": "22bb45b80a1e590ca6f2e0bd07581084ac56b347b0c6005b05ca5551ef27142a",
+    "unmodified_from_upstream_commit": "8eb3418b3343bc1e3d1a330b55cb1d708a015721",
+    "source_archive": "guest/libstdcxx-39.tar.gz",
+    "source_mapping_basis": "Pinned upstream library README",
+    "license": "GPL-2.0-or-later",
+    "exception": "historical libstdc++ linking exception",
+    "independently_bit_reproduced": false
+  },
+  {
+    "path": "runtime/touchHLE_dylibs/libz.1.2.3.dylib",
+    "sha256": "9f008d19994def560a2565533ae3f93b1c033df3ef9622c90fe80b21ac66dd17",
+    "unmodified_from_upstream_commit": "8eb3418b3343bc1e3d1a330b55cb1d708a015721",
+    "source_archive": "guest/zlib-23.0.1.tar.gz",
+    "source_mapping_basis": "Pinned upstream library README",
+    "license": "Zlib",
+    "exception": null,
+    "independently_bit_reproduced": false
+  },
+  {
+    "path": "runtime/touchHLE_dylibs/libsqlite3.dylib",
+    "sha256": "d3795f741db6ade461fa07edf13962858fcebc75c738c4c32634c390c93131b6",
+    "unmodified_from_upstream_commit": "8eb3418b3343bc1e3d1a330b55cb1d708a015721",
+    "source_archive": "guest/sqlite-3.6.10.tar.gz",
+    "source_mapping_basis": "Pinned upstream library README",
+    "license": "public-domain",
+    "exception": null,
+    "independently_bit_reproduced": false
+  },
+  {
+    "path": "runtime/touchHLE_dylibs/libxml2.2.dylib",
+    "sha256": "40607187ac35748e7aa0e515acd44c1cffbed5be3c0e05c51060e8b1d4cc697c",
+    "unmodified_from_upstream_commit": "8eb3418b3343bc1e3d1a330b55cb1d708a015721",
+    "source_archive": "guest/libxml2-22.3.tar.gz",
+    "source_mapping_basis": "Pinned upstream library README",
+    "license": "MIT",
+    "exception": null,
+    "independently_bit_reproduced": false
+  }
+]

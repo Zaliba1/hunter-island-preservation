@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:glEsVersion="0x00030000" android:required="true" />
+    <!-- Local offline preservation: no INTERNET or shared-storage permission. -->
+    <application android:allowBackup="false" android:fullBackupContent="false"
+        android:hardwareAccelerated="true" android:icon="@drawable/icon_unofficial"
+        android:label="Hunter Island · touchHLE" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name=".LauncherActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".LicenseActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false"
+            android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:screenOrientation="landscape" android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+    </application>
+</manifest>

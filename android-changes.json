@@ -1,0 +1,53 @@
+{
+  "compared_to": "Desktop test6 (byte-identical test4 core)",
+  "modified_date": "2026-11-14",
+  "modified_or_added_engine_files": [
+    ".cargo/config.toml",
+    "android/app/build.gradle.kts",
+    "android/app/src/main/AndroidManifest.xml",
+    "android/app/src/main/java/org/touchhle/android/GameStore.java",
+    "android/app/src/main/java/org/touchhle/android/IpaInspector.java",
+    "android/app/src/main/java/org/touchhle/android/LauncherActivity.java",
+    "android/app/src/main/java/org/touchhle/android/LicenseActivity.java",
+    "android/app/src/main/java/org/touchhle/android/MainActivity.java",
+    "android/app/src/test/java/org/touchhle/android/PreservationFrameworkTest.java",
+    "android/gradle.properties",
+    "android/settings.gradle.kts",
+    "src/android_entry.rs",
+    "src/frameworks/opengles/eagl.rs",
+    "src/frameworks/opengles/gles2_guest.rs",
+    "src/gles.rs",
+    "src/gles/gl_bindings/build.rs",
+    "src/gles/gl_bindings/lib.rs",
+    "src/gles/gles2_native.rs",
+    "src/gles/gles2_present.rs",
+    "src/gles/gles2_shaders.rs",
+    "src/gles/gles2_shaders/client.rs",
+    "src/gles/gles_generic.rs",
+    "src/gles/shader_source.rs",
+    "src/lib.rs",
+    "src/window.rs"
+  ],
+  "sdl_change": "android-sdl-patch.json",
+  "android10_changes_from_android9": [
+    "android/app/build.gradle.kts",
+    "android/app/src/main/java/org/touchhle/android/LauncherActivity.java",
+    "android/app/src/main/java/org/touchhle/android/MainActivity.java",
+    "android/app/src/main/java/org/touchhle/android/ModOptions.java",
+    "android/app/src/test/java/org/touchhle/android/PreservationFrameworkTest.java",
+    "src/frameworks/uikit/ui_application.rs",
+    "src/libc/stdlib.rs",
+    "src/objc.rs",
+    "src/objc/hunter_rare_dragons.rs",
+    "src/objc/hunter_silver_exchange.rs",
+    "src/objc/messages.rs",
+    "src/options.rs"
+  ],
+  "current_release": "0.2.0-preview.1",
+  "combined_release_changes": [
+    "Windows launcher mod settings",
+    "common source delivery",
+    "setup/build documentation",
+    "fresh rebuild checks"
+  ]
+}

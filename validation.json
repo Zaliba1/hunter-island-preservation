@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0-preview.1",
+  "review_date": "2026-11-14",
+  "windows": {
+    "fresh_source_build": true,
+    "engine_tests_passed": 141,
+    "engine_tests_ignored": 2,
+    "launcher_tests_passed": 28,
+    "engine_sha256": "07be67cab50f15b1a10121b59a9c533ad27fd9298242dc3065d0472d11dd3bc8",
+    "portable_zip_title_screen_verified": true,
+    "isolated_no_network": true,
+    "smoke_test_limit_seconds": 25,
+    "smoke_test_stopped_by_time_limit": true
+  },
+  "android": {
+    "fresh_source_build": true,
+    "framework_tests_passed": 36,
+    "apk_sha256": "f4b118cb92bc9b6ca3c2efb9d02d2079085953577a48b528e5cb9d045785abe4",
+    "signature_verified": true,
+    "apk_and_elf_16k_alignment_verified": true,
+    "physical_device_execution_tested": false
+  },
+  "source_inputs": {
+    "archives": 23,
+    "rust_packages": 148,
+    "rust_files": 9974,
+    "all_checksums_verified": true
+  },
+  "code_matches_fresh_build_inputs": true,
+  "known_limits": [
+    "Current APK has not been executed on a physical device.",
+    "Historical guest dylibs have not been independently bit-reproduced.",
+    "Full story, all combat effects and all devices remain unverified."
+  ]
+}

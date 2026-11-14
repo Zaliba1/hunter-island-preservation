@@ -1,0 +1,16 @@
+[
+  {
+    "file": "emulator/vendor/SDL/src/sensor/android/SDL_androidsensor.c",
+    "original_sha256": "1d38a4cdfdb4c1f673fb04d8880392e22b7a81dfde1f832399a60009d0b70353",
+    "patched_sha256": "1ff5cec245dc3c58314c4e8d87daf0f107fdb1d2edabb80c742679142122f353",
+    "modified_date": "2026-10-26",
+    "change": "Use ALooper_pollOnce; pollAll was removed from current NDK headers. Queue read still drains pending sensor events."
+  },
+  {
+    "file": "emulator/vendor/rust/sdl2-sys-0.37.0/SDL/src/sensor/android/SDL_androidsensor.c",
+    "original_sha256": "1d38a4cdfdb4c1f673fb04d8880392e22b7a81dfde1f832399a60009d0b70353",
+    "patched_sha256": "1ff5cec245dc3c58314c4e8d87daf0f107fdb1d2edabb80c742679142122f353",
+    "modified_date": "2026-10-26",
+    "change": "Use ALooper_pollOnce; pollAll was removed from current NDK headers. Queue read still drains pending sensor events."
+  }
+]

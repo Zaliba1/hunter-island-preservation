@@ -1,0 +1,21 @@
+{
+  "ndk": "28.2.13676358",
+  "libraries": [
+    {
+      "file": "libtouchHLE.so",
+      "sha256": "5e61f70d5fae13914a8ba617f6312d10aa06d6cb6d3b9ecd90a38828e337e9be",
+      "bytes": 19596464
+    },
+    {
+      "file": "libSDL2.so",
+      "sha256": "22a1f5416ca8c666035823a8b9ed1e13a76768c0f35d5478b7951f177e71c065",
+      "bytes": 1228384
+    },
+    {
+      "file": "libc++_shared.so",
+      "sha256": "cd61762848882a16c8244c964a6f396c0caa0b440588a210ce9cc4ab0e6d9f0c",
+      "bytes": 1253544
+    }
+  ],
+  "symbols_stripped": true
+}

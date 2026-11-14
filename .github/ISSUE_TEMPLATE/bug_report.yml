@@ -1,0 +1,22 @@
+name: Game or launcher bug
+description: Report a reproducible problem without attaching game files
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach IPAs, extracted assets, keys, or unreviewed raw logs. Diagnostic exports exclude saves by default.
+  - type: input
+    id: version
+    attributes:
+      label: Launcher and game version
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Windows version, GPU, and iPad/iPhone profile
+  - type: textarea
+    id: steps
+    attributes:
+      label: Exact steps and expected / actual result
+    validations:
+      required: true

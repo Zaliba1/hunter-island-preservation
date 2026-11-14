@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "version": "0.2.0-preview.1",
+  "review_date": "2026-11-14",
+  "target": "aarch64-linux-android",
+  "rust": "1.90.0-x86_64-pc-windows-gnu",
+  "java": "Eclipse Temurin 17",
+  "gradle": "8.11.1",
+  "android_gradle_plugin": "8.10.1",
+  "ndk": "28.2.13676358",
+  "sdk_build_tools": "35.0.0",
+  "min_sdk": 26,
+  "cmake": "3.22.1",
+  "combined_binary_license": "GPL-3.0-or-later",
+  "source_terms": "MPL-2.0 and original component terms",
+  "sdk_and_compiler_binaries_redistributed": false,
+  "project_private_key_redistributed": false
+}

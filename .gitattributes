@@ -1,0 +1,7 @@
+# Preserve byte identity between Git sources, release sources and license notices.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.png binary
+*.ttf binary
+*.dylib binary
+licenses/** -whitespace
+emulator/** -whitespace
