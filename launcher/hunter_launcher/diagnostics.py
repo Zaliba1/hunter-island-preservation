@@ -28,10 +28,11 @@ def export(store, target, with_saves=False):
     with store.lock():
         config = store.settings()
         from .app import mod_arguments
+        from .language import selected_language
         report = dict(schema='hunter-tester-report-v1', launcher=VERSION,
             created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             windows=platform.release(), os_version=platform.version(), architecture=platform.machine(),
-            game=config.get('game'), device=config.get('device','ipad'), active_mods=mod_arguments(config), includes_saves=with_saves,
+            game=config.get('game'), device=config.get('device','ipad'), language=selected_language(config), active_mods=mod_arguments(config), includes_saves=with_saves,
             raw_logs_included=False, emulator_savestate=False)
         executable=store.run/'touchHLE.exe'
         report['emulator_sha256']=ipa.digest(executable) if executable.is_file() else None

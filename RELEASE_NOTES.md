@@ -1,4 +1,19 @@
-# 0.2.0-preview.2
+# 0.2.0-preview.3
+
+Add a saved **Spiel-Sprache / Game language** dropdown to the Windows and
+Android launchers. English is the default, including for older profiles with
+no explicit language choice. Available choices are English, Deutsch, Français,
+Español, Italiano, 日本語, and the device's preferred system languages.
+
+Changes are saved immediately and apply on the next game start. Users do not
+need to enter launch arguments. This setting affects the original game;
+launcher and custom mod labels remain in German.
+
+The emulator binaries are unchanged from preview.2. Android's application
+version code increases to 13 and retains the project update signature.
+See VALIDATION.md for the checks performed for this local build.
+
+## Previous changes: 0.2.0-preview.2
 
 Fix the crash when opening **Rewards / Belohnungen** from the arena overview
 in Hunter Island 2.02.

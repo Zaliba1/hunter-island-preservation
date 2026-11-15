@@ -6,7 +6,8 @@ Import your own compatible, already decrypted 32-bit IPA locally.
 
 ## Current release
 
-**0.2.0-preview.2** adds the arena Rewards crash fix for Windows and Android.
+**0.2.0-preview.3** adds a saved game-language selector on Windows and Android,
+with English as the default. It includes the arena Rewards fix from preview.2.
 The release includes matching sources, dependency sources and license
 inventories. See VALIDATION.md for the checks performed and remaining limits.
 
@@ -17,8 +18,8 @@ Download the package for your device from
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.2.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
-| Android | HunterIsland-Android-arm64-0.2.0-preview.2.apk | Android 8+, ARM64, OpenGL ES 3.0 |
+| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.3.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
+| Android | HunterIsland-Android-arm64-0.2.0-preview.3.apk | Android 8+, ARM64, OpenGL ES 3.0 |
 
 **Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
 the game. Install Python with Tcl/Tk from

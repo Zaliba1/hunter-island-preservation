@@ -31,6 +31,7 @@ public class MainActivity extends SDLActivity {
             "--legacy-string-unsigned-int","--legacy-deferred-texture-deletes",
             "--landscape-left","--device-family="+family));
         if("iphone-retina".equals(profile))arguments.add("--experimental-retina");
+        LanguageOptions.appendArguments(this, arguments);
         ModOptions.appendArguments(this, arguments);
         return arguments.toArray(new String[0]);
     }

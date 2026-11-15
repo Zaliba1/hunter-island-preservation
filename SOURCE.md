@@ -1,12 +1,13 @@
 # Source delivery
 
-Matching sources accompany the Windows and Android binaries in
+Matching sources accompany locally supplied Windows and Android binaries.
+Published builds provide them in
 [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
 
-- HunterIsland-Source-0.2.0-preview.2.zip
-- HunterIsland-SourceDependencies-0.2.0-preview.2.zip
+- HunterIsland-Source-0.2.0-preview.3.zip
+- HunterIsland-SourceDependencies-0.2.0-preview.3.zip
 
-Retain both archives beside this version's binaries. Sources for preview.1
+Retain both archives beside this version's binaries. Sources for older builds
 remain attached to its own release; use the archives matching your binary.
 
 Source includes this modified work, controlling build scripts, tests and notices.

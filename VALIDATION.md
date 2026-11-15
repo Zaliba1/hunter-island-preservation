@@ -1,4 +1,31 @@
-# Validation for 0.2.0-preview.2
+# Validation for 0.2.0-preview.3
+
+Verified on 15 November 2026 on the Windows build PC.
+
+- Windows launcher/package tests: 31 passed. These include the actual Tk
+  language dropdown, immediate persistence without starting the game,
+  restoration after reopening, and forwarding every supported language to
+  the game launch. System-language mode omits the language override.
+- Android Robolectric/JUnit tests: 42 passed on API 26 and 35, including
+  language selection, activity recreation, persistence, English defaults
+  for existing installs and fallback for unsupported stored values.
+- Android Java application rebuilt and signed with the existing project key;
+  application version code 13. Native libraries are copied byte for byte
+  from the verified preview.2 APK. The Windows engine is also unchanged.
+- Windows startup with English as the unset-profile default and an explicit
+  German selection: both reached the title screen in separate AppContainers
+  with zero capabilities. Logs confirm the game requested and received the
+  selected language. Both runs were deliberately ended after 20 seconds;
+  exit 124 denotes that test timeout, not a game panic.
+
+No original game content or user saves are included in the packages. The
+language setting changes the original game, not the German launcher/mod labels.
+Physical-device installation and gameplay of this new APK have not been
+tested. All six translations have not been reviewed throughout the full game.
+
+The engine checks below apply to the unchanged preview.2 engine binaries.
+
+## Previous validation: 0.2.0-preview.2
 
 Verified on 15 November 2026 on the Windows build PC.
 

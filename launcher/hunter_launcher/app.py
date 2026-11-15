@@ -8,6 +8,7 @@ import sys
 import threading
 from . import VERSION, ipa
 from .storage import Store, atomic_json
+from .language import LANGUAGES, language_arguments, selected_language
 
 MOD_OPTIONS = (
     ("--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"),
@@ -39,9 +40,11 @@ def play(store, release, timeout=None, test_taps=(), capture=False):
             container.probe()
             args = ['HunterIsland.ipa','--no-error-popup','--experimental-gles2',
                 '--legacy-string-unsigned-int','--legacy-deferred-texture-deletes','--landscape-left','--runtime-metrics']
-            if store.settings().get('device','ipad') == 'ipad':
+            settings = store.settings()
+            if settings.get('device','ipad') == 'ipad':
                 args.append('--device-family=ipad')
-            args.extend(mod_arguments(store.settings()))
+            args.extend(language_arguments(settings))
+            args.extend(mod_arguments(settings))
             if capture:
                 args.append('--capture-frames')
             for tap in test_taps:
@@ -60,8 +63,8 @@ def gui(store, release):
     from . import diagnostics
     root = tk.Tk()
     root.title('Hunter Island · Testlauncher')
-    root.geometry('710x650')
-    root.minsize(660,620)
+    root.geometry('710x740')
+    root.minsize(660,710)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -88,6 +91,21 @@ def gui(store, release):
     mod_controls = []
     settings = store.settings()
     mod_arguments(settings)
+    ttk.Label(frame,text='Spiel-Sprache / Game language').pack(anchor='w',pady=(14,4))
+    languages = ttk.Combobox(frame,name='game_language',values=[label for _, label in LANGUAGES],state='readonly',width=34)
+    languages.current([code for code, _ in LANGUAGES].index(selected_language(settings)))
+    languages.pack(anchor='w')
+    ttk.Label(frame,text='Wird gespeichert und beim nächsten Spielstart verwendet.',font=('Segoe UI',9)).pack(anchor='w',pady=(3,0))
+    def save_language(_event):
+        try:
+            with store.lock():
+                config = store.settings()
+                config['language'] = LANGUAGES[languages.current()][0]
+                atomic_json(store.config,config)
+        except Exception as error:
+            languages.current([code for code, _ in LANGUAGES].index(selected_language(store.settings())))
+            messagebox.showerror('Sprache konnte nicht gespeichert werden',str(error),parent=root)
+    languages.bind('<<ComboboxSelected>>',save_language)
     ttk.Label(frame,text='Optionale Mods · gelten ab dem nächsten Spielstart').pack(anchor='w',pady=(14,4))
     for flag, label in MOD_OPTIONS:
         value = tk.BooleanVar(value=settings.get('mods', {}).get(flag, False))
@@ -113,7 +131,7 @@ def gui(store, release):
     def background(action,done):
         nonlocal busy
         busy = True
-        for widget in (import_button,start_button,export_button,save_check,devices,*mod_controls):
+        for widget in (import_button,start_button,export_button,save_check,devices,languages,*mod_controls):
             widget.configure(state='disabled')
         def worker():
             try:
@@ -132,6 +150,7 @@ def gui(store, release):
             for widget in (import_button,start_button,export_button,save_check,*mod_controls):
                 widget.configure(state='normal')
             devices.configure(state='readonly')
+            languages.configure(state='readonly')
             refresh()
             if error:
                 messagebox.showerror('Vorgang fehlgeschlagen',str(error),parent=root)

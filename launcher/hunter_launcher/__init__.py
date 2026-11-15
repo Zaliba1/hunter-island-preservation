@@ -1,2 +1,2 @@
 """Local-only Hunter Island tester launcher."""
-VERSION = '0.2.0-preview.2'
+VERSION = '0.2.0-preview.3'

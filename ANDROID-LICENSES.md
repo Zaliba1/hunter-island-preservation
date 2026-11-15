@@ -1,4 +1,4 @@
-# Android licenses and acknowledgements — 0.2.0-preview.2
+# Android licenses and acknowledgements — 0.2.0-preview.3
 
 touchHLE © 2023–2026 touchHLE project contributors. Independent modifications are based on touchHLE v0.3.0, commit 8eb3418b3343bc1e3d1a330b55cb1d708a015721. Original authorship and per-file notices are retained. This project is not endorsed by touchHLE, Apple or the game developer.
 

@@ -32,6 +32,7 @@ public final class LauncherActivity extends Activity {
             public void onItemSelected(AdapterView<?> p,android.view.View v,int position,long id){preferences.edit().putString("family",position==2?"ipad":position==1?"iphone":"iphone-retina").apply();}
             public void onNothingSelected(AdapterView<?> p){}
         });root.addView(display);
+        LanguageOptions.addControls(this, root);
         ModOptions.addControls(this, root);
         status=new TextView(this);status.setPadding(0,pad,0,pad);root.addView(status);
         choose=new Button(this);choose.setText("Eigene IPA importieren …");root.addView(choose);
@@ -98,6 +99,7 @@ public final class LauncherActivity extends Activity {
         if(request==EXPORT)run(()->{
             JSONObject data=new JSONObject();data.put("schema","hunter-android-diagnostics-v1");data.put("app_version",BuildConfig.VERSION_NAME);
             data.put("android_api",android.os.Build.VERSION.SDK_INT);data.put("device_model",android.os.Build.MODEL);
+            data.put("language",LanguageOptions.selectedLanguage(this));
             data.put("game",store.diagnosticGame());data.put("includes_saves",false);data.put("includes_raw_logs",false);
             try(OutputStream out=getContentResolver().openOutputStream(uri,"wt")) {
                 if(out==null)throw new IOException("Exportziel nicht verfügbar");out.write(data.toString(2).getBytes(StandardCharsets.UTF_8));

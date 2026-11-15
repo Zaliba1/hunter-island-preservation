@@ -16,7 +16,7 @@ labels; the labels below are quoted so you can find the corresponding actions.
 2. Install 64-bit Python 3.11 or later with Tcl/Tk using the official
    [Windows installer](https://www.python.org/downloads/windows/).
 3. Open Start.cmd and select **Eigene IPA importieren** (import your IPA).
-4. Choose the display mode and optional mods, then select
+4. Choose the display mode, game language and optional mods, then select
    **Spiel starten** (start the game).
 5. Close the game window to return to the launcher.
 
@@ -37,7 +37,7 @@ use its Start.cmd. It uses the same local data directory.
 2. Open the APK. If prompted, allow installation from your file/download app.
 3. Open **Hunter Island · touchHLE**.
 4. Select **Eigene IPA importieren** (import your IPA) and choose your file.
-5. Choose the display mode and mod switches, then select
+5. Choose the display mode, game language and mod switches, then select
    **Spiel starten** (start the game).
 
 Updates signed with the same project key can be installed over the existing
@@ -49,6 +49,18 @@ Android keeps the import and settings in private app storage. Saves are stored
 in the app-specific external files directory. Uninstalling the app may remove
 this data. **Spielstand exportieren** (export save) writes a ZIP to a location
 you select.
+
+## Game language
+
+Both launchers offer **Spiel-Sprache / Game language**. English is the default,
+including for existing profiles that have never selected a game language.
+Choose English, Deutsch, Français, Español, Italiano, 日本語, or
+**Systemsprache / System language** to follow the device's preferred languages.
+The selection is saved immediately and takes effect the next time you start
+the game. No command-line arguments are needed.
+
+This setting controls the original game's translations. The launcher interface
+and the added mod dialogs currently retain their German labels.
 
 ## Display modes
 
