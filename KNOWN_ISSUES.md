@@ -14,3 +14,8 @@
   explicitly selected. It currently has no button for importing phone saves.
 - VALIDATION.md records the scope of verification for this release. Historical
   device tests do not establish complete testing of the current binary.
+
+- In the native Rewards overview, the top-right close control may display
+  "Button" instead of the intended icon. It remains usable. Table clipping and
+  modal-background composition are incomplete; rows/background can overlap
+  other elements while scrolling.

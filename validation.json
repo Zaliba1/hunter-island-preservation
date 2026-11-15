@@ -1,38 +1,41 @@
 {
   "version": "0.2.0-preview.2",
-  "status": "unreleased-development-source",
+  "status": "prerelease",
   "review_date": "2026-11-15",
   "windows": {
-    "rebuild_from_prepared_checkout": true,
-    "fresh_clean_output_build": false,
+    "fresh_source_build": true,
+    "new_output_directory": true,
     "engine_tests_passed": 151,
     "engine_tests_ignored": 2,
     "launcher_tests_passed": 28,
-    "engine_sha256": "e1a8ba09f48fdc1358bf1ee9dae1785fe16edd3cf711f19160084d3689c483e7",
+    "engine_sha256": "236bb7f65235378643f03011ec7cf7c8e783893f06700786f1c016b41c6fc8e8",
     "isolated_no_network": true,
-    "rewards_opened": true,
-    "close_and_reopen_verified_before_final_nib_patch": true,
-    "scrolling_on_final_candidate": "user-confirmed",
-    "final_close_button_icon_visually_verified": false
+    "rewards_open_scroll_close_reopen_verified": true,
+    "clean_game_exit": true,
+    "original_save_seed_unchanged": true
   },
   "android": {
-    "final_apk_built": false,
-    "final_apk_signature_verified": false,
-    "physical_device_execution_tested": false,
-    "intermediate_native_build_completed": true,
-    "apk_assembly_blocker": "Could not connect to the local Gradle daemon; last NIB interaction/button patch not included in that intermediate build."
+    "fresh_source_build": true,
+    "new_output_directory": true,
+    "framework_tests_passed": 36,
+    "apk_sha256": "f125a4f9a588d343f93c1adf04c409459eb26b2f9b96b6de5b11d60199ea67de",
+    "signature_verified": true,
+    "apk_and_elf_16k_alignment_verified": true,
+    "signer_matches_preview1": true,
+    "no_internet_or_broad_storage_permission": true,
+    "physical_device_execution_tested": false
   },
   "source_inputs": {
     "archives": 23,
     "rust_packages": 148,
     "rust_files": 9974,
-    "dependency_revisions_unchanged": true
+    "all_checksums_verified": true
   },
+  "code_matches_fresh_build_inputs": true,
   "known_limits": [
-    "No preview.2 binary release published.",
-    "Final close-button icon and all reward layouts remain incompletely verified.",
-    "Current Android execution and a complete final fresh-export rebuild are unverified.",
-    "Full story and long sessions remain unverified.",
+    "New APK physical-device execution and update installation not tested.",
+    "Rewards close control can display Button; table clipping and modal composition are incomplete.",
+    "Full story, all devices, long sessions and a second Windows PC not verified.",
     "Historical guest binaries not independently bit-reproduced."
   ]
 }

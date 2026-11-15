@@ -2,13 +2,8 @@
 
 ## Inputs
 
-For the current unreleased preview.2, use this Git checkout and the
-HunterIsland-SourceDependencies-0.2.0-preview.1.zip archive from the existing
-release. Dependency revisions are unchanged. No preview.2 download assets
-have been published yet.
-
-For a packaged release, use its matching Source and SourceDependencies archives,
-or check out the source commit recorded in its release-checks.json.
+Use the Source and SourceDependencies archives from the same release, or
+check out the source commit recorded in its release-checks.json.
 No game copy or saves are required to build.
 
 Source includes engine and launcher changes, build scripts, tests, license
@@ -44,7 +39,7 @@ excessively long native CPU-core dependency paths in GCC.
 ~~~powershell
 rustup toolchain install 1.90.0-x86_64-pc-windows-gnu --profile minimal
 rustup target add aarch64-linux-android --toolchain 1.90.0-x86_64-pc-windows-gnu
-python tools/prepare_offline_sources.py C:/Downloads/HunterIsland-SourceDependencies-0.2.0-preview.1.zip
+python tools/prepare_offline_sources.py C:/Downloads/HunterIsland-SourceDependencies-0.2.0-preview.2.zip
 python -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r requirements-build.txt
 ~~~

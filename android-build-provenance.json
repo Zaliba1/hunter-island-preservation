@@ -15,5 +15,7 @@
   "source_terms": "MPL-2.0 and original component terms",
   "sdk_and_compiler_binaries_redistributed": false,
   "project_private_key_redistributed": false,
-  "status": "Final preview.2 APK not built; see VALIDATION.md for intermediate native-build and Gradle connection failure details."
+  "status": "Clean native and signed APK builds completed; 36 host tests passed; no physical-device execution.",
+  "signer_matches_previous_release": true,
+  "update_installation_tested": false
 }

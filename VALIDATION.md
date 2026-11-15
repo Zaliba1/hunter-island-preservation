@@ -1,51 +1,51 @@
-# Validation of the current development source
+# Validation for 0.2.0-preview.2
 
-Current source version: **0.2.0-preview.2 (unreleased)**.
-Reviewed on 15 November 2026.
-
-## Checks actually completed
+Verified on 15 November 2026 on the Windows build PC.
 
 | Check | Result |
 | --- | --- |
-| Windows GNU rebuild from the prepared source checkout | Passed |
+| Matching source copied into a separate clean checkout | Passed |
+| Pinned source/dependency preparation | 23 archives, 148 Rust packages, 9,974 vendored Rust files verified |
+| Windows GNU build in a new output directory | Passed |
 | Engine library tests | 151 passed, 2 existing tests ignored |
 | Windows launcher/package unit tests | 28 passed |
-| Original arena Rewards crash | Reproduced on the preview.1 binary |
-| Rewards list presentation | Visible on Windows after the framework fixes |
-| Closing and reopening the list | Verified before the final NIB interaction/button patch |
-| Scrolling on the final candidate | Confirmed by the user |
-| Final close-button icon | Implemented; final visual verification pending |
+| Android ARM64 build in a new output directory | Passed |
+| Android Robolectric/JUnit tests on API 26 and 35 | 36 passed |
+| APK signature, ARM64, 16-KiB alignment, permissions and source notices | Passed |
+| APK signer compared with preview.1 | Same project signer |
+| Arena Rewards opening, scrolling to lower classes, closing and reopening | Passed on Windows |
+| Arena test AppContainer / normal exit / original save seed | Zero capabilities / exit 0 / seed unchanged |
 
-The Windows game ran in a separate AppContainer with zero network capabilities
-and a copied save. The original test seed was preserved. Private game data,
-captures and detailed execution logs are excluded from the repository.
-The final tested engine hash and evidence boundaries are recorded in
-validation.json.
+The game test used a separate local save copy. Private game files, captures and
+detailed execution logs are excluded from the source and release packages.
+The tested binary hashes are in validation.json. Final archive extraction/start
+evidence and downloadable asset checksums accompany the release in
+release-checks.json and SHA256SUMS.txt.
 
-The test adds coverage for modal ownership, appearance callbacks and completion
+The clean Android build exposed a compile-time dependency on an ignored local
+options file. It now uses a tracked, neutral template containing no user
+settings. Neither build requires an IPA, save or private runtime settings.
+
+The framework tests cover modal ownership, appearance callbacks and completion
 blocks; table rows, index paths and reloads; NIB archive selection and numeric
-font values; image alpha formats; scaled/nested image contexts; passive view
-hit testing; and image-only button ownership.
+font values; image alpha formats; scaled/nested image contexts; passive view hit
+testing; and button image ownership.
 
-## Android and packaging status
+## Limits
 
-An intermediate Android native candidate compiled. APK assembly failed because
-the build could not connect to its local Gradle daemon. It did not include the
-last NIB interaction/button changes. No current APK is declared built, signed,
-installed or device-tested.
+The new APK has not been executed or installed on a physical Android device in
+this review. Same-signer comparison establishes the intended update-signing
+relationship, rather than a completed device update test.
 
-The new sources and dependencies were also exported/prepared in a separate
-clean directory. A complete fresh build from that final export, final package
-audits and binary publication remain pending. Reusing the prepared Windows
-build checkout does not establish a new clean-output rebuild.
+Native UI rendering remains incomplete. The Rewards close control can still
+display "Button", table clipping is incomplete, and the underlying arena can
+show through the modal background. The verified interaction path completes
+despite these cosmetic issues. KNOWN_ISSUES.md lists further limits.
 
-## Previous published release
+The full story, all combat effects, all devices, long sessions and a second
+Windows PC remain unverified. Historical Apple guest binaries have not been
+independently rebuilt byte for byte; see LICENSE_REVIEW.md.
 
-The immutable preview.1 checks, hashes and matching sources remain in
-[its release assets](https://github.com/Zaliba1/hunter-island-preservation/releases/tag/v0.2.0-preview.1).
-Its 141 engine tests, 36 Android host tests and APK checks apply to that release,
-rather than the current development source.
-
-Full gameplay, every UI layout, long sessions and current Android execution
-remain unverified. Historical Apple guest binaries have not been independently
-rebuilt byte for byte; see LICENSE_REVIEW.md.
+preview.1 retains its own binaries and checks. Its source archive has received
+the original comment-only Android build template as a corresponding-source
+correction; the binary bytes are unchanged.

@@ -51,7 +51,7 @@
     "fresh rebuild checks"
   ],
   "arena_fix_base_commit": "373e5ec736b821226d035bc247da633c372bfe71",
-  "publication_status": "Unreleased source; no matching final APK is published.",
+  "publication_status": "Prepared preview.2 prerelease; actual asset checks in release-checks.json.",
   "arena_rewards_changed_engine_files": [
     "android/app/build.gradle.kts",
     "src/frameworks/core_graphics/cg_bitmap_context.rs",
@@ -70,6 +70,8 @@
     "src/frameworks/uikit/ui_view/ui_scroll_view.rs",
     "src/frameworks/uikit/ui_view/ui_scroll_view/ui_table_view.rs",
     "src/frameworks/uikit/ui_view/ui_window/probe.rs",
-    "src/frameworks/uikit/ui_view_controller.rs"
+    "src/frameworks/uikit/ui_view_controller.rs",
+    "src/paths.rs",
+    "templates/user-options.txt"
   ]
 }

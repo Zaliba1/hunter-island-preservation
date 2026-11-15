@@ -3,12 +3,12 @@
   "libraries": [
     {
       "file": "libtouchHLE.so",
-      "sha256": "5e61f70d5fae13914a8ba617f6312d10aa06d6cb6d3b9ecd90a38828e337e9be",
-      "bytes": 19596464
+      "sha256": "1de1babcaff0cbafeb3024c2905d4d3cae1feea1257cb90a0b6498e44b2e5882",
+      "bytes": 19806896
     },
     {
       "file": "libSDL2.so",
-      "sha256": "22a1f5416ca8c666035823a8b9ed1e13a76768c0f35d5478b7951f177e71c065",
+      "sha256": "1442369774fd2a9a97d76284dd13aab86f0d1c08fc199cb5ec0623b9571ecab3",
       "bytes": 1228384
     },
     {
@@ -18,6 +18,6 @@
     }
   ],
   "symbols_stripped": true,
-  "version": "0.2.0-preview.1",
-  "scope": "Previously published runtime inventory. Not evidence for the current preview.2 source or an unbuilt final APK."
+  "version": "0.2.0-preview.2",
+  "scope": "Native runtime built from the clean preview.2 source checkout; packaged APK checks recorded separately."
 }

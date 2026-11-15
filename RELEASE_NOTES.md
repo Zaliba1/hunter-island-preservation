@@ -1,7 +1,7 @@
-# Unreleased: 0.2.0-preview.2
+# 0.2.0-preview.2
 
-The current source fixes the crash when opening **Rewards / Belohnungen** from
-the arena overview in Hunter Island 2.02.
+Fix the crash when opening **Rewards / Belohnungen** from the arena overview
+in Hunter Island 2.02.
 
 - Add modal view-controller presentation and dismissal with ownership and
   completion callbacks.
@@ -9,20 +9,20 @@ the arena overview in Hunter Island 2.02.
 - Add basic legacy table views, row index paths and custom-cell layout.
 - Support padded RGB images without alpha and UIKit bitmap image contexts,
   including scale, orientation and nested-context restoration.
-- Respect noninteractive decorative views in NIB files so the reward list can
-  scroll; decode image-only buttons without the placeholder title.
+- Respect noninteractive decorative NIB views so the reward list can scroll.
+- Decode button image/background properties and preserve state ownership.
+- Build Android from a tracked, neutral options template, without requiring a
+  local runtime settings file.
 
-Windows engine checks: 151 passed, 2 existing tests ignored.
-The list opened, closed and reopened in the isolated Windows test. Scrolling
-on the final candidate was confirmed by the user. The final close-button icon
-still needs a visual check. See VALIDATION.md for the exact scope.
+The three optional mods remain opt-in. Install the APK over the previous
+project-signed version, or extract the new Windows package into a separate
+program directory. Keep your existing local save/profile directory.
 
-There is no packaged preview.2 release yet. Existing preview.1 Windows/APK
-downloads do not contain these fixes. Android execution of the current changes
-remains unverified.
+Matching sources, dependency sources, license inventories and SHA-256 checksums
+accompany both platforms. See VALIDATION.md for actual checks and remaining
+limits, especially the scope of Android device testing.
 
-# Published: 0.2.0-preview.1
-
-The previous combined Windows/Android preview remains available with its
-matching source archives and dependency sources in Releases. Its binaries
-and release assets are unchanged by the current source update.
+Known visual limits: the Rewards close control may still display "Button";
+table clipping and modal-background composition remain incomplete.
+The verified Windows Rewards interaction path completes without a panic.
+The current APK is build/package-tested; physical-device execution is unverified.

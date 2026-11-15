@@ -1,0 +1,8 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# Local per-app option overrides. This template contains no user settings.
+# Recommended defaults are in touchHLE_default_options.txt.
+# Syntax: bundle.identifier: --option --other-option
+# Lines beginning with # and empty lines are ignored.

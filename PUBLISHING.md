@@ -10,8 +10,7 @@
 7. Verify the uploaded commit, files, hashes and intended visibility.
 
 The owner has requested that this repository be public. A source push does not
-publish a new binary release. preview.2 packaging is pending; preview.1 assets
-retain their existing source correspondence.
+publish a new binary release. Each packaged release must retain its own source correspondence.
 
 Make matching source assets available to each binary recipient and retain
 them for every distributed version. A build-PC test does not establish support

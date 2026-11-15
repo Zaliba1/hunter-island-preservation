@@ -224,7 +224,7 @@ pub fn prepopulate_user_data_dir() {
 
     let user_options = base_path.join(USER_OPTIONS_FILE);
     if !user_options.is_file() {
-        let content = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/touchHLE_options.txt"));
+        let content = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/user-options.txt"));
         create_file(&user_options, content);
     }
 
