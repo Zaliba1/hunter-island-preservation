@@ -56,3 +56,13 @@ The rule leaves capture logic and `bonusMonster` unchanged. The Windows test
 confirmed spawning, capture using the game's 100-gold card, bank/team transfer,
 and persistence after restarting the unmodified preview.3 runtime without the
 test option. See ORBLING_TEST.md for the exact scope and remaining limits.
+
+## Developer-only Tiamat tests
+
+`--hunter-test-tiamat` selects the original `Boss.Tiamat` in the same first
+wild-group slot. Its original `Summon` category makes it uncatchable.
+Adding `--hunter-test-tiamat-capture` enables a narrowly scoped exception to
+that category check, only while the Tiamat spawn diagnostic is active.
+Other capture restrictions, card costs and chance calculations remain in use.
+Both options default to off and are absent from the normal launcher UI.
+See TIAMAT_TEST.md for observed results and limits.

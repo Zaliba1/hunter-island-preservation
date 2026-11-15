@@ -46,6 +46,11 @@ exit status must not be classified as a game crash.
 
 ## Limits
 
+Follow-up: the user also confirmed a successful silver-card capture during
+the separate Orbling silver test. That test used the original capture rules;
+neither card probabilities nor random values were overridden. This is a human
+confirmation, not a measured estimate of the capture success rate.
+
 Only this monster and this original encounter pool were tested. A successful
 gold-card capture does not establish the long-run statistics of silver-card
 attempts. Orbling's abilities were displayed but not exhaustively exercised
