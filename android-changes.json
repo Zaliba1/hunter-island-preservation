@@ -1,6 +1,6 @@
 {
   "compared_to": "Desktop test6 (byte-identical test4 core)",
-  "modified_date": "2026-11-14",
+  "modified_date": "2026-11-15",
   "modified_or_added_engine_files": [
     ".cargo/config.toml",
     "android/app/build.gradle.kts",
@@ -43,11 +43,33 @@
     "src/objc/messages.rs",
     "src/options.rs"
   ],
-  "current_release": "0.2.0-preview.1",
+  "current_release": "0.2.0-preview.2",
   "combined_release_changes": [
     "Windows launcher mod settings",
     "common source delivery",
     "setup/build documentation",
     "fresh rebuild checks"
+  ],
+  "arena_fix_base_commit": "373e5ec736b821226d035bc247da633c372bfe71",
+  "publication_status": "Unreleased source; no matching final APK is published.",
+  "arena_rewards_changed_engine_files": [
+    "android/app/build.gradle.kts",
+    "src/frameworks/core_graphics/cg_bitmap_context.rs",
+    "src/frameworks/core_graphics/cg_context.rs",
+    "src/frameworks/core_graphics/cg_image.rs",
+    "src/frameworks/foundation/_nib_archive_decoder.rs",
+    "src/frameworks/foundation/ns_index_path.rs",
+    "src/frameworks/uikit.rs",
+    "src/frameworks/uikit/ui_font.rs",
+    "src/frameworks/uikit/ui_graphics.rs",
+    "src/frameworks/uikit/ui_image.rs",
+    "src/frameworks/uikit/ui_nib.rs",
+    "src/frameworks/uikit/ui_view.rs",
+    "src/frameworks/uikit/ui_view/ui_control/ui_button.rs",
+    "src/frameworks/uikit/ui_view/ui_label.rs",
+    "src/frameworks/uikit/ui_view/ui_scroll_view.rs",
+    "src/frameworks/uikit/ui_view/ui_scroll_view/ui_table_view.rs",
+    "src/frameworks/uikit/ui_view/ui_window/probe.rs",
+    "src/frameworks/uikit/ui_view_controller.rs"
   ]
 }

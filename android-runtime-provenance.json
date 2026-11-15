@@ -17,5 +17,7 @@
       "bytes": 1253544
     }
   ],
-  "symbols_stripped": true
+  "symbols_stripped": true,
+  "version": "0.2.0-preview.1",
+  "scope": "Previously published runtime inventory. Not evidence for the current preview.2 source or an unbuilt final APK."
 }

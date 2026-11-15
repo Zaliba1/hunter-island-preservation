@@ -491,6 +491,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     () = msg![env; this setBackgroundColor:bg_color];
     () = msg![env; this setTag:tag];
     () = msg![env; this setMultipleTouchEnabled:multi_touch_enabled];
+    let key = get_static_str(env, "UIUserInteractionDisabled");
+    let disabled: bool = msg![env; coder decodeBoolForKey:key];
+    () = msg![env; this setUserInteractionEnabled:(!disabled)];
+    let key = get_static_str(env, "UIAlpha");
+    let has_alpha: bool = msg![env; coder containsValueForKey:key];
+    if has_alpha {
+        let alpha: f32 = msg![env; coder decodeFloatForKey:key];
+        () = msg![env; this setAlpha:alpha];
+    }
 
     for i in 0..subview_count {
         let subview: id = msg![env; subviews objectAtIndex:i];
@@ -934,7 +943,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 // UIResponder implementation
 // From the Apple UIView docs regarding [UIResponder nextResponder]:
 // "UIView implements this method and returns the UIViewController object that
-//  manages it (if it has one) or its superview (if it doesn’t)."
+//  manages it (if it has one) or its superview (if it doesnâ€™t)."
 - (id)nextResponder {
     let host_object = env.objc.borrow::<UIViewHostObject>(this);
     if host_object.view_controller != nil {
@@ -1109,3 +1118,40 @@ pub const CLASSES: ClassExports = objc_classes! {
 @end
 
 };
+
+#[cfg(test)]
+mod nib_interaction_tests {
+    use super::*;
+    #[test]
+    fn decoded_decorative_views_do_not_intercept_touches_and_keep_their_alpha() {
+        use nibarchive::{NIBArchive,Object,Value,ValueVariant,ClassName};
+        let mut environment=Environment::new_without_app(
+            crate::options::Options{headless:true,..Default::default()},
+            crate::image::Image::from_pixel_vec(vec![0;4],(1,1)),
+        ).unwrap();let env=&mut environment;
+        let pool:id=msg_class![env; NSAutoreleasePool new];
+        let mut bounds=vec![6];for v in [0f32,0.,100.,100.] {bounds.extend(v.to_le_bytes());}
+        let mut center=vec![6];for v in [50f32,50.] {center.extend(v.to_le_bytes());}
+        let archive=NIBArchive::new_unchecked(vec![Object::new(0,0,4)],
+            vec!["UIBounds".into(),"UICenter".into(),"UIUserInteractionDisabled".into(),"UIAlpha".into()],
+            vec![Value::new(0,ValueVariant::Data(bounds)),Value::new(1,ValueVariant::Data(center)),
+                 Value::new(2,ValueVariant::Bool(true)),Value::new(3,ValueVariant::Float(0.25))],
+            vec![ClassName::new("NSObject".into(),vec![])]);
+        let bytes=archive.to_bytes();let len=bytes.len() as u32;let pointer=env.mem.alloc(len);
+        env.mem.bytes_at_mut(pointer.cast(),len).copy_from_slice(&bytes);
+        let data:id=msg_class![env; NSData dataWithBytes:(pointer.cast_const().cast_void()) length:len];
+        env.mem.free(pointer);
+        let coder:id=msg_class![env; _touchHLE_NIBArchiveDecoder alloc];
+        let coder:id=msg![env; coder _touchHLE_initForReadingWithData:data];
+        let overlay:id=msg_class![env; UIView alloc];
+        let overlay:id=msg![env; overlay initWithCoder:coder];
+        let frame=CGRect{origin:CGPoint::default(),size:CGSize{width:100.,height:100.}};
+        let container:id=msg_class![env; UIView alloc];let container:id=msg![env; container initWithFrame:frame];
+        let underneath:id=msg_class![env; UIView alloc];let underneath:id=msg![env; underneath initWithFrame:frame];
+        ()=msg![env; container addSubview:underneath];()=msg![env; container addSubview:overlay];
+        let hit:id=msg![env; container hitTest:(CGPoint{x:50.,y:50.}) withEvent:nil];
+        assert_eq!(hit,underneath);
+        let alpha:f32=msg![env; overlay alpha];assert_eq!(alpha,0.25);
+        release(env,overlay);release(env,underneath);release(env,container);release(env,coder);release(env,pool);
+    }
+}

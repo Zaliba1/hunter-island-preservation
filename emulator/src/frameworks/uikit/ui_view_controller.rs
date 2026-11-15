@@ -37,6 +37,10 @@ pub(super) struct UIViewControllerHostObject {
     /// of the nib by name, may be nil.
     /// `NSBundle*`
     bundle: id,
+    /// Strong reference to the presented controller; the reverse link is weak.
+    presented: id,
+    presenting: id,
+    presentation_transition: bool,
 }
 impl HostObject for UIViewControllerHostObject {}
 
@@ -77,7 +81,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())dealloc {
-    let &UIViewControllerHostObject { view, nib_name, bundle } = env.objc.borrow(this);
+    let &UIViewControllerHostObject { view, nib_name, bundle, presented, .. } = env.objc.borrow(this);
+    if presented != nil {
+        env.objc.borrow_mut::<UIViewControllerHostObject>(presented).presenting = nil;
+        let modal_view = env.objc.borrow::<UIViewControllerHostObject>(presented).view;
+        () = msg![env; modal_view removeFromSuperview];
+        release(env, presented);
+    }
 
     if view != nil {
         set_view_controller(env, view, nil);
@@ -191,8 +201,28 @@ pub const CLASSES: ClassExports = objc_classes! {
     todo_objc_setter!(this, style);
 }
 
+- (id)presentedViewController {
+    env.objc.borrow::<UIViewControllerHostObject>(this).presented
+}
+- (id)presentingViewController {
+    env.objc.borrow::<UIViewControllerHostObject>(this).presenting
+}
+- (id)modalViewController {
+    env.objc.borrow::<UIViewControllerHostObject>(this).presented
+}
+- (())presentViewController:(id)controller animated:(bool)animated
+                completion:(crate::mem::MutVoidPtr)completion {
+    present(env, this, controller, animated, completion);
+}
+- (())presentModalViewController:(id)controller animated:(bool)animated {
+    present(env, this, controller, animated, crate::mem::MutPtr::null());
+}
+- (())dismissViewControllerAnimated:(bool)animated
+                        completion:(crate::mem::MutVoidPtr)completion {
+    dismiss(env, this, animated, completion);
+}
 - (())dismissModalViewControllerAnimated:(bool)animated {
-    log!("TODO: [(UIViewController*){:?} dismissModalViewControllerAnimated:{}]", this, animated); // TODO
+    dismiss(env, this, animated, crate::mem::MutPtr::null());
 }
 - (())dismissMoviePlayerViewControllerAnimated {
     log!("TODO: [(UIViewController*){:?} dismissMoviePlayerViewControllerAnimated]", this); // TODO
@@ -205,7 +235,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 // UIResponder implementation
 // From the Apple UIView docs regarding [UIResponder nextResponder]:
 // "UIViewController similarly implements the method
-// and returns its view’s superview."
+// and returns its viewÃ¢â‚¬â„¢s superview."
 // https://developer.apple.com/documentation/uikit/uiresponder/next?language=objc
 - (id)nextResponder {
     let view = msg![env; this view];
@@ -265,4 +295,101 @@ fn check_nib_exists(env: &mut Environment, bundle: id, nib_name: id) -> bool {
     let type_: id = get_static_str(env, "nib");
     let res: id = msg![env; bundle pathForResource:nib_name ofType:type_];
     res != nil
+}
+
+/// Synchronous full-screen presentation. Transition animations are not modeled.
+/// The overlay shares the presenter's coordinate space, preserving landscape
+/// bounds and avoiding duplicate UIWindow appearance/rotation callbacks.
+/// UIKit contract: https://developer.apple.com/documentation/uikit/uiviewcontroller/present(_:animated:completion:)
+fn present(
+    env: &mut Environment,
+    presenter: id,
+    controller: id,
+    animated: bool,
+    completion: crate::mem::MutVoidPtr,
+) {
+    assert!(controller != nil && controller != presenter, "Invalid modal controller");
+    let state = env.objc.borrow::<UIViewControllerHostObject>(presenter);
+    if state.presented != nil || state.presentation_transition {
+        log!("Ignoring presentation while a controller is already presented");
+        return;
+    }
+    assert!(env.objc.borrow::<UIViewControllerHostObject>(controller).presenting == nil);
+    retain(env, controller);
+    let state = env.objc.borrow_mut::<UIViewControllerHostObject>(presenter);
+    state.presented = controller;
+    state.presentation_transition = true;
+    env.objc.borrow_mut::<UIViewControllerHostObject>(controller).presenting = presenter;
+    let parent_view: id = msg![env; presenter view];
+    let modal_view: id = msg![env; controller view];
+    let bounds: CGRect = msg![env; parent_view bounds];
+    () = msg![env; modal_view setFrame:bounds];
+    layout_modal_subviews(env, modal_view);
+    () = msg![env; presenter viewWillDisappear:animated];
+    () = msg![env; controller viewWillAppear:animated];
+    () = msg![env; parent_view addSubview:modal_view];
+    () = msg![env; presenter viewDidDisappear:animated];
+    () = msg![env; controller viewDidAppear:animated];
+    env.objc.borrow_mut::<UIViewControllerHostObject>(presenter).presentation_transition = false;
+    if !completion.is_null() {
+        crate::libc::blocks::invoke(env, completion);
+    }
+}
+
+/// Both the presenting controller and the presented controller may dismiss.
+/// Dismissing from below a modal stack removes all descendants, top first.
+/// The completion runs after viewDidDisappear:, while the callback's caller
+/// is kept alive even if presentation held its last external ownership.
+fn dismiss(
+    env: &mut Environment,
+    caller: id,
+    animated: bool,
+    completion: crate::mem::MutVoidPtr,
+) {
+    let state = env.objc.borrow::<UIViewControllerHostObject>(caller);
+    let presenter = if state.presented != nil { caller } else { state.presenting };
+    retain(env, caller);
+    if presenter != nil {
+        let state = env.objc.borrow::<UIViewControllerHostObject>(presenter);
+        let controller = state.presented;
+        if controller != nil && !state.presentation_transition {
+            if env.objc.borrow::<UIViewControllerHostObject>(controller).presented != nil {
+                dismiss(env, controller, false, crate::mem::MutPtr::null());
+            }
+            env.objc.borrow_mut::<UIViewControllerHostObject>(presenter).presentation_transition = true;
+            () = msg![env; controller viewWillDisappear:animated];
+            () = msg![env; presenter viewWillAppear:animated];
+            let modal_view = env.objc.borrow::<UIViewControllerHostObject>(controller).view;
+            () = msg![env; modal_view removeFromSuperview];
+            () = msg![env; controller viewDidDisappear:animated];
+            env.objc.borrow_mut::<UIViewControllerHostObject>(controller).presenting = nil;
+            let state = env.objc.borrow_mut::<UIViewControllerHostObject>(presenter);
+            state.presented = nil;
+            state.presentation_transition = false;
+            () = msg![env; presenter viewDidAppear:animated];
+            release(env, controller);
+        }
+    }
+    if !completion.is_null() {
+        crate::libc::blocks::invoke(env, completion);
+    }
+    release(env, caller);
+}
+
+/// Layout after the controller's viewDidLoad has initialized its data source.
+/// In particular, NIB tables must not request rows while outlets are connecting.
+fn layout_modal_subviews(env: &mut Environment, view: id) {
+    let mut pending = vec![view];
+    let mut visited = 0;
+    while let Some(view) = pending.pop() {
+        visited += 1;
+        assert!(visited <= 10000, "Modal view hierarchy exceeds supported size");
+        () = msg![env; view layoutSubviews];
+        let children: id = msg![env; view subviews];
+        let count: u32 = msg![env; children count];
+        for i in (0..count).rev() {
+            let child: id = msg![env; children objectAtIndex:i];
+            pending.push(child);
+        }
+    }
 }

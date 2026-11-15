@@ -1,35 +1,38 @@
 {
-  "version": "0.2.0-preview.1",
-  "review_date": "2026-11-14",
+  "version": "0.2.0-preview.2",
+  "status": "unreleased-development-source",
+  "review_date": "2026-11-15",
   "windows": {
-    "fresh_source_build": true,
-    "engine_tests_passed": 141,
+    "rebuild_from_prepared_checkout": true,
+    "fresh_clean_output_build": false,
+    "engine_tests_passed": 151,
     "engine_tests_ignored": 2,
     "launcher_tests_passed": 28,
-    "engine_sha256": "07be67cab50f15b1a10121b59a9c533ad27fd9298242dc3065d0472d11dd3bc8",
-    "portable_zip_title_screen_verified": true,
+    "engine_sha256": "e1a8ba09f48fdc1358bf1ee9dae1785fe16edd3cf711f19160084d3689c483e7",
     "isolated_no_network": true,
-    "smoke_test_limit_seconds": 25,
-    "smoke_test_stopped_by_time_limit": true
+    "rewards_opened": true,
+    "close_and_reopen_verified_before_final_nib_patch": true,
+    "scrolling_on_final_candidate": "user-confirmed",
+    "final_close_button_icon_visually_verified": false
   },
   "android": {
-    "fresh_source_build": true,
-    "framework_tests_passed": 36,
-    "apk_sha256": "f4b118cb92bc9b6ca3c2efb9d02d2079085953577a48b528e5cb9d045785abe4",
-    "signature_verified": true,
-    "apk_and_elf_16k_alignment_verified": true,
-    "physical_device_execution_tested": false
+    "final_apk_built": false,
+    "final_apk_signature_verified": false,
+    "physical_device_execution_tested": false,
+    "intermediate_native_build_completed": true,
+    "apk_assembly_blocker": "Could not connect to the local Gradle daemon; last NIB interaction/button patch not included in that intermediate build."
   },
   "source_inputs": {
     "archives": 23,
     "rust_packages": 148,
     "rust_files": 9974,
-    "all_checksums_verified": true
+    "dependency_revisions_unchanged": true
   },
-  "code_matches_fresh_build_inputs": true,
   "known_limits": [
-    "Current APK has not been executed on a physical device.",
-    "Historical guest dylibs have not been independently bit-reproduced.",
-    "Full story, all combat effects and all devices remain unverified."
+    "No preview.2 binary release published.",
+    "Final close-button icon and all reward layouts remain incompletely verified.",
+    "Current Android execution and a complete final fresh-export rebuild are unverified.",
+    "Full story and long sessions remain unverified.",
+    "Historical guest binaries not independently bit-reproduced."
   ]
 }

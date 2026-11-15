@@ -191,4 +191,95 @@ mod tests {
         .unwrap();
         super::exercise(&mut env);
     }
+
+    #[test]
+    fn modal_lifecycle_ownership_landscape_and_completion() {
+        use super::*;
+        use crate::dyld::export_c_func;
+        use crate::mem::{MutPtr, MutVoidPtr};
+        fn completed(env: &mut Environment, block: MutVoidPtr) {
+            let controller: id = env.mem.read((block.cast::<u32>() + 5).cast());
+            let count = env.mem.read(block.cast::<u32>() + 6);
+            // A real guest-ABI callback observes the completed appearance event.
+            let events = &env.objc.borrow::<ProbeController>(controller).events;
+            assert!(matches!(events.last(), Some(&"appeared") | Some(&"disappeared")));
+            env.mem.write(block.cast::<u32>() + 6, count + 1u32);
+        }
+        fn exercise(env: &mut Environment) {
+        let pool: id = msg_class![env; NSAutoreleasePool new];
+        let root: id = msg_class![env; _touchHLE_WindowProbeController new];
+        let modal: id = msg_class![env; _touchHLE_WindowProbeController new];
+        let destroyed = Arc::new(AtomicUsize::new(0));
+        env.objc.borrow_mut::<ProbeController>(modal).destroyed = Some(destroyed.clone());
+        let root_view: id = msg![env; root view];
+        let bounds = CGRect { origin: CGPoint::default(), size: CGSize { width: 1024., height: 768. } };
+        () = msg![env; root_view setBounds:bounds];
+        events(env, root);
+        let (name, callback) = export_c_func!(completed(_));
+        let invoke = env.dyld.create_guest_function(&mut env.mem, name, callback);
+        let block = env.mem.alloc(28);
+        env.mem.write(block.cast(), crate::libc::blocks::Header {
+            isa: nil, flags: crate::libc::blocks::IS_GLOBAL, reserved: 0,
+            invoke, descriptor: MutPtr::null(),
+        });
+        env.mem.write((block.cast::<u32>() + 5).cast(), modal);
+        env.mem.write(block.cast::<u32>() + 6, 0u32);
+        () = msg![env; root presentViewController:modal animated:true completion:(block.cast_void())];
+        assert_eq!(env.mem.read(block.cast::<u32>() + 6), 1u32);
+        assert_eq!(events(env, root), ["will-disappear", "disappeared"]);
+        assert_eq!(events(env, modal), ["load", "loaded", "will-appear", "appeared"]);
+        let actual: id = msg![env; root presentedViewController]; assert_eq!(actual, modal);
+        let actual: id = msg![env; modal presentingViewController]; assert_eq!(actual, root);
+        let modal_view: id = msg![env; modal view];
+        let actual: CGRect = msg![env; modal_view frame]; assert_eq!(actual, bounds);
+        let parent: id = msg![env; modal_view superview]; assert_eq!(parent, root_view);
+        // Presentation owns the controller after its caller releases it.
+        release(env, modal); assert_eq!(destroyed.load(Ordering::SeqCst), 0);
+        // The callback keeps the dismissing controller alive until completion.
+        () = msg![env; modal dismissViewControllerAnimated:true completion:(block.cast_void())];
+        assert_eq!(env.mem.read(block.cast::<u32>() + 6), 2u32);
+        assert_eq!(destroyed.load(Ordering::SeqCst), 1);
+        let actual: id = msg![env; root presentedViewController]; assert_eq!(actual, nil);
+        assert_eq!(events(env, root), ["will-appear", "appeared"]);
+        // No presentation is a safe no-op.
+        () = msg![env; root dismissModalViewControllerAnimated:false];
+        env.mem.free(block);
+        release(env, root); release(env, pool);
+        }
+        let environment = Environment::new_without_app(
+            crate::options::Options { headless: true, ..Default::default() },
+            crate::image::Image::from_pixel_vec(vec![0; 4], (1, 1)),
+        ).unwrap();
+        environment.run_framework_probe(exercise);
+    }
+
+    #[test]
+    fn modal_stack_dismissal_and_parent_destruction_release_children() {
+        use super::*;
+        let mut environment = Environment::new_without_app(
+            crate::options::Options { headless: true, ..Default::default() },
+            crate::image::Image::from_pixel_vec(vec![0; 4], (1, 1)),
+        ).unwrap();
+        let env = &mut environment;
+        let pool: id = msg_class![env; NSAutoreleasePool new];
+        let root: id = msg_class![env; _touchHLE_WindowProbeController new];
+        let destroyed = Arc::new(AtomicUsize::new(0));
+        for _ in 0..3 {
+            let a: id = msg_class![env; _touchHLE_WindowProbeController new];
+            let b: id = msg_class![env; _touchHLE_WindowProbeController new];
+            for controller in [a,b] {env.objc.borrow_mut::<ProbeController>(controller).destroyed = Some(destroyed.clone());}
+            () = msg![env; root presentModalViewController:a animated:false];
+            () = msg![env; a presentModalViewController:b animated:false];
+            release(env,a); release(env,b);
+            () = msg![env; root dismissModalViewControllerAnimated:false];
+            let actual: id = msg![env; root presentedViewController]; assert_eq!(actual,nil);
+        }
+        assert_eq!(destroyed.load(Ordering::SeqCst),6);
+        let child: id = msg_class![env; _touchHLE_WindowProbeController new];
+        env.objc.borrow_mut::<ProbeController>(child).destroyed=Some(destroyed.clone());
+        () = msg![env; root presentModalViewController:child animated:false];
+        release(env,child);release(env,root);
+        assert_eq!(destroyed.load(Ordering::SeqCst),7);
+        release(env,pool);
+    }
 }

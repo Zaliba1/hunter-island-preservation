@@ -63,8 +63,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)initWithCoder:(id)coder {
     let this: id = msg_super![env; this initWithCoder:coder];
 
-    // TODO: Decode other property values from the coder
-    () = msg![env; this setFont:nil];
+    let font_key = get_static_str(env, "UIFont");
+    let font: id = msg![env; coder decodeObjectForKey:font_key];
+    () = msg![env; this setFont:font];
 
     let key_ns_string = get_static_str(env, "UIText");
     let text: id = msg![env; coder decodeObjectForKey:key_ns_string];

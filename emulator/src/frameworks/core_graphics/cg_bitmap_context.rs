@@ -336,13 +336,16 @@ pub fn CGBitmapContextCreateImage(env: &mut Environment, context: CGContextRef) 
                 kCGImageAlphaNoneSkipLast | kCGImageAlphaPremultipliedLast
             )
     );
-    let pixels = env
+    let mut pixels = env
         .mem
         .bytes_at(
             bitmap_data.data.cast(),
             bitmap_data.bytes_per_row * bitmap_data.height,
         )
         .to_vec();
+    if bitmap_data.alpha_info == kCGImageAlphaNoneSkipLast {
+        for pixel in pixels.as_chunks_mut::<4>().0 { pixel[3] = 255; }
+    }
     cg_image::from_image(
         env,
         Image::from_pixel_vec(pixels, (bitmap_data.width, bitmap_data.height)),

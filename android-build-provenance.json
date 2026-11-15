@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "0.2.0-preview.1",
-  "review_date": "2026-11-14",
+  "version": "0.2.0-preview.2",
+  "review_date": "2026-11-15",
   "target": "aarch64-linux-android",
   "rust": "1.90.0-x86_64-pc-windows-gnu",
   "java": "Eclipse Temurin 17",
@@ -14,5 +14,6 @@
   "combined_binary_license": "GPL-3.0-or-later",
   "source_terms": "MPL-2.0 and original component terms",
   "sdk_and_compiler_binaries_redistributed": false,
-  "project_private_key_redistributed": false
+  "project_private_key_redistributed": false,
+  "status": "Final preview.2 APK not built; see VALIDATION.md for intermediate native-build and Gradle connection failure details."
 }

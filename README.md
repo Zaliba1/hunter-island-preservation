@@ -4,6 +4,14 @@ An unofficial project for preserving Hunter Island 2.02 offline on Windows
 and Android, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
 Import your own compatible, already decrypted 32-bit IPA locally.
 
+## Current status
+
+The current Git source is **0.2.0-preview.2 (unreleased)** and includes the arena
+Rewards crash fix. The latest downloadable Windows/APK package is still
+**0.2.0-preview.1** and does not include this fix. Build the current source using
+BUILD.md to test the new code. VALIDATION.md separates current checks from the
+previous release's evidence.
+
 ## Play
 
 Download the package for your device from

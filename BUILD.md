@@ -2,9 +2,14 @@
 
 ## Inputs
 
-Use the Source and SourceDependencies ZIPs from the same release.
-A Git checkout of the source commit recorded in release-checks.json can replace
-the Source ZIP. No game copy or saves are required to build.
+For the current unreleased preview.2, use this Git checkout and the
+HunterIsland-SourceDependencies-0.2.0-preview.1.zip archive from the existing
+release. Dependency revisions are unchanged. No preview.2 download assets
+have been published yet.
+
+For a packaged release, use its matching Source and SourceDependencies archives,
+or check out the source commit recorded in its release-checks.json.
+No game copy or saves are required to build.
 
 Source includes engine and launcher changes, build scripts, tests, license
 texts and provenance. SourceDependencies includes pinned native archives,
@@ -96,7 +101,7 @@ Use the supplied tools to inspect the Android package.
 
 ~~~powershell
 python tools/verify_android_apk.py --apk PATH/TO/app-debug.apk --sdk-root C:/Android/sdk --java-home C:/Java17 --out .build/android-review
-python tools/android_license_inventory.py .build/android-review/HunterIsland-Android-arm64-0.2.0-preview.1.apk --out .build/android-license-inventory.json
+python tools/android_license_inventory.py .build/android-review/HunterIsland-Android-arm64-0.2.0-preview.2.apk --out .build/android-license-inventory.json
 python tools/audit_public.py .
 ~~~
 

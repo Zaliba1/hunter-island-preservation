@@ -185,7 +185,15 @@ fn CGImageCreate(
     assert_eq!(alpha_info | byte_order, bitmap_info); // TODO
     match byte_order {
         kCGImageByteOrderDefault | kCGImageByteOrder32Big => {
-            assert_eq!(alpha_info, kCGImageAlphaPremultipliedLast); // TODO
+            match alpha_info {
+                kCGImageAlphaPremultipliedLast => {}
+                // Quartz treats AlphaNone as NoneSkipLast for padded pixels.
+                // https://developer.apple.com/library/archive/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/dq_images/dq_images.html
+                kCGImageAlphaNone | kCGImageAlphaNoneSkipLast => {
+                    for pixel in pixels.as_chunks_mut::<4>().0 { pixel[3] = 255; }
+                }
+                _ => unimplemented!("RGB32 alpha format {alpha_info}"),
+            }
         }
         kCGImageByteOrder32Little => {
             // TODO: fix CGImageGetAlphaInfo()
@@ -379,3 +387,36 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGImageGetBitsPerComponent(_)),
     export_c_func!(CGImageCreateWithImageInRect(_, _)),
 ];
+
+#[cfg(test)]
+mod alpha_none_tests {
+    use super::*;
+    use crate::objc::{id,msg_class,release};
+    #[test]
+    fn rgb32_opaque_images_ignore_padding_and_existing_formats_remain_correct() {
+        let mut environment=Environment::new_without_app(
+            crate::options::Options{headless:true,..Default::default()},
+            Image::from_pixel_vec(vec![0;4],(1,1)),
+        ).unwrap();
+        let env=&mut environment;
+        let pool:id=msg_class![env; NSAutoreleasePool new];
+        let original=from_image(env,Image::from_pixel_vec(vec![1,2,3,4,10,20,30,40],(2,1)));
+        let space=CGImageGetColorSpace(env,original);
+        let provider=CGImageGetDataProvider(env,original);
+        for info in [kCGImageAlphaNone,kCGImageAlphaNoneSkipLast,
+            kCGImageByteOrder32Big|kCGImageAlphaNone,kCGImageByteOrder32Big|kCGImageAlphaNoneSkipLast] {
+            let image=CGImageCreate(env,2,1,8,32,8,space,info,provider,ConstPtr::null(),false,0);
+            assert_eq!(borrow_image(&env.objc,image).pixels(),[1,2,3,255,10,20,30,255]);
+            CGImageRelease(env,image);
+        }
+        for (info,expected) in [
+            (kCGImageAlphaPremultipliedLast,vec![1,2,3,4,10,20,30,40]),
+            (kCGImageByteOrder32Little|kCGImageAlphaNoneSkipFirst,vec![3,2,1,255,30,20,10,255]),
+        ] {
+            let image=CGImageCreate(env,2,1,8,32,8,space,info,provider,ConstPtr::null(),false,0);
+            assert_eq!(borrow_image(&env.objc,image).pixels(),expected);
+            CGImageRelease(env,image);
+        }
+        CGImageRelease(env,original);release(env,pool);
+    }
+}

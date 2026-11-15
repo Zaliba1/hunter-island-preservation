@@ -23,7 +23,7 @@ def checked_zip(path):
 def validate(root):
     root=Path(root).resolve();checks=json.loads((root/'release-checks.json').read_text());version=checks['version']
     if (root/'DO-NOT-PUBLISH.md').exists():raise ValueError('Publication blocked')
-    if not re.fullmatch(r'(?:0\.1\.0-android[1-9][0-9]*|0\.2\.0-preview\.1)',version):raise ValueError('Invalid version')
+    if not re.fullmatch(r'(?:0\.1\.0-android[1-9][0-9]*|0\.2\.0-preview\.[12])',version):raise ValueError('Invalid version')
     apk=f'HunterIsland-Android-arm64-{version}.apk';source=f'HunterIsland-Source-{version}.zip';deps=f'HunterIsland-SourceDependencies-{version}.zip'
     names={apk,source,deps,'android-license-inventory.json','license-review.md','release-checks.json','SETUP.md'}
     hashes={}

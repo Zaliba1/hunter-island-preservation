@@ -336,13 +336,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 /// depending on the NIB file format).
 /// The unarchiver should later be manually [release]d
 fn load_nib_file(env: &mut Environment, ui_nib: id, path: GuestPathBuf) -> Result<id, ()> {
-    let path = ns_string::from_rust_string(env, path.as_str().to_string());
-    assert!(msg![env; path isAbsolutePath]);
-    let ns_data: id = msg_class![env; NSData dataWithContentsOfFile:path];
+    // A compiled NIB can be a directory containing its runtime archive.
+    // Resolve this inside the guest bundle, without extracting or editing it.
+    let path = resolve_nib_archive(&path, env.fs.is_dir(&path), |candidate| env.fs.is_file(candidate))?;
+    let path_string = ns_string::from_rust_string(env, path.as_str().to_string());
+    assert!(msg![env; path_string isAbsolutePath]);
+    let ns_data: id = msg_class![env; NSData dataWithContentsOfFile:path_string];
+    release(env, path_string);
     if ns_data == nil {
         // Apparently it's permitted to specify the nib file key in the
         // Info.plist, yet not have it point to a valid nib file?!
-        log!("Warning: couldn't load nib file {:?}", path);
+        log!("Warning: couldn't load nib file {}", path.as_str());
         return Err(());
     };
 
@@ -400,4 +404,35 @@ fn load_nib_file(env: &mut Environment, ui_nib: id, path: GuestPathBuf) -> Resul
     }
 
     Ok(unarchiver)
+}
+
+fn resolve_nib_archive(
+    path: &crate::fs::GuestPath,
+    directory: bool,
+    is_file: impl Fn(&crate::fs::GuestPath) -> bool,
+) -> Result<GuestPathBuf, ()> {
+    if !directory { return Ok(GuestPathBuf::from(path.as_str().to_owned())); }
+    for name in ["runtime.nib", "objects.nib"] {
+        let candidate = path.join(name);
+        if is_file(&candidate) { return Ok(candidate); }
+    }
+    Err(())
+}
+
+#[cfg(test)]
+mod archive_path_tests {
+    use super::*;
+    #[test]
+    fn single_files_and_directory_nibs_resolve_without_changing_bundle_paths() {
+        let path = crate::fs::GuestPath::new("/App/View.nib");
+        assert_eq!(resolve_nib_archive(path,false, |_| false).unwrap().as_str(),"/App/View.nib");
+        for (files,wanted) in [
+            (vec!["/App/View.nib/runtime.nib","/App/View.nib/objects.nib"],"/App/View.nib/runtime.nib"),
+            (vec!["/App/View.nib/objects.nib"],"/App/View.nib/objects.nib"),
+        ] {
+            let result=resolve_nib_archive(path,true,|p| files.contains(&p.as_str())).unwrap();
+            assert_eq!(result.as_str(),wanted);
+        }
+        assert!(resolve_nib_archive(path,true, |_| false).is_err());
+    }
 }

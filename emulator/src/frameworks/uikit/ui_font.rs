@@ -9,9 +9,9 @@ use super::ui_graphics::UIGraphicsGetCurrentContext;
 use crate::font::{Font, TextAlignment, WrapMode};
 use crate::frameworks::core_graphics::cg_bitmap_context::CGBitmapContextDrawer;
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect, CGSize};
-use crate::frameworks::foundation::ns_string::to_rust_string;
+use crate::frameworks::foundation::ns_string::{get_static_str, to_rust_string};
 use crate::frameworks::foundation::NSInteger;
-use crate::objc::{autorelease, id, msg, objc_classes, ClassExports, HostObject};
+use crate::objc::{autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr};
 use crate::Environment;
 use std::collections::HashMap;
 use std::ops::Range;
@@ -64,6 +64,9 @@ struct UIFontHostObject {
     kind: FontKind,
 }
 impl HostObject for UIFontHostObject {}
+#[derive(Default)]
+struct FontDescriptor { attributes: id }
+impl HostObject for FontDescriptor {}
 
 /// Line break mode.
 ///
@@ -94,7 +97,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 (env, this, _cmd);
 
 @implementation UIFont: NSObject
-
++ (id)allocWithZone:(NSZonePtr)_zone {
+    env.objc.alloc_object(this,Box::new(UIFontHostObject{size:17.,kind:FontKind::SansRegular}),&mut env.mem)
+}
 // Values are checked against iPhone 3GS, iOS 4.0.1
 + (CGFloat)labelFontSize {
     17.0
@@ -147,6 +152,19 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
+- (id)initWithCoder:(id)coder {
+    let key=get_static_str(env,"UIFontName");
+    let name:id=msg![env; coder decodeObjectForKey:key];
+    let key=get_static_str(env,"UIFontPointSize");
+    let size:f64=msg![env; coder decodeDoubleForKey:key];
+    let kind=if name!=nil { get_equivalent_font(&to_rust_string(env,name)).unwrap_or(FontKind::SansRegular) } else {FontKind::SansRegular};
+    let state=env.objc.borrow_mut::<UIFontHostObject>(this);
+    state.kind=kind;state.size=if size.is_finite() && size>0. {size as f32} else {17.};
+    this
+}
+- (CGFloat)pointSize {env.objc.borrow::<UIFontHostObject>(this).size}
+
+
 - (CGFloat)ascender {
     let host_object = env.objc.borrow::<UIFontHostObject>(this);
     let font = env.framework_state.uikit.ui_font.get_font_by_kind(host_object.kind);
@@ -173,6 +191,23 @@ pub const CLASSES: ClassExports = objc_classes! {
     ascender + leading - descender
 }
 
+@end
+
+@implementation UIFontDescriptor: NSObject
++ (id)allocWithZone:(NSZonePtr)_zone {
+    env.objc.alloc_object(this,Box::<FontDescriptor>::default(),&mut env.mem)
+}
+- (id)initWithCoder:(id)coder {
+    let key=get_static_str(env,"UIFontDescriptorAttributes");
+    let attributes:id=msg![env; coder decodeObjectForKey:key];
+    retain(env,attributes);env.objc.borrow_mut::<FontDescriptor>(this).attributes=attributes;
+    this
+}
+- (id)fontAttributes {env.objc.borrow::<FontDescriptor>(this).attributes}
+- (())dealloc {
+    let attributes=env.objc.borrow::<FontDescriptor>(this).attributes;
+    release(env,attributes);env.objc.dealloc_object(this,&mut env.mem);
+}
 @end
 
 };

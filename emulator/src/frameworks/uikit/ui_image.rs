@@ -248,7 +248,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())drawInRect:(CGRect)rect {
     let context = UIGraphicsGetCurrentContext(env);
     let image = drawing_image(env, this);
-    CGContextDrawImage(env, context, rect, image);
+    draw_ui_image(env, context, rect, image);
 }
 
 - (())drawAtPoint:(CGPoint)point {
@@ -263,7 +263,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         origin: point,
         size,
     };
-    CGContextDrawImage(env, context, rect, image);
+    draw_ui_image(env, context, rect, image);
 }
 
 @end
@@ -323,4 +323,18 @@ mod tests {
         assert!(env.objc.get_host_object(source).is_none());
         assert!(env.objc.get_host_object(oriented).is_none());
     }
+}
+
+/// UIImage compensates for the top-left UIKit image-context CTM; raw
+/// CGContextDrawImage intentionally retains Quartz's bottom-left convention.
+fn draw_ui_image(env: &mut Environment, context: crate::frameworks::core_graphics::cg_context::CGContextRef, rect: CGRect, image: CGImageRef) {
+    use crate::frameworks::core_graphics::cg_context::{CGContextSaveGState,CGContextRestoreGState,CGContextTranslateCTM,CGContextScaleCTM};
+    if context==nil {return;}
+    if super::ui_graphics::is_image_context(env,context) {
+        CGContextSaveGState(env,context);
+        CGContextTranslateCTM(env,context,rect.origin.x,rect.origin.y+rect.size.height);
+        CGContextScaleCTM(env,context,1.,-1.);
+        CGContextDrawImage(env,context,CGRect{origin:CGPoint::default(),size:rect.size},image);
+        CGContextRestoreGState(env,context);
+    } else {CGContextDrawImage(env,context,rect,image);}
 }

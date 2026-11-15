@@ -122,17 +122,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     })
 }
 
-- (f32)decodeFloatForKey:(id)key { // NSString *
-    // TODO: Check bounds, raise NSRangeException if it doesn't fit
-    get_value_to_decode_for_key(env, this, key).map_or(
-        0.0,
-        |value| {
-            let &ValueVariant::Float(f) = value.value() else {
-                unreachable!()
-            };
-            f
-        }
-    )
+- (f32)decodeFloatForKey:(id)key {
+    get_value_to_decode_for_key(env, this, key).map_or(0., |v| decode_real(v.value()) as f32)
+}
+- (f64)decodeDoubleForKey:(id)key {
+    get_value_to_decode_for_key(env, this, key).map_or(0., |v| decode_real(v.value()))
 }
 
 - (NSInteger)decodeIntegerForKey:(id)key { // NSString *
@@ -379,5 +373,22 @@ pub fn decode_current_number(env: &mut Environment, unarchiver: id) -> id {
             msg![env; num initWithInteger:int]
         }
         _ => unimplemented!("decode_current_number: {key}"),
+    }
+}
+
+fn decode_real(value: &ValueVariant) -> f64 {
+    match value {
+        ValueVariant::Float(v) => *v as f64,
+        ValueVariant::Double(v) => *v,
+        _ => panic!("Expected floating-point NIB value"),
+    }
+}
+#[cfg(test)]
+mod real_value_tests {
+    #[test]
+    fn legacy_float_and_modern_double_font_sizes_decode() {
+        use super::*;
+        assert_eq!(decode_real(&ValueVariant::Float(140.)),140.);
+        assert_eq!(decode_real(&ValueVariant::Double(15.)),15.);
     }
 }

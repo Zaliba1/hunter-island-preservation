@@ -37,6 +37,8 @@ struct UIButtonContentHostObject {
     title: id,
     /// `UIColor*`
     title_color: id,
+    image: id,
+    background_image: id,
 }
 impl HostObject for UIButtonContentHostObject {}
 
@@ -200,17 +202,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let key_idx: id = msg_class![env; NSNumber numberWithLongLong:0i64];
     let button_content: id = msg![env; dict objectForKey:key_idx];
 
-    let title: id = msg![env; button_content title];
-    if title != nil {
-        log_dbg!("UIButton initWithCoder: title {}", to_rust_string(env, title));
-        () = msg![env; this setTitle:title forState:UIControlStateNormal];
-    }
-
-    let title_color: id = msg![env; button_content titleColor];
-    if title_color != nil {
-        log_dbg!("UIButton initWithCoder: title_color {}", to_rust_string(env, title_color));
-        () = msg![env; this setTitleColor:title_color forState:UIControlStateNormal];
-    }
+    apply_coded_content(env, this, button_content);
 
     // TODO: decode other properties
     update(env, this);
@@ -419,6 +411,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     let title_color: id = msg![env; coder decodeObjectForKey:title_color_key];
     log_dbg!("UIButtonContent: UITitleColor -> {:?}", title_color);
 
+    let key = get_static_str(env, "UIImage");
+    let image: id = msg![env; coder decodeObjectForKey:key];
+    let key = get_static_str(env, "UIBackgroundImage");
+    let background_image: id = msg![env; coder decodeObjectForKey:key];
+    retain(env, image);retain(env, background_image);
+    let state = env.objc.borrow_mut::<UIButtonContentHostObject>(this);
+    state.image=image;state.background_image=background_image;
+
     // TODO: decode other properties
 
     retain(env, title);
@@ -437,6 +437,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<UIButtonContentHostObject>(this).title_color
 }
 
+- (id)image {env.objc.borrow::<UIButtonContentHostObject>(this).image}
+- (id)backgroundImage {env.objc.borrow::<UIButtonContentHostObject>(this).background_image}
+
 - (id)description {
     let title = env.objc.borrow::<UIButtonContentHostObject>(this).title;
     let title_color = env.objc.borrow::<UIButtonContentHostObject>(this).title_color;
@@ -450,10 +453,14 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())dealloc {
     let &UIButtonContentHostObject {
         title,
-        title_color
+        title_color,
+        image,
+        background_image
     } = env.objc.borrow(this);
     release(env, title);
     release(env, title_color);
+    release(env, image);
+    release(env, background_image);
 
     env.objc.dealloc_object(this, &mut env.mem)
 }
@@ -461,3 +468,39 @@ pub const CLASSES: ClassExports = objc_classes! {
 @end
 
 };
+
+/// A missing archived title clears init_common's placeholder "Button".
+/// Images and background images retain their normal UIButton state ownership.
+fn apply_coded_content(env: &mut Environment, button: id, content: id) {
+    let title:id=msg![env; content title];
+    ()=msg![env; button setTitle:title forState:UIControlStateNormal];
+    let color:id=msg![env; content titleColor];
+    if color!=nil {()=msg![env; button setTitleColor:color forState:UIControlStateNormal];}
+    let image:id=msg![env; content image];
+    ()=msg![env; button setImage:image forState:UIControlStateNormal];
+    let background:id=msg![env; content backgroundImage];
+    ()=msg![env; button setBackgroundImage:background forState:UIControlStateNormal];
+}
+#[cfg(test)]
+mod coded_content_tests {
+    use super::*;
+    #[test]
+    fn image_only_coded_buttons_clear_placeholder_and_retain_the_image() {
+        let mut environment=Environment::new_without_app(
+            crate::options::Options{headless:true,..Default::default()},
+            crate::image::Image::from_pixel_vec(vec![0;4],(1,1)),
+        ).unwrap();let env=&mut environment;
+        let pool:id=msg_class![env; NSAutoreleasePool new];
+        let cg=crate::frameworks::core_graphics::cg_image::from_image(env,crate::image::Image::from_pixel_vec(vec![255;4],(1,1)));
+        let image:id=msg_class![env; UIImage imageWithCGImage:cg];
+        let content:id=msg_class![env; UIButtonContent alloc];
+        retain(env,image);env.objc.borrow_mut::<UIButtonContentHostObject>(content).image=image;
+        let button:id=msg_class![env; UIButton buttonWithType:0i32];
+        apply_coded_content(env,button,content);
+        release(env,content);
+        let actual:id=msg![env; button imageForState:UIControlStateNormal];assert_eq!(actual,image);
+        let title:id=msg![env; button titleForState:UIControlStateNormal];assert_eq!(title,nil);
+        crate::frameworks::core_graphics::cg_image::CGImageRelease(env,cg);
+        release(env,pool);
+    }
+}

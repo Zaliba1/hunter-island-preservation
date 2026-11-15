@@ -1,38 +1,51 @@
-# Validation for 0.2.0-preview.1
+# Validation of the current development source
 
-Verified on 14 November 2026 on the Windows build PC.
+Current source version: **0.2.0-preview.2 (unreleased)**.
+Reviewed on 15 November 2026.
+
+## Checks actually completed
 
 | Check | Result |
 | --- | --- |
-| Sources and dependencies prepared in a fresh copy | Passed |
-| Windows GNU release build in a fresh output directory | Passed |
-| Engine library tests | 141 passed, 2 existing tests ignored |
-| Windows launcher and package checks | 28 passed |
-| Fresh Android ARM64 release build | Passed |
-| Android Robolectric/JUnit tests on API 26 and 35 | 36 passed |
-| APK signature, ARM64 and 16-KiB alignment | Passed |
-| Windows AppContainer and title screen from ZIP | Passed |
+| Windows GNU rebuild from the prepared source checkout | Passed |
+| Engine library tests | 151 passed, 2 existing tests ignored |
+| Windows launcher/package unit tests | 28 passed |
+| Original arena Rewards crash | Reproduced on the preview.1 binary |
+| Rewards list presentation | Visible on Windows after the framework fixes |
+| Closing and reopening the list | Verified before the final NIB interaction/button patch |
+| Scrolling on the final candidate | Confirmed by the user |
+| Final close-button icon | Implemented; final visual verification pending |
 
-Windows was started with a separate test profile and a locally supplied IPA.
-The title screen was visible at 1024 × 768. The bounded 25-second test was
-deliberately stopped by its time limit.
-Private test profiles and images are outside this repository.
+The Windows game ran in a separate AppContainer with zero network capabilities
+and a copied save. The original test seed was preserved. Private game data,
+captures and detailed execution logs are excluded from the repository.
+The final tested engine hash and evidence boundaries are recorded in
+validation.json.
 
-23 source archives and 9,974 files from 148 Rust packages were checked against
-the supplied checksums. Matching sources and controlling build scripts are
-included in the source assets.
+The test adds coverage for modal ownership, appearance callbacks and completion
+blocks; table rows, index paths and reloads; NIB archive selection and numeric
+font values; image alpha formats; scaled/nested image contexts; passive view
+hit testing; and image-only button ownership.
 
-Files in emulator/src and the Android app sources match the fresh build inputs.
-Current runtime hashes are recorded in validation.json and the release
-inventories.
+## Android and packaging status
 
-## Limits
+An intermediate Android native candidate compiled. APK assembly failed because
+the build could not connect to its local Gradle daemon. It did not include the
+last NIB interaction/button changes. No current APK is declared built, signed,
+installed or device-tested.
 
-The new APK was not executed on a phone during this review. The Pixel was not
-available through ADB. Earlier Pixel tests apply to their respective APKs.
+The new sources and dependencies were also exported/prepared in a separate
+clean directory. A complete fresh build from that final export, final package
+audits and binary publication remain pending. Reusing the prepared Windows
+build checkout does not establish a new clean-output rebuild.
 
-The full story, all combat effects, all GPUs and long sessions remain unverified.
-Historical Apple guest libraries have not been independently rebuilt byte for
-byte. LICENSE_REVIEW.md describes this provenance limit.
-Successful builds verify the documented rebuild route; they do not establish
-cross-platform byte-identical output.
+## Previous published release
+
+The immutable preview.1 checks, hashes and matching sources remain in
+[its release assets](https://github.com/Zaliba1/hunter-island-preservation/releases/tag/v0.2.0-preview.1).
+Its 141 engine tests, 36 Android host tests and APK checks apply to that release,
+rather than the current development source.
+
+Full gameplay, every UI layout, long sessions and current Android execution
+remain unverified. Historical Apple guest binaries have not been independently
+rebuilt byte for byte; see LICENSE_REVIEW.md.
