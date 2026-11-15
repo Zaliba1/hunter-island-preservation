@@ -27,9 +27,22 @@ jobs:
           curl --fail --location --retry 3 -o .build/dependencies.zip https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.2/HunterIsland-SourceDependencies-0.2.0-preview.2.zip
           echo 'b232e533bea7ce266cbd8751ac83f19a496c4c8f87d02b411e887f1244cc4788  .build/dependencies.zip' | shasum -a 256 -c -
           python3 tools/prepare_offline_sources.py .build/dependencies.zip
+      - name: Restore native build cache
+        id: native-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: .build/macos/target
+          key: macos-arm64-rust190-v1-${{ hashFiles('emulator/Cargo.lock', 'emulator/Cargo.toml', 'emulator/src/**') }}
+          restore-keys: macos-arm64-rust190-v1-
       - name: Build and test the native app
         shell: bash
         run: bash tools/build-macos.sh
+      - name: Retain native build cache
+        if: always() && steps.native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: .build/macos/target
+          key: ${{ steps.native-cache.outputs.cache-primary-key }}
       - name: Upload test app and matching sources
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

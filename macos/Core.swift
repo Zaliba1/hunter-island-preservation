@@ -12,8 +12,12 @@ func require(_ condition: Bool, _ message: String) throws {
 }
 func runTool(_ executable: String, _ arguments: [String], limit: Int = 2 << 20) throws -> Data {
     let process = Process(), pipe = Pipe()
+    let errorURL = FileManager.default.temporaryDirectory.appendingPathComponent("hunter-tool-" + UUID().uuidString)
+    FileManager.default.createFile(atPath: errorURL.path, contents: Data())
+    let errors = try FileHandle(forWritingTo: errorURL)
+    defer { try? errors.close(); try? FileManager.default.removeItem(at: errorURL) }
     process.executableURL = URL(fileURLWithPath: executable); process.arguments = arguments
-    process.standardOutput = pipe; process.standardError = FileHandle.nullDevice
+    process.standardOutput = pipe; process.standardError = errors
     try process.run()
     let timer = DispatchSource.makeTimerSource(queue: .global())
     timer.schedule(deadline: .now() + 30)
@@ -31,7 +35,11 @@ func runTool(_ executable: String, _ arguments: [String], limit: Int = 2 << 20) 
         }
     } catch { if process.isRunning { kill(process.processIdentifier, SIGKILL) }; process.waitUntilExit(); throw error }
     process.waitUntilExit()
-    try require(process.terminationStatus == 0, "A required tool failed: \(URL(fileURLWithPath: executable).lastPathComponent)")
+    if process.terminationStatus != 0 {
+        let reader = try FileHandle(forReadingFrom: errorURL); defer { try? reader.close() }
+        let detail = String(data: try reader.read(upToCount: 8192) ?? Data(), encoding: .utf8) ?? ""
+        throw PreviewError.invalid("A required tool failed: \(URL(fileURLWithPath: executable).lastPathComponent) (status \(process.terminationStatus)). \(detail)")
+    }
     return data
 }
 func digest(_ url: URL) throws -> String {
@@ -167,7 +175,7 @@ final class MacStore {
     let root: URL, run: URL, settingsURL: URL
     var settings: [String: Any]
     init(root explicit: URL? = nil) throws {
-        root = explicit ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("HunterIslandPreservation", isDirectory: true)
+        root = (explicit ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("HunterIslandPreservation", isDirectory: true)).resolvingSymlinksInPath()
         run = root.appendingPathComponent("profiles/default/run", isDirectory: true)
         settingsURL = root.appendingPathComponent("settings.json")
         try FileManager.default.createDirectory(at: run, withIntermediateDirectories: true)
@@ -231,8 +239,8 @@ final class MacStore {
 
 func sandboxArguments(app: URL, store: MacStore) -> [String] {
     return ["-f", app.appendingPathComponent("Contents/Resources/game.sb").path,
-            "-D", "HOME_ROOT=" + FileManager.default.homeDirectoryForCurrentUser.path,
-            "-D", "APP_ROOT=" + app.path, "-D", "DATA_ROOT=" + store.root.path,
+            "-D", "HOME_ROOT=" + FileManager.default.homeDirectoryForCurrentUser.resolvingSymlinksInPath().path,
+            "-D", "APP_ROOT=" + app.resolvingSymlinksInPath().path, "-D", "DATA_ROOT=" + store.root.path,
             "-D", "RUN_ROOT=" + store.run.path]
 }
 
