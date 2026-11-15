@@ -334,8 +334,5 @@ Other options:
 
 Hunter Island preservation options (default off):
   --hunter-rare-dragons        Five percent per ordinary wild pack on four starter tiles.
-  --hunter-test-orbling        Diagnostic: Orbling in every wild pack on the Leafy field.
-  --hunter-test-tiamat         Diagnostic: original Tiamat on the Leafy field; no capture bypass.
-  --hunter-test-tiamat-capture Diagnostic: allow the Tiamat test's Summon category; retain capture rolls.
   --hunter-silver-exchange     Add the local 50:1 silver-to-gold shop action.
   --hunter-no-arena-cooldown   Allow the next local tournament round immediately.
