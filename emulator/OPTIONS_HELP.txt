@@ -334,5 +334,6 @@ Other options:
 
 Hunter Island preservation options (default off):
   --hunter-rare-dragons        Five percent per ordinary wild pack on four starter tiles.
+  --hunter-test-orbling        Diagnostic: Orbling in every wild pack on the Leafy field.
   --hunter-silver-exchange     Add the local 50:1 silver-to-gold shop action.
   --hunter-no-arena-cooldown   Allow the next local tournament round immediately.

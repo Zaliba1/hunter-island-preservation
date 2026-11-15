@@ -194,7 +194,7 @@ Type mismatch when sending message {} to {:?}!
         }
         // Keep stack arguments in place, including on a cached guest IMP.
         IMP::Guest(guest_imp) => {
-            if env.options.hunter_rare_dragons
+            if (env.options.hunter_rare_dragons || env.options.hunter_test_orbling)
                 && super::hunter_rare_dragons::try_draw(env, receiver, guest_imp)
             {
                 return;

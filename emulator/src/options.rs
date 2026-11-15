@@ -70,6 +70,8 @@ pub struct Options {
     /// Legacy compatibility: defer uniquely owned texture deletes to their GL sharegroup.
     pub legacy_deferred_texture_deletes: bool,
     pub hunter_rare_dragons: bool,
+    /// Diagnostic-only Orbling encounter on the original Leafy field.
+    pub hunter_test_orbling: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_no_arena_cooldown: bool,
     pub fps_limit: Option<f64>,
@@ -115,6 +117,7 @@ impl Default for Options {
             legacy_string_unsigned_int: false,
             legacy_deferred_texture_deletes: false,
             hunter_rare_dragons: false,
+            hunter_test_orbling: false,
             hunter_silver_exchange: false,
             hunter_no_arena_cooldown: false,
             fps_limit: Some(60.0), // Original iPhone is 60Hz and uses v-sync,
@@ -281,6 +284,8 @@ impl Options {
             self.hunter_silver_exchange = true;
         } else if arg == "--hunter-rare-dragons" {
             self.hunter_rare_dragons = true;
+        } else if arg == "--hunter-test-orbling" {
+            self.hunter_test_orbling = true;
         } else if arg == "--legacy-string-unsigned-int" {
             self.legacy_string_unsigned_int = true;
         } else if arg == "--legacy-deferred-texture-deletes" {

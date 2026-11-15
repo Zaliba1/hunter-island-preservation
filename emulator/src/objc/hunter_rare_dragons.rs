@@ -6,10 +6,10 @@
 //! Optional encounter rule for the four early starter dragon tiles in Hunter Island 2.02.
 use crate::abi::GuestFunction;
 use crate::cpu::Cpu;
-use crate::frameworks::foundation::ns_string::to_rust_string;
+use crate::frameworks::foundation::ns_string::{from_rust_string, to_rust_string};
 use crate::libc::stdlib::arc4random;
 use crate::mem::Ptr;
-use crate::objc::{id, msg, nil};
+use crate::objc::{autorelease, id, msg, nil};
 use crate::Environment;
 
 const WEIGHTED_DRAW: u32 = 0x169ec1;
@@ -71,6 +71,10 @@ fn draw_for_starter_list(env: &mut Environment, list: id) -> Option<id> {
     if !is_starter(&dragon) {
         return None;
     }
+    let test_orbling = env.options.hunter_test_orbling && dragon == "Earthdragon01";
+    if !env.options.hunter_rare_dragons && !test_orbling {
+        return None;
+    }
 
     // At this verified call site, the guest keeps its current EncounterData at
     // SP + 0x64. Its monsters array is still empty before the first draw.
@@ -84,6 +88,16 @@ fn draw_for_starter_list(env: &mut Environment, list: id) -> Option<id> {
     }
     let monsters: id = msg![env; encounter monsters];
     let already_drawn: u32 = msg![env; monsters count];
+    if test_orbling {
+        // Change only the first member of an ordinary wild group. Keep
+        // original capture rules and the monster's bonusMonster property.
+        if already_drawn == 0 {
+            let name = from_rust_string(env, "Crystaldragon01".to_owned());
+            log!("Hunter Island Orbling test: Leafy pool (over-28x92), first slot Crystaldragon01, original capture rules");
+            return Some(autorelease(env, name));
+        }
+        return None;
+    }
 
     // arc4random produces the nonzero u32 range. Reject the partial bucket
     // before taking a remainder so that each of the 60 buckets is equal.

@@ -41,3 +41,18 @@ This option bypasses the 12-hour check between local tournament rounds.
 The game's existing routines handle results, progression and rewards.
 When you disable the option, the game again uses its recorded time of the
 last arena victory.
+
+## Developer-only Orbling encounter test
+
+`--hunter-test-orbling` is a diagnostic option, disabled by default and not
+enabled by any launcher checkbox. It replaces the first monster in every
+ordinary wild group generated from the verified Leafy encounter pool
+(`over-28x92`, north of Ark Island) with `Crystaldragon01` (Orbling).
+Other group slots retain the original draw. This guarantees Orbling in a
+generated wild group; it does not force a battle on every movement step.
+It is a narrowly matched encounter test, not a general coordinate editor.
+
+The rule leaves capture logic and `bonusMonster` unchanged. The Windows test
+confirmed spawning, capture using the game's 100-gold card, bank/team transfer,
+and persistence after restarting the unmodified preview.3 runtime without the
+test option. See ORBLING_TEST.md for the exact scope and remaining limits.
