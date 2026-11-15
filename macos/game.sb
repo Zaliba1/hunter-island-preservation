@@ -1,0 +1,8 @@
+(version 1)
+; Experimental Seatbelt boundary, validated before each game launch.
+(allow default)
+(deny network*)
+(deny file-read* (subpath (param "HOME_ROOT")))
+(deny file-write*)
+(allow file-read* (subpath (param "APP_ROOT")) (subpath (param "DATA_ROOT")))
+(allow file-write* (subpath (param "RUN_ROOT")) (literal "/dev/null"))

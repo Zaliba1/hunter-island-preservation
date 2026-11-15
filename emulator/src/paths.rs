@@ -136,6 +136,12 @@ pub fn user_data_base_path() -> Cow<'static, Path> {
     }
     #[cfg(not(target_os = "android"))]
     {
+        #[cfg(target_os = "macos")]
+        if let Some(path) = std::env::var_os("TOUCHHLE_PRESERVATION_DATA") {
+            let path = PathBuf::from(path);
+            assert!(path.is_absolute(), "The preservation data directory must be absolute");
+            return Cow::Owned(path);
+        }
         // When touchHLE is run from a .app bundle on macOS, the user might not
         // be able to control the current directory, so user data needs to go in
         // a standard location.

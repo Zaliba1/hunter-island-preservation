@@ -27,7 +27,7 @@ pub fn api(context: &mut dyn GLES) -> ShaderApi<'_> {
 
 /// Keep ES 1.00 precision rules and GL_ES conditionals when compiling on a
 /// desktop driver with ES2 shader compatibility. Existing #version is preserved.
-fn desktop_source(parts: &[Vec<u8>]) -> Vec<u8> {
+fn es_source(parts: &[Vec<u8>]) -> Vec<u8> {
     let joined = parts.concat();
     let mut start = 0;
     while start < joined.len() {
@@ -56,6 +56,14 @@ fn desktop_source(parts: &[Vec<u8>]) -> Vec<u8> {
     } else {
         [b"#version 100\n".as_slice(), joined.as_slice()].concat()
     }
+}
+
+fn desktop_source(parts: &[Vec<u8>]) -> Vec<u8> {
+    let source = es_source(parts);
+    #[cfg(target_os = "macos")]
+    { super::shader_source::macos_source(&source) }
+    #[cfg(not(target_os = "macos"))]
+    { source }
 }
 
 struct AttributeState {
@@ -641,13 +649,13 @@ mod tests {
     #[test]
     fn glsl_version_follows_comments_and_split_source() {
         assert_eq!(
-            desktop_source(&[b"// test\n /*x*/ #version 100\n".to_vec()]),
+            es_source(&[b"// test\n /*x*/ #version 100\n".to_vec()]),
             b"// test\n /*x*/ #version 100\n"
         );
         assert_eq!(
-            desktop_source(&[b"/*#version 100*/".to_vec(), b"void main(){}".to_vec()]),
+            es_source(&[b"/*#version 100*/".to_vec(), b"void main(){}".to_vec()]),
             b"#version 100\n/*#version 100*/void main(){}"
         );
-        assert_eq!(desktop_source(&[]), b"#version 100\n");
+        assert_eq!(es_source(&[]), b"#version 100\n");
     }
 }

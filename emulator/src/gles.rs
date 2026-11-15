@@ -66,7 +66,7 @@
 pub mod gles1_native;
 pub mod gles1_on_gl2;
 pub mod gles2_shaders;
-#[cfg(any(target_os = "android", test))]
+#[cfg(any(target_os = "android", target_os = "macos", test))]
 mod shader_source;
 #[cfg(target_os = "android")]
 pub mod gles2_native;
