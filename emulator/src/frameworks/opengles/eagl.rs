@@ -63,6 +63,8 @@ pub(super) struct EAGLContextHostObject {
     pub(super) api: EAGLRenderingAPI,
     pub(super) guest_error: GLenum,
     pub(super) client_attributes: HashMap<u32, super::gles2_guest::ClientAttribute>,
+    #[cfg(target_os = "macos")]
+    pub(super) generated_vertex_arrays: std::collections::HashSet<u32>,
     pub(super) gles_ctx: Option<Box<dyn GLESContext>>,
     /// Mapping of OpenGL ES renderbuffer names to `EAGLDrawable` instances
     /// (always `CAEAGLLayer*`). Retains the instance so it won't dangle.
@@ -115,6 +117,8 @@ pub const CLASSES: ClassExports = objc_classes! {
         api: kEAGLRenderingAPIOpenGLES1,
         guest_error: 0,
         client_attributes: HashMap::new(),
+        #[cfg(target_os = "macos")]
+        generated_vertex_arrays: std::collections::HashSet::new(),
         renderbuffer_drawable_bindings: Rc::new(RefCell::new(HashMap::new())),
         fps_counter: None,
         present_frame_count: 0,

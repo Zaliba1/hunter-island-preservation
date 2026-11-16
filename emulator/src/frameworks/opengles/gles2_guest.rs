@@ -62,22 +62,31 @@ pub(super) fn integer_parameter(
     });
     true
 }
+#[cfg(target_os = "macos")]
+fn generated_vertex_arrays(env: &mut Environment) -> Option<&mut std::collections::HashSet<u32>> {
+    let context = env.framework_state.opengles.current_ctxs.get(&env.current_thread).copied().flatten()?;
+    Some(&mut env.objc.borrow_mut::<super::eagl::EAGLContextHostObject>(context).generated_vertex_arrays)
+}
+
 pub(super) fn glGenVertexArraysOES(env: &mut Environment, count: i32, output: MutPtr<u32>) {
-    with_api(env, |api, mem| {
+    let _names = with_api(env, |api, mem| {
         if count > 0 {
             let _ = mem.bytes_at_mut(output.cast(), (count as u32).checked_mul(4).unwrap());
         }
         let names = api.gen_vertex_arrays(count);
-        for (index, name) in names.into_iter().enumerate() {
+        for (index, &name) in names.iter().enumerate() {
             mem.write(output + index as u32, name);
         }
+        names
     });
+    #[cfg(target_os = "macos")]
+    if let Some(allocated) = generated_vertex_arrays(env) { allocated.extend(_names); }
 }
 pub(super) fn glDeleteVertexArraysOES(env: &mut Environment, count: i32, source: ConstPtr<u32>) {
-    with_api(env, |api, mem| {
+    let _names = with_api(env, |api, mem| {
         if count < 0 {
             api.invalid_vertex_array_delete_count(count);
-            return;
+            return Vec::new();
         }
         if count > 0 {
             let _ = mem.bytes_at(source.cast(), (count as u32).checked_mul(4).unwrap());
@@ -86,12 +95,25 @@ pub(super) fn glDeleteVertexArraysOES(env: &mut Environment, count: i32, source:
             .map(|index| mem.read(source + index))
             .collect();
         api.delete_vertex_arrays(&names);
+        names
     });
+    #[cfg(target_os = "macos")]
+    if let Some(allocated) = generated_vertex_arrays(env) {
+        for name in _names { allocated.remove(&name); }
+    }
 }
 pub(super) fn glBindVertexArrayOES(env: &mut Environment, name: u32) {
+    // APPLE VAOs allow binding arbitrary unused names, while OES requires a
+    // name from GenVertexArraysOES. Validate without altering the old binding.
+    #[cfg(target_os = "macos")]
+    if name != 0 && generated_vertex_arrays(env).is_some_and(|names| !names.contains(&name)) {
+        super::guest_error(env, Some(0x0502)); return;
+    }
     with_api(env, |api, _| api.bind_vertex_array(name));
 }
 pub(super) fn glIsVertexArrayOES(env: &mut Environment, name: u32) -> u8 {
+    #[cfg(target_os = "macos")]
+    if generated_vertex_arrays(env).is_some_and(|names| !names.contains(&name)) { return 0; }
     with_api(env, |api, _| api.is_vertex_array(name))
 }
 fn glEnableVertexAttribArray(env: &mut Environment, index: u32) {
@@ -362,7 +384,9 @@ pub(crate) fn vertex_array_probe(env: &mut Environment) -> Result<(), String> {
     super::gles_guest::glGetFloatv(env, 0x85b5, (scratch + 3).cast());
     assert_eq!(env.mem.read((scratch + 3).cast::<f32>()), first as f32);
     glBindVertexArrayOES(env, u32::MAX);
-    assert_eq!(with_api(env, |api, _| api.error()), 0x0502);
+    assert_eq!(super::gles_guest::glGetError(env), 0x0502);
+    assert_eq!(with_api(env, |api, _| api.integer(0x85b5)) as u32, first);
+    assert_eq!(glIsVertexArrayOES(env, u32::MAX), 0);
     glGenVertexArraysOES(env, -1, MutPtr::null());
     assert_eq!(with_api(env, |api, _| api.error()), 0x0501);
     glDeleteVertexArraysOES(env, -1, ConstPtr::null());
@@ -393,6 +417,8 @@ pub(crate) fn vertex_array_probe(env: &mut Environment) -> Result<(), String> {
         "Deleting bound VAO must select zero"
     );
     assert_eq!(glIsVertexArrayOES(env, first), 0);
+    glBindVertexArrayOES(env, first);
+    assert_eq!(super::gles_guest::glGetError(env), 0x0502);
     glBindVertexArrayOES(env, second);
     glDeleteVertexArraysOES(env, 2, scratch.cast_const());
     assert_eq!(with_api(env, |api, _| api.error()), 0);
