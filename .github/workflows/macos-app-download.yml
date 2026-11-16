@@ -1,0 +1,61 @@
+name: Mac app download
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Successful Apple Silicon Mac preview run ID
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: ${{ inputs.source_run }}
+      REPOSITORY: ${{ github.repository }}
+    steps:
+      - name: Download the verified Mac build
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          gh run view "$SOURCE_RUN" --repo "$REPOSITORY" --json conclusion,workflowName > run.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('run.json'))
+          assert r['conclusion']=='success' and r['workflowName']=='Apple Silicon Mac preview'
+          PY
+          gh run download "$SOURCE_RUN" --repo "$REPOSITORY" --name HunterIsland-macOS-arm64-preview --dir original
+      - name: Check hashes and prepare the small download
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,re,shutil
+          root=Path('original');out=Path('app-download');out.mkdir()
+          for line in (root/'SHA256SUMS.txt').read_text().splitlines():
+              match=re.fullmatch(r'([0-9a-f]{64})  ([^/\\]+)',line)
+              assert match
+              digest,name=match.groups()
+              assert name not in {'.','..'}
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest
+          for p in root.iterdir():
+              if p.is_file() and not p.name.startswith('HunterIsland-SourceDependencies-'):
+                  shutil.copy2(p,out/p.name)
+          original_url=f"https://github.com/{os.environ['REPOSITORY']}/actions/runs/{os.environ['SOURCE_RUN']}"
+          with (out/'README.md').open('a') as f:
+              f.write('\nThis small artifact contains the app and matching project sources.\n'
+                      'The full matching dependency source archive remains in the original build artifact:\n'+original_url+'\n')
+          (out/'SHA256SUMS.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n'
+              for p in sorted(out.iterdir()) if p.is_file() and p.name!='SHA256SUMS.txt'))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: HunterIsland-macOS-arm64-app
+          path: app-download/*
+          retention-days: 14
