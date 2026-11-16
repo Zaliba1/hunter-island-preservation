@@ -128,16 +128,11 @@ final class LauncherBackground: NSView {
                 try self.store.backup(); try verifyIsolation(app: app, store: self.store)
                 let logs = self.store.root.appendingPathComponent("logs", isDirectory: true)
                 try FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
-                let temp = self.store.run.appendingPathComponent("temp", isDirectory: true)
-                try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
                 let log = logs.appendingPathComponent("game.log")
                 FileManager.default.createFile(atPath: log.path, contents: Data())
                 let handle = try FileHandle(forWritingTo: log)
-                let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/bin/sandbox-exec")
                 let options = gameArguments(language: self.store.settings["language"] as? String ?? "en", device: self.store.settings["device"] as? String ?? "ipad", mods: self.store.settings["mods"] as? [String: Bool] ?? [:])
-                process.arguments = try sandboxArguments(app: app, store: self.store) + [app.appendingPathComponent("Contents/MacOS/touchHLE").path, game.path] + options
-                process.currentDirectoryURL = self.store.run
-                process.environment = ["PATH": "/usr/bin:/bin", "HOME": self.store.run.path, "TMPDIR": temp.path, "TOUCHHLE_PRESERVATION_DATA": self.store.run.path, "RUST_BACKTRACE": "1"]
+                let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice
                 try process.run(); self.gameProcess = process
                 DispatchQueue.main.async { self.status.stringValue = "Game running. Close the game window to return here." }

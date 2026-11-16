@@ -71,6 +71,8 @@ The build runs engine tests, synthetic IPA-import/core tests, the native
 launcher UI smoke test, a packaged isolation probe, and the existing real
 shader/render/readback probe. It creates the app, matching source ZIP,
 compiled-file inventory and checksums under `dist/macos/`.
+The graphics probe uses the packaged, signed engine through the same isolated
+process setup and private environment as the Play button, without an IPA.
 
 ## Validation limits
 

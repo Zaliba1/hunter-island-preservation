@@ -5,6 +5,19 @@ import Darwin
 @main struct CoreTests {
     static func main() throws {
         let args = CommandLine.arguments
+        if args.count == 3 && args[1] == "--graphics" {
+            guard let directory = ProcessInfo.processInfo.environment["HI_MAC_GRAPHICS_DATA"] else { throw PreviewError.invalid("Missing private graphics fixture directory.") }
+            let store = try MacStore(root: URL(fileURLWithPath: directory))
+            let process = try isolatedEngine(app: URL(fileURLWithPath: args[2]), store: store, arguments: ["--test-gles2-shaders"])
+            try process.run()
+            let timer = DispatchSource.makeTimerSource(queue: .global())
+            timer.schedule(deadline: .now() + 120)
+            timer.setEventHandler { if process.isRunning { kill(process.processIdentifier, SIGKILL) } }
+            timer.resume(); defer { timer.cancel() }
+            process.waitUntilExit()
+            try require(process.terminationStatus == 0, "Isolated graphics probe failed with status \(process.terminationStatus).")
+            print("Packaged isolated engine graphics probe passed."); return
+        }
         if args.count == 3 && args[1] == "--isolation" {
             for parent in [FileManager.default.temporaryDirectory, FileManager.default.homeDirectoryForCurrentUser] {
                 let data = parent.appendingPathComponent("hunter-isolation-test-"+UUID().uuidString)

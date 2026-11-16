@@ -39,7 +39,7 @@ for path in app.rglob('*'):
 report=dict(schema='hunter-macos-preview-v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
     architecture='arm64',minimum_macos='13.0',compiled_files=compiled,signature='ad-hoc',notarized=False,
     source_dependency_asset='HunterIsland-SourceDependencies-0.2.0-preview.2.zip',source_dependency_sha256='b232e533bea7ce266cbd8751ac83f19a496c4c8f87d02b411e887f1244cc4788',
-    native_launcher_ui_smoke_tested=True,ipa_fixture_import_tested=True,graphics_shader_render_readback_tested=True,
+    native_launcher_ui_smoke_tested=True,ipa_fixture_import_tested=True,graphics_shader_render_readback_tested=True,isolated_engine_graphics_tested=True,
     actual_game_start_tested=False,actual_game_audio_touch_save_tested=False,original_game_included=False,
     privacy=audit(app,True),isolation_scope='Network denied, reads under the real home directory denied except app/profile, writes limited to the run directory. Seatbelt probe required before play.',
     notes='Experimental test branch. Engine test/graphics probes are synthetic and do not establish Hunter Island gameplay compatibility.')

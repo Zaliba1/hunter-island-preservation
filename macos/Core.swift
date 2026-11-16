@@ -253,6 +253,17 @@ func sandboxArguments(app: URL, store: MacStore) throws -> [String] {
             "-D", "RUN_ROOT=" + store.run.path]
 }
 
+func isolatedEngine(app: URL, store: MacStore, arguments: [String]) throws -> Process {
+    let temp = store.run.appendingPathComponent("temp", isDirectory: true)
+    try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+    let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/bin/sandbox-exec")
+    process.arguments = try sandboxArguments(app: app, store: store) + [app.appendingPathComponent("Contents/MacOS/touchHLE").path] + arguments
+    process.currentDirectoryURL = store.run
+    process.environment = ["PATH": "/usr/bin:/bin", "HOME": store.run.path, "TMPDIR": temp.path, "TOUCHHLE_PRESERVATION_DATA": store.run.path, "RUST_BACKTRACE": "1"]
+    process.standardInput = FileHandle.nullDevice
+    return process
+}
+
 func verifyIsolation(app: URL, store: MacStore) throws {
     let canary = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".hunter-isolation-" + UUID().uuidString)
     let outside = canary.appendingPathExtension("write")

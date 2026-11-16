@@ -42,8 +42,7 @@ HI_MAC_TEST_DATA="$root/.build/macos/ui-profile" HI_MAC_UI_SNAPSHOT="$root/.buil
 # Repeat isolation against the packaged probe and actual SB profile.
 .build/macos/core-tests --isolation "$app"
 # No original game is needed or supplied for the real GL render/readback probe.
-mkdir -p .build/macos/graphics
-(cd .build/macos/graphics && TOUCHHLE_PRESERVATION_DATA="$root/.build/macos/graphics" "$app/Contents/MacOS/touchHLE" --test-gles2-shaders) > .build/macos/graphics-probe.log 2>&1
+HI_MAC_GRAPHICS_DATA="$root/.build/macos/graphics" .build/macos/core-tests --graphics "$app" > .build/macos/graphics-probe.log 2>&1
 short=$(git rev-parse --short HEAD)
 ditto -c -k --keepParent "$app" "dist/macos/HunterIsland-macOS-arm64-test-$short.zip"
 git archive --format=zip --output="dist/macos/HunterIsland-Source-test-$short.zip" HEAD
