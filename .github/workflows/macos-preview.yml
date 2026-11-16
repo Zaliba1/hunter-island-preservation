@@ -2,7 +2,7 @@ name: Apple Silicon Mac preview
 on:
   workflow_dispatch:
   push:
-    branches: [main, codex/macos-apple-silicon]
+    branches: [main]
 permissions:
   contents: read
 jobs:
