@@ -205,6 +205,14 @@ Type mismatch when sending message {} to {:?}!
                 return;
             }
             if !super::leaf_getter::try_call(env, guest_imp) {
+                let history_hook = if super::hunter_history::interesting(guest_imp.addr_with_thumb_bit()) {
+                    let entry_regs = *env.cpu.regs();
+                    let entry_flags = env.cpu.cpsr();
+                    let hook = super::hunter_history::before(env, receiver, guest_imp.addr_with_thumb_bit());
+                    *env.cpu.regs_mut() = entry_regs;
+                    env.cpu.set_cpsr(entry_flags);
+                    hook
+                } else { None };
                 guest_imp.call_without_pushing_stack_frame(env);
                 if env.options.hunter_no_arena_cooldown
                     && matches!(guest_imp.addr_with_thumb_bit(), 0xdbec1 | 0xdbfe1)
@@ -218,10 +226,14 @@ Type mismatch when sending message {} to {:?}!
                     // Hunter Island 2.02 returns the arena wait as a soft-float
                     // double in r0/r1. Preserve the guest's other side effects
                     // and let its original round, unlock and reward logic run.
-                    let regs = env.cpu.regs_mut();
+                    let regs = env.cpu.regs();
                     let wait = f64::from_bits(u64::from(regs[0]) | (u64::from(regs[1]) << 32));
                     if wait > 0.0 {
-                        regs[..2].fill(0);
+                        // Queries may run every frame. Count the begin action only.
+                        if guest_imp.addr_with_thumb_bit() == 0xdbec1 {
+                            super::hunter_history::arena(env, wait);
+                        }
+                        env.cpu.regs_mut()[..2].fill(0);
                         if env.options.capture_frames && guest_imp.addr_with_thumb_bit() == 0xdbec1 {
                             log!("Hunter Island arena cooldown skipped: {wait:.0} seconds");
                         }
@@ -229,6 +241,13 @@ Type mismatch when sending message {} to {:?}!
                 }
                 if env.options.hunter_silver_exchange {
                     super::hunter_silver_exchange::after_guest_call(env, receiver, guest_imp);
+                }
+                if let Some(hook) = history_hook {
+                    let exit_regs = *env.cpu.regs();
+                    let exit_flags = env.cpu.cpsr();
+                    super::hunter_history::after(env, hook);
+                    *env.cpu.regs_mut() = exit_regs;
+                    env.cpu.set_cpsr(exit_flags);
                 }
             }
         }

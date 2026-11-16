@@ -54,7 +54,9 @@ try {
     if ($LASTEXITCODE) { throw 'Emulator build failed.' }
 } finally { Pop-Location }
 # GNU import-library symbol names can contain the compiler's temporary path.
-# Strip the distributed executable's COFF/debug symbols explicitly, then audit it.
-& (Join-Path $gnuBin 'strip.exe') --strip-all (Join-Path $env:CARGO_TARGET_DIR 'x86_64-pc-windows-gnu\release\touchHLE.exe')
-if ($LASTEXITCODE) { throw 'Executable symbol stripping failed.' }
+# Strip both executables' COFF/debug symbols explicitly, then audit them.
+foreach ($binary in @('touchHLE.exe','hunter-history.exe')) {
+    & (Join-Path $gnuBin 'strip.exe') --strip-all (Join-Path $env:CARGO_TARGET_DIR "x86_64-pc-windows-gnu\release\$binary")
+    if ($LASTEXITCODE) { throw "Executable symbol stripping failed: $binary" }
+}
 Write-Host (Join-Path $env:CARGO_TARGET_DIR 'x86_64-pc-windows-gnu\release\touchHLE.exe')

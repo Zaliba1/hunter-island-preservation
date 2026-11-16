@@ -46,7 +46,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         return nil;
     }
 
-    let value = match serialize_plist(env, plist) {
+    let mut value = match serialize_plist(env, plist) {
         Ok(value) => value,
         Err(message) => {
             log!("Property list serialization failed: {}", message);
@@ -54,6 +54,10 @@ pub const CLASSES: ClassExports = objc_classes! {
             return nil;
         }
     };
+    if let Err(message) = crate::objc::hunter_history::write_plist(env, &mut value) {
+        write_legacy_error(env, error_string, message);
+        return nil;
+    }
     log_dbg!("dataFromPropertyList value {:?}", value);
     let mut buf = Vec::new();
     if let Err(error) = value.to_writer_binary(&mut buf) {
@@ -78,6 +82,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         if !format.is_null() {
             env.mem.write(format, NSPropertyListXMLFormat_v1_0);
         }
+        crate::objc::hunter_history::read_plist(env, &root);
         let property_list = deserialize_plist(env, &root, opt);
         return autorelease(env, property_list)
     }
@@ -87,6 +92,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         if !format.is_null() {
             env.mem.write(format, NSPropertyListBinaryFormat_v1_0);
         }
+        crate::objc::hunter_history::read_plist(env, &root);
         let property_list = deserialize_plist(env, &root, opt);
         return autorelease(env, property_list)
     }

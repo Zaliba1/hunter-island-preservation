@@ -51,6 +51,7 @@ mod mem;
 mod objc;
 mod options;
 mod paths;
+pub mod preservation;
 mod stack;
 mod window;
 

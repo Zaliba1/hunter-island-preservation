@@ -3,8 +3,8 @@
   "libraries": [
     {
       "file": "libtouchHLE.so",
-      "sha256": "1de1babcaff0cbafeb3024c2905d4d3cae1feea1257cb90a0b6498e44b2e5882",
-      "bytes": 19806896
+      "sha256": "2eaba455845a484dfa1170bee427da6a0b0e2148e3240a8691487625a7c8bd3f",
+      "bytes": 20189696
     },
     {
       "file": "libSDL2.so",
@@ -17,7 +17,5 @@
       "bytes": 1253544
     }
   ],
-  "symbols_stripped": true,
-  "version": "0.2.0-preview.2",
-  "scope": "Native runtime built from the clean preview.2 source checkout; packaged APK checks recorded separately."
+  "symbols_stripped": true
 }

@@ -94,6 +94,9 @@ fn draw_for_starter_list(env: &mut Environment, list: id) -> Option<id> {
         }
     };
     let index = draw_index(already_drawn == 0, roll);
+    if already_drawn == 0 {
+        super::hunter_history::draw(env, encounter, &dragon, index == 3);
+    }
     if already_drawn == 0 && (index == 3 || env.options.capture_frames) {
         log!("Hunter Island rare dragons: tile dragon={dragon}, selected={}", index == 3);
     }

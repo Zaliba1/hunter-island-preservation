@@ -1,7 +1,7 @@
 # Apple Silicon Mac preview
 
-This work lives on `codex/macos-apple-silicon`. It does not change the main
-branch or replace the published Windows/Android packages.
+The Apple Silicon preview is included in the shared source tree on `main`.
+Building a new preview does not replace older downloaded application packages.
 
 The target is an ARM64 **Hunter Island.app** for macOS 13 or later. Intel Macs
 are not included in this preview. Players do not need Python, Rust, Homebrew,
@@ -9,7 +9,7 @@ or a Windows `.cmd` file. Developers need the tools described below.
 
 ## Using a successful test build
 
-1. Open the **Apple Silicon Mac preview** run for this test branch in GitHub
+1. Open the **Apple Silicon Mac preview** run for the desired commit in GitHub
    Actions. Download the `HunterIsland-macOS-arm64-preview` artifact.
 2. Extract the artifact, then the `HunterIsland-macOS-arm64-test-….zip` inside.
    Move **Hunter Island.app** to a local folder such as Applications.
@@ -20,8 +20,8 @@ or a Windows `.cmd` file. Developers need the tools described below.
    English is the default; all three optional mods default to off.
 5. Select **Play**. Close the game window to return to the launcher.
 
-The test build is **ad-hoc signed, not notarized** and is not a published Mac
-release. The starter does not disable Gatekeeper or remove quarantine flags.
+The test build is an experimental preview, **ad-hoc signed, not notarized**.
+The starter does not disable Gatekeeper or remove quarantine flags.
 Follow macOS's own review/approval flow for software you have chosen to trust.
 
 Data is stored separately from the app in
@@ -51,11 +51,10 @@ a replacement. The launcher itself needs access to user-selected import files.
 ## Building and source delivery
 
 Use the source ZIP matching the test artifact's commit. Its source dependencies
-are the unchanged
-`HunterIsland-SourceDependencies-0.2.0-preview.2.zip` supplied in the existing
-preview.2 GitHub release. Retain both source archives when sharing this build.
-The dependency asset SHA-256 is
-`b232e533bea7ce266cbd8751ac83f19a496c4c8f87d02b411e887f1244cc4788`.
+are included as `HunterIsland-SourceDependencies-test-<commit>.zip` in the same
+artifact. This includes the added SHA-2 source, unlike the older preview.2
+dependency archive alone. Retain both source archives when sharing this build.
+`SHA256SUMS.txt` and `checks.json` record the exact dependency archive digest.
 Per-file license terms remain applicable; see LICENSES.md and LICENSE_REVIEW.md.
 
 On an Apple Silicon development Mac, install Xcode Command Line Tools, Rust
@@ -63,7 +62,7 @@ On an Apple Silicon development Mac, install Xcode Command Line Tools, Rust
 Prepare sources in a fresh checkout, then run:
 
 ```sh
-python3 tools/prepare_offline_sources.py /path/to/HunterIsland-SourceDependencies-0.2.0-preview.2.zip
+python3 tools/prepare_offline_sources.py /path/to/HunterIsland-SourceDependencies-test-COMMIT.zip
 bash tools/build-macos.sh
 ```
 

@@ -56,13 +56,16 @@
 - regex-lite version 0.1.9 by The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>, licensed under Apache-2.0 OR MIT
 - regex-syntax version 0.8.11 by The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>, licensed under Apache-2.0 OR MIT
 - rusttype version 0.9.3 by Dylan Ede <dylanede@googlemail.com>, Jeremy Soller <jackpot51@gmail.com>, Alex Butler <alexheretic@gmail.com>, licensed under Apache-2.0 OR MIT
+- ryu version 1.0.12 by David Tolnay <dtolnay@gmail.com>, licensed under Apache-2.0 OR BSL-1.0
 - scopeguard version 1.2.0 by bluss, licensed under Apache-2.0 OR MIT
 - sdl2 version 0.37.0 by Tony Aldridge <tony@angry-lawyer.com>, Cobrand <cobrandw@gmail.com>, licensed under MIT
 - sdl2-sys version 0.37.0 by Tony Aldridge <tony@angry-lawyer.com>, Cobrand <cobrandw@gmail.com>, licensed under MIT AND Zlib
 - serde version 1.0.228 by Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>, licensed under Apache-2.0 OR MIT
 - serde_core version 1.0.228 by Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>, licensed under Apache-2.0 OR MIT
 - serde_derive version 1.0.228 by Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>, licensed under Apache-2.0 OR MIT
+- serde_json version 1.0.91 by Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>, licensed under Apache-2.0 OR MIT
 - sha1 version 0.10.6 by RustCrypto Developers, licensed under Apache-2.0 OR MIT
+- sha2 version 0.10.6 by RustCrypto Developers, licensed under Apache-2.0 OR MIT
 - siphasher version 1.0.4 by Frank Denis <github@pureftpd.org>, licensed under Apache-2.0 OR MIT
 - smallvec version 1.15.1 by The Servo Project Developers, licensed under Apache-2.0 OR MIT
 - symphonia version 0.6.0 by Philip Deljanov <philip.deljanov@gmail.com>, licensed under MPL-2.0

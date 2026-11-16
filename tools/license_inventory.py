@@ -14,7 +14,7 @@ def inventory(root):
         name=path.name.lower();rel=path.relative_to(root).as_posix();component=None
         if name.startswith('api-ms-win-') or name=='ucrtbase.dll':
             raise ValueError('Windows OS component must not be copied from the build machine: '+rel)
-        if rel=='runtime/touchHLE.exe':component='touchHLE-and-static-dependencies-with-GNU-runtime'
+        if rel in {'runtime/touchHLE.exe','runtime/hunter-history.exe'}:component='touchHLE-and-static-dependencies-with-GNU-runtime'
         elif rel=='runtime/isolation-probe.exe':component='launcher'
         elif rel.startswith('runtime/touchHLE_dylibs/') and path.name in GUEST:component=GUEST[path.name]
         elif rel.startswith('runtime/touchHLE_fonts/') and name.startswith('liberation'):component='Liberation-fonts'

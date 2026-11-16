@@ -26,6 +26,7 @@ use std::collections::HashMap;
 mod arc;
 mod hunter_rare_dragons;
 mod hunter_silver_exchange;
+pub(crate) mod hunter_history;
 mod classes;
 mod dispatch_cache;
 pub(crate) mod key_value_coding;
@@ -99,6 +100,7 @@ pub struct ObjC {
     message_type_info: Option<(std::any::TypeId, &'static str)>,
     method_cache: dispatch_cache::MethodCache,
     hunter_exchange_save: Option<hunter_silver_exchange::SaveReceipt>,
+    pub(crate) hunter_history: hunter_history::State,
 }
 
 impl ObjC {
@@ -130,6 +132,7 @@ impl ObjC {
             message_type_info: None,
             method_cache: dispatch_cache::MethodCache::new(),
             hunter_exchange_save: None,
+            hunter_history: hunter_history::State::default(),
         }
     }
 

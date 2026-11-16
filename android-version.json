@@ -1,7 +1,7 @@
 {
-  "version": "0.2.0-preview.3",
-  "version_code": 13,
+  "version": "0.2.0-preview.4",
+  "version_code": 14,
   "application_id": "org.hunterislandpreservation.android",
   "base_desktop": "0.1.0-test4",
-  "modified_date": "2026-11-15"
+  "modified_date": "2026-11-16"
 }

@@ -32,7 +32,7 @@ cp LICENSE LICENSES.md LICENSE_REVIEW.md THIRD_PARTY.md SOURCE.md MACOS.md guest
 python3 - "$app" <<'PY'
 import pathlib,plistlib,sys
 p=pathlib.Path(sys.argv[1])/'Contents/Info.plist'
-p.write_bytes(plistlib.dumps(dict(CFBundleIdentifier='org.hunterislandpreservation.macos.preview',CFBundleName='Hunter Island',CFBundleDisplayName='Hunter Island',CFBundleExecutable='HunterIslandLauncher',CFBundlePackageType='APPL',CFBundleShortVersionString='0.2.0',CFBundleVersion='1',LSMinimumSystemVersion='13.0',NSHighResolutionCapable=True,NSPrincipalClass='NSApplication')))
+p.write_bytes(plistlib.dumps(dict(CFBundleIdentifier='org.hunterislandpreservation.macos.preview',CFBundleName='Hunter Island',CFBundleDisplayName='Hunter Island',CFBundleExecutable='HunterIslandLauncher',CFBundlePackageType='APPL',CFBundleShortVersionString='0.2.0',CFBundleVersion='2',LSMinimumSystemVersion='13.0',NSHighResolutionCapable=True,NSPrincipalClass='NSApplication')))
 PY
 codesign --force --sign - --options runtime --entitlements macos/engine-entitlements.plist "$app/Contents/MacOS/touchHLE"
 codesign --force --sign - "$app/Contents/MacOS/isolation-probe"
@@ -46,6 +46,16 @@ HI_MAC_GRAPHICS_DATA="$root/.build/macos/graphics" .build/macos/core-tests --gra
 short=$(git rev-parse --short HEAD)
 ditto -c -k --keepParent "$app" "dist/macos/HunterIsland-macOS-arm64-test-$short.zip"
 git archive --format=zip --output="dist/macos/HunterIsland-Source-test-$short.zip" HEAD
+python3 tools/verify_source_delivery.py .dependencies > dist/macos/dependency-checks.json
+python3 - "$short" <<'PY'
+from pathlib import Path
+import sys,zipfile
+root=Path('.dependencies')
+with zipfile.ZipFile(f'dist/macos/HunterIsland-SourceDependencies-test-{sys.argv[1]}.zip','x',zipfile.ZIP_DEFLATED) as z:
+    for p in sorted(root.rglob('*')):
+        if p.is_symlink():raise ValueError('Unexpected dependency source symlink')
+        if p.is_file():z.write(p,p.relative_to(root).as_posix())
+PY
 python3 tools/check_macos_package.py "$app" --out dist/macos/checks.json
 cp MACOS.md dist/macos/README.md
 python3 - <<'PY'

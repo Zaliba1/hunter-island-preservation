@@ -1308,37 +1308,6 @@
       "source_directory": "rust/scopeguard-1.2.0"
     },
     {
-      "name": "sdl2",
-      "version": "0.37.0",
-      "license": "MIT",
-      "authors": [
-        "Tony Aldridge <tony@angry-lawyer.com>",
-        "Cobrand <cobrandw@gmail.com>"
-      ],
-      "source": "git+https://github.com/touchHLE/rust-sdl2?tag=touchHLE-3#b67f98fe6a147773b6f05d50ae775d9fe16561e7",
-      "repository": "https://github.com/Rust-SDL2/rust-sdl2",
-      "notices": [
-        "licenses/rust/sdl2-0.37.0/LICENSE"
-      ],
-      "source_directory": "rust/sdl2-0.37.0"
-    },
-    {
-      "name": "sdl2-sys",
-      "version": "0.37.0",
-      "license": "MIT AND Zlib",
-      "authors": [
-        "Tony Aldridge <tony@angry-lawyer.com>",
-        "Cobrand <cobrandw@gmail.com>"
-      ],
-      "source": "git+https://github.com/touchHLE/rust-sdl2?tag=touchHLE-3#b67f98fe6a147773b6f05d50ae775d9fe16561e7",
-      "repository": "https://github.com/rust-sdl2/rust-sdl2",
-      "notices": [
-        "licenses/rust/sdl2-sys-0.37.0/LICENSE-MIT",
-        "licenses/rust/sdl2-sys-0.37.0/LICENSE-SDL"
-      ],
-      "source_directory": "rust/sdl2-sys-0.37.0"
-    },
-    {
       "name": "semver",
       "version": "1.0.16",
       "license": "MIT OR Apache-2.0",
@@ -1431,6 +1400,21 @@
         "licenses/rust/sha1-0.10.6/LICENSE-MIT"
       ],
       "source_directory": "rust/sha1-0.10.6"
+    },
+    {
+      "name": "sha2",
+      "version": "0.10.6",
+      "license": "MIT OR Apache-2.0",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/RustCrypto/hashes",
+      "notices": [
+        "licenses/rust/sha2-0.10.6/LICENSE-APACHE",
+        "licenses/rust/sha2-0.10.6/LICENSE-MIT"
+      ],
+      "source_directory": "rust/sha2-0.10.6"
     },
     {
       "name": "siphasher",

@@ -15,6 +15,10 @@ use digest::Digest;
 use md5::Md5;
 use sha1::Sha1;
 
+pub(crate) fn decode_local_save(key: &[u8;32], bytes:&[u8])->Result<Vec<u8>,String> {
+    cryptor::transform(1,3,key,&[0;16],bytes).map_err(|_|"The game save could not be decoded with this IPA".into())
+}
+
 fn CC_MD5(env: &mut Environment, data: ConstVoidPtr, len: u32, md: MutPtr<u8>) -> MutPtr<u8> {
     let mut hasher = Md5::new();
     hasher.update(env.mem.bytes_at(data.cast(), len));

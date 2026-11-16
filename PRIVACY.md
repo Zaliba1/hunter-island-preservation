@@ -14,6 +14,8 @@ Windows diagnostics contain technical details and selected, sanitized error
 locations. Saves are included only when explicitly selected.
 Android diagnostics and save exports are separate actions.
 Save files may contain personal gameplay progress.
+New saves also retain local mod-use history and counters, including provenance
+through recipe fusion. This stays in the save and is not uploaded automatically.
 
 The repository and downloads contain software, license texts, provenance and
 tests using synthetic data. The project owner selected the GitHub repository

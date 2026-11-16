@@ -325,7 +325,7 @@ fn CFStringGetBytes(
         ns_string::get_bytes_buffer_inner(env, substring, buffer, buffer_size, encoding, false);
     assert!(success); // TODO
     let length: NSUInteger = msg![env; substring length];
-    assert_eq!(length, range_len.try_into().unwrap());
+    assert_eq!(length, NSUInteger::try_from(range_len).unwrap());
 
     if !used_buf_len.is_null() {
         let result_bytes_length: NSUInteger =

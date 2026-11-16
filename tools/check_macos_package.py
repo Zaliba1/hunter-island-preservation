@@ -36,11 +36,15 @@ for path in app.rglob('*'):
     for private in [str(Path.home()),str(root)]:
         for encoding in ('utf-8','utf-16-le'):
             assert private.lower().encode(encoding) not in data,('Private build path',path.relative_to(app))
-report=dict(schema='hunter-macos-preview-v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+short=subprocess.check_output(['git','rev-parse','--short','HEAD'],text=True).strip()
+dependency_asset=a.out.parent/f'HunterIsland-SourceDependencies-test-{short}.zip'
+assert dependency_asset.is_file(),'Matching dependency source archive is missing'
+report=dict(schema='hunter-macos-preview-v1',source_commit=commit,
     architecture='arm64',minimum_macos='13.0',compiled_files=compiled,signature='ad-hoc',notarized=False,
-    source_dependency_asset='HunterIsland-SourceDependencies-0.2.0-preview.2.zip',source_dependency_sha256='b232e533bea7ce266cbd8751ac83f19a496c4c8f87d02b411e887f1244cc4788',
+    source_dependency_asset=dependency_asset.name,source_dependency_sha256=hashlib.sha256(dependency_asset.read_bytes()).hexdigest(),
     native_launcher_ui_smoke_tested=True,ipa_fixture_import_tested=True,graphics_shader_render_readback_tested=True,isolated_engine_graphics_tested=True,
     actual_game_start_tested=False,actual_game_audio_touch_save_tested=False,original_game_included=False,
     privacy=audit(app,True),isolation_scope='Network denied, reads under the real home directory denied except app/profile, writes limited to the run directory. Seatbelt probe required before play.',
-    notes='Experimental test branch. Engine test/graphics probes are synthetic and do not establish Hunter Island gameplay compatibility.')
+    notes='Experimental Apple Silicon build. Engine test/graphics probes are synthetic and do not establish Hunter Island gameplay compatibility.')
 a.out.write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

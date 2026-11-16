@@ -219,12 +219,14 @@ fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), &'stati
     env.mem.write(silver, next_silver);
     env.mem.write(gold, next_gold);
     env.mem.write(dirty, 1);
+    let history_before = super::hunter_history::exchange_snapshot(env, (amount * RATE) as u64, amount as u64);
     env.objc.hunter_exchange_save = Some(SaveReceipt { thread: env.current_thread, written: false });
     () = msg![env; save safeSaveToFile];
     if !env.objc.hunter_exchange_save.take().unwrap().written {
         env.mem.write(silver, old_silver);
         env.mem.write(gold, old_gold);
         env.mem.write(dirty, old_dirty);
+        super::hunter_history::exchange_rollback(env, history_before);
         return Err("Speichern fehlgeschlagen. Der Tausch wurde rückgängig gemacht.");
     }
     () = msg![env; store updateAll];
