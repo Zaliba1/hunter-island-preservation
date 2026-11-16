@@ -199,7 +199,12 @@ pub(super) fn query_vertex_arrays_available() -> bool {
             && std::ffi::CStr::from_ptr(extensions.cast())
                 .to_bytes()
                 .split(|&byte| byte == b' ')
-                .any(|name| name == b"GL_ARB_vertex_array_object")
+                .any(|name| {
+                    #[cfg(target_os = "macos")]
+                    { name == b"GL_APPLE_vertex_array_object" }
+                    #[cfg(not(target_os = "macos"))]
+                    { name == b"GL_ARB_vertex_array_object" }
+                })
     }
 }
 
@@ -283,7 +288,7 @@ impl ShaderApi<'_> {
     pub fn gen_vertex_arrays(&mut self, count: i32) -> Vec<u32> {
         assert!(
             vertex_arrays_available(self._context),
-            "Host ARB vertex arrays unavailable"
+            "Host vertex array objects unavailable"
         );
         if count < 0 {
             unsafe { gl::GenVertexArrays(count, std::ptr::null_mut()) };

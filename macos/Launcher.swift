@@ -3,6 +3,14 @@ import AppKit
 import UniformTypeIdentifiers
 import Darwin
 
+final class LauncherBackground: NSView {
+    override var isOpaque: Bool { true }
+    override func draw(_ dirtyRect: NSRect) {
+        NSColor.windowBackgroundColor.setFill(); NSBezierPath(rect: bounds).fill()
+        super.draw(dirtyRect)
+    }
+}
+
 @main final class Launcher: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!, store: MacStore!, status: NSTextField!, playButton: NSButton!
     var language: NSPopUpButton!, device: NSPopUpButton!, mods = [NSButton](), buttons = [NSControl]()
@@ -21,6 +29,7 @@ import Darwin
             let explicit = ProcessInfo.processInfo.environment["HI_MAC_TEST_DATA"].map { URL(fileURLWithPath: $0) }
             store = try MacStore(root: explicit)
             window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 700), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: 700))
             window.title = "Hunter Island · Mac Preview"; window.delegate = self; window.center()
             let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 13
             stack.translatesAutoresizingMaskIntoConstraints = false; window.contentView!.addSubview(stack)

@@ -80,6 +80,9 @@ sound, mouse input, Retina presentation, save roundtrip and extended play must
 still be tested on a user's Mac. The app's OpenGL ES 1.00 shaders are translated
 to desktop GLSL 1.20 for Apple's compatibility renderer; unknown shader
 extensions continue to report errors rather than being silently discarded.
+The compatibility backend uses Apple's vertex-array entry points. GitHub's
+Mac runner currently exposes Apple's software renderer; passing its graphics
+probe does not establish performance or compatibility on a user's GPU.
 
 There are no Orbling/Tiamat experiment switches in this build. Such local
 experiments are separate from the Mac port.

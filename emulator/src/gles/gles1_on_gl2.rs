@@ -400,6 +400,24 @@ pub struct GLES1OnGL2Context {
     state: GLES1OnGL2State,
     is_loaded: bool,
 }
+
+fn load_gl_entries(mut loader: impl FnMut(&'static str) -> *const std::ffi::c_void) {
+    gl21::load_with(|name| {
+        // Apple's GL 2.1 compatibility context exposes APPLE VAOs, whereas
+        // its unsuffixed VAO entry points belong to the separate core profile.
+        // The binding enum and entry-point signatures match the ARB interface.
+        #[cfg(target_os = "macos")]
+        let name = match name {
+            "glGenVertexArrays" => "glGenVertexArraysAPPLE",
+            "glDeleteVertexArrays" => "glDeleteVertexArraysAPPLE",
+            "glBindVertexArray" => "glBindVertexArrayAPPLE",
+            "glIsVertexArray" => "glIsVertexArrayAPPLE",
+            other => other,
+        };
+        loader(name)
+    });
+}
+
 impl GLESContext for GLES1OnGL2Context {
     fn description() -> &'static str {
         "OpenGL ES 1.1 via touchHLE GLES1-on-GL2 layer"
@@ -432,7 +450,7 @@ impl GLESContext for GLES1OnGL2Context {
         unsafe {
             window.make_gl_context_current(&self.gl_ctx);
         }
-        gl21::load_with(|s| window.gl_get_proc_address(s));
+        load_gl_entries(|s| window.gl_get_proc_address(s));
         self.is_loaded = true;
 
         Box::new(GLES1OnGL2 {
@@ -452,7 +470,7 @@ impl GLESContext for GLES1OnGL2Context {
         }
 
         make_current_fn(&self.gl_ctx);
-        gl21::load_with(loader_fn);
+        load_gl_entries(loader_fn);
         self.is_loaded = true;
 
         Box::new(GLES1OnGL2 {
