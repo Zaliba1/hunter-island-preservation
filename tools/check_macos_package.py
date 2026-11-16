@@ -22,7 +22,7 @@ for name in ['HunterIslandLauncher','touchHLE','isolation-probe']:
 notices=app/'Contents/Resources/notices'
 assert (notices/'licenses/GPL-3.0.txt').stat().st_size>30000
 assert (notices/'licenses/MPL-2.0.txt').stat().st_size>10000
-for alias in ['LICENSE','LICENSES.md','THIRD_PARTY.md','SOURCE.md','MACOS.md']:
+for alias in ['LICENSE','LICENSES.md','LICENSE_REVIEW.md','THIRD_PARTY.md','SOURCE.md','MACOS.md']:
     assert (notices/alias).read_bytes()==(root/alias).read_bytes()
 guest=json.loads((root/'guest-library-provenance.json').read_text())
 for record in guest:

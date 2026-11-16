@@ -11,13 +11,16 @@ import Darwin
     static func main() {
         let app = NSApplication.shared, delegate = Launcher()
         app.setActivationPolicy(.regular); app.delegate = delegate
+        let menu = NSMenu(), item = NSMenuItem(), applicationMenu = NSMenu()
+        applicationMenu.addItem(withTitle: "Quit Hunter Island", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        item.submenu = applicationMenu; menu.addItem(item); app.mainMenu = menu
         withExtendedLifetime(delegate) { app.run() }
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         do {
             let explicit = ProcessInfo.processInfo.environment["HI_MAC_TEST_DATA"].map { URL(fileURLWithPath: $0) }
             store = try MacStore(root: explicit)
-            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 590), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 700), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
             window.title = "Hunter Island · Mac Preview"; window.delegate = self; window.center()
             let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 13
             stack.translatesAutoresizingMaskIntoConstraints = false; window.contentView!.addSubview(stack)
@@ -47,14 +50,40 @@ import Darwin
             let privacy = label("Import your own decrypted Hunter Island 2.02 IPA. Your game and saves stay local.\nThis preview includes no game copy and does not upload your data.")
             privacy.maximumNumberOfLines = 3; privacy.font = .systemFont(ofSize: 12); stack.addArrangedSubview(privacy)
             refresh(); window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
-            if CommandLine.arguments.contains("--ui-smoke") { DispatchQueue.main.asyncAfter(deadline: .now()+3) { NSApp.terminate(nil) } }
+            if CommandLine.arguments.contains("--ui-smoke") {
+                DispatchQueue.main.asyncAfter(deadline: .now()+2) {
+                    self.window.contentView!.layoutSubtreeIfNeeded()
+                    let available = self.window.contentView!.bounds.insetBy(dx: 10, dy: 10)
+                    for view in stack.arrangedSubviews {
+                        let frame = view.convert(view.bounds, to: self.window.contentView!)
+                        if !available.contains(frame) { self.show(PreviewError.invalid("A launcher control is clipped: \(frame)")); return }
+                    }
+                    if let destination = ProcessInfo.processInfo.environment["HI_MAC_UI_SNAPSHOT"] {
+                        let content = self.window.contentView!
+                        guard let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds) else {
+                            self.show(PreviewError.invalid("Cannot capture the launcher test image.")); return
+                        }
+                        content.cacheDisplay(in: content.bounds, to: bitmap)
+                        guard let png = bitmap.representation(using: .png, properties: [:]) else {
+                            self.show(PreviewError.invalid("Cannot encode the launcher test image.")); return
+                        }
+                        do { try png.write(to: URL(fileURLWithPath: destination)) } catch { self.show(error); return }
+                    }
+                    print("Native launcher UI layout passed."); NSApp.terminate(nil)
+                }
+            }
         } catch { show(error); NSApp.terminate(nil) }
     }
     func label(_ text: String) -> NSTextField { NSTextField(wrappingLabelWithString: text) }
     func button(_ title: String, _ action: Selector) -> NSButton {
         let result = NSButton(title: title, target: self, action: action); result.bezelStyle = .rounded; buttons.append(result); return result
     }
-    func show(_ error: Error) { let alert = NSAlert(error: error); alert.runModal() }
+    func show(_ error: Error) {
+        if CommandLine.arguments.contains("--ui-smoke") {
+            FileHandle.standardError.write(Data((error.localizedDescription + "\n").utf8)); exit(1)
+        }
+        let alert = NSAlert(error: error); alert.runModal()
+    }
     func refresh() {
         buttons.forEach { $0.isEnabled = !busy }
         playButton?.isEnabled = !busy && store.settings["gameHash"] is String
@@ -97,7 +126,7 @@ import Darwin
                 let handle = try FileHandle(forWritingTo: log)
                 let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/bin/sandbox-exec")
                 let options = gameArguments(language: self.store.settings["language"] as? String ?? "en", device: self.store.settings["device"] as? String ?? "ipad", mods: self.store.settings["mods"] as? [String: Bool] ?? [:])
-                process.arguments = sandboxArguments(app: app, store: self.store) + [app.appendingPathComponent("Contents/MacOS/touchHLE").path, game.path] + options
+                process.arguments = try sandboxArguments(app: app, store: self.store) + [app.appendingPathComponent("Contents/MacOS/touchHLE").path, game.path] + options
                 process.currentDirectoryURL = self.store.run
                 process.environment = ["PATH": "/usr/bin:/bin", "HOME": self.store.run.path, "TMPDIR": temp.path, "TOUCHHLE_PRESERVATION_DATA": self.store.run.path, "RUST_BACKTRACE": "1"]
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice

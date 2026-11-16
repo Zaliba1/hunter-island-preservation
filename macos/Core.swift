@@ -10,6 +10,13 @@ enum PreviewError: LocalizedError {
 func require(_ condition: Bool, _ message: String) throws {
     if !condition { throw PreviewError.invalid(message) }
 }
+// Seatbelt compares physical vnode paths. Foundation may keep /var instead
+// of /private/var, especially when resolving a not-yet-created directory.
+func physicalURL(_ url: URL) throws -> URL {
+    guard let path = realpath(url.path, nil) else { throw PreviewError.invalid("Cannot resolve the local data path.") }
+    defer { free(path) }
+    return URL(fileURLWithPath: String(cString: path), isDirectory: true)
+}
 func runTool(_ executable: String, _ arguments: [String], limit: Int = 2 << 20) throws -> Data {
     let process = Process(), pipe = Pipe()
     let errorURL = FileManager.default.temporaryDirectory.appendingPathComponent("hunter-tool-" + UUID().uuidString)
@@ -175,7 +182,9 @@ final class MacStore {
     let root: URL, run: URL, settingsURL: URL
     var settings: [String: Any]
     init(root explicit: URL? = nil) throws {
-        root = (explicit ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("HunterIslandPreservation", isDirectory: true)).resolvingSymlinksInPath()
+        let candidate = explicit ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("HunterIslandPreservation", isDirectory: true)
+        try FileManager.default.createDirectory(at: candidate, withIntermediateDirectories: true)
+        root = try physicalURL(candidate)
         run = root.appendingPathComponent("profiles/default/run", isDirectory: true)
         settingsURL = root.appendingPathComponent("settings.json")
         try FileManager.default.createDirectory(at: run, withIntermediateDirectories: true)
@@ -237,10 +246,10 @@ final class MacStore {
     }
 }
 
-func sandboxArguments(app: URL, store: MacStore) -> [String] {
+func sandboxArguments(app: URL, store: MacStore) throws -> [String] {
     return ["-f", app.appendingPathComponent("Contents/Resources/game.sb").path,
-            "-D", "HOME_ROOT=" + FileManager.default.homeDirectoryForCurrentUser.resolvingSymlinksInPath().path,
-            "-D", "APP_ROOT=" + app.resolvingSymlinksInPath().path, "-D", "DATA_ROOT=" + store.root.path,
+            "-D", "HOME_ROOT=" + (try physicalURL(FileManager.default.homeDirectoryForCurrentUser)).path,
+            "-D", "APP_ROOT=" + (try physicalURL(app)).path, "-D", "DATA_ROOT=" + store.root.path,
             "-D", "RUN_ROOT=" + store.run.path]
 }
 

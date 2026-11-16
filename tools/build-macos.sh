@@ -28,7 +28,7 @@ python3 tools/macos_fixtures.py .build/macos/fixtures
 cp -R emulator/touchHLE_fonts emulator/touchHLE_dylibs "$app/Contents/Resources/"
 cp emulator/touchHLE_default_options.txt macos/game.sb "$app/Contents/Resources/"
 cp -R licenses "$app/Contents/Resources/notices/"
-cp LICENSE LICENSES.md THIRD_PARTY.md SOURCE.md MACOS.md guest-library-provenance.json "$app/Contents/Resources/notices/"
+cp LICENSE LICENSES.md LICENSE_REVIEW.md THIRD_PARTY.md SOURCE.md MACOS.md guest-library-provenance.json "$app/Contents/Resources/notices/"
 python3 - "$app" <<'PY'
 import pathlib,plistlib,sys
 p=pathlib.Path(sys.argv[1])/'Contents/Info.plist'
@@ -38,7 +38,7 @@ codesign --force --sign - --options runtime --entitlements macos/engine-entitlem
 codesign --force --sign - "$app/Contents/MacOS/isolation-probe"
 codesign --force --sign - "$app"
 codesign --verify --deep --strict "$app"
-HI_MAC_TEST_DATA="$root/.build/macos/ui-profile" "$app/Contents/MacOS/HunterIslandLauncher" --ui-smoke
+HI_MAC_TEST_DATA="$root/.build/macos/ui-profile" HI_MAC_UI_SNAPSHOT="$root/.build/macos/launcher.png" "$app/Contents/MacOS/HunterIslandLauncher" --ui-smoke
 # Repeat isolation against the packaged probe and actual SB profile.
 .build/macos/core-tests --isolation "$app"
 # No original game is needed or supplied for the real GL render/readback probe.

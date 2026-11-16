@@ -6,10 +6,12 @@ import Darwin
     static func main() throws {
         let args = CommandLine.arguments
         if args.count == 3 && args[1] == "--isolation" {
-            let data = FileManager.default.temporaryDirectory.appendingPathComponent("hunter-isolation-test-"+UUID().uuidString)
-            let store = try MacStore(root: data); defer { try? FileManager.default.removeItem(at: data) }
-            try verifyIsolation(app: URL(fileURLWithPath: args[2]), store: store)
-            print("Packaged isolation probe passed."); return
+            for parent in [FileManager.default.temporaryDirectory, FileManager.default.homeDirectoryForCurrentUser] {
+                let data = parent.appendingPathComponent("hunter-isolation-test-"+UUID().uuidString)
+                let store = try MacStore(root: data); defer { try? FileManager.default.removeItem(at: data) }
+                try verifyIsolation(app: URL(fileURLWithPath: args[2]), store: store)
+            }
+            print("Packaged isolation probe passed for temporary and home profiles."); return
         }
         let root = URL(fileURLWithPath: args[1])
         let cases = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("cases.json"))) as! [[String: Any]]

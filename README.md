@@ -4,6 +4,10 @@ An unofficial project for preserving Hunter Island 2.02 offline on Windows
 and Android, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
 Import your own compatible, already decrypted 32-bit IPA locally.
 
+This test branch also contains an experimental native **Apple Silicon Mac**
+app for macOS 13 or later. See [MACOS.md](MACOS.md) for test-build downloads,
+installation, data locations and the remaining gameplay checks.
+
 ## Current release
 
 **0.2.0-preview.3** adds a saved game-language selector on Windows and Android,
