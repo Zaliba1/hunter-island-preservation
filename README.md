@@ -35,6 +35,8 @@ Download the package for your device from
 **Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
 the game. Install Python with Tcl/Tk from
 [python.org](https://www.python.org/downloads/windows/).
+For instructions to build a local Windows ZIP with Python and Tcl/Tk included,
+see [BUILD.md](BUILD.md#build-and-check-windows).
 
 **Android:** install the APK, open the app, import your IPA and start the game.
 Android may ask you to allow APK installation from your download or file app.

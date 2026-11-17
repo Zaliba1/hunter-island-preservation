@@ -17,7 +17,7 @@ The combined emulator executable is distributed under **GPL-3.0-or-later**, as s
 | Liberation / Noto fonts | SIL Open Font License as supplied | Unmodified fonts and notices in touchHLE_fonts |
 | GNU C++/GCC runtime code | GPL-3.0-or-later with GCC Runtime Library Exception 3.1, as marked in runtime sources | Original COPYING3 and COPYING.RUNTIME in licenses/gnu-runtime; GCC 15.2.0 sources supplied |
 | MinGW-w64 / Winpthreads runtime code | Original ZPL, MIT, BSD/public-domain terms as marked | Complete supplied copyright/license/disclaimer files in licenses/gnu-runtime; MinGW-w64 13.0.0 sources supplied |
-| Python/Tk and Windows/.NET | Separately installed prerequisites | No interpreter, PyInstaller bootloader, VC runtime DLL, OS DLL or .NET Framework is redistributed |
+| Python/Tk and Windows/.NET in the standard Windows ZIP | Separately installed prerequisites | The optional standalone variant is described below |
 
 `license-inventory.json` maps every shipped executable, DLL, PYD, guest dylib and font to a component and hash. Packaging rejects unknown compiled components and excludes build-machine `api-ms-win-*.dll` and `ucrtbase.dll`; Windows 10/11 supplies those OS components.
 
@@ -29,9 +29,21 @@ Guest FSF libraries are byte-identical to the pinned public touchHLE tree, as re
 
 ## Build and prerequisite boundary
 
-This release uses GCC/MinGW-w64 and the GNU Windows Rust toolchain. No MSVC-built emulator or copied Microsoft VC runtime DLL is shipped. GCC's original runtime exception permits eligible combinations with independent modules; the source components retain their own licenses. The GNU runtime and MinGW notices are preserved.
+The standard Windows release uses GCC/MinGW-w64 and the GNU Windows Rust toolchain. No MSVC-built emulator or copied Microsoft VC runtime DLL is shipped in that package. GCC's original runtime exception permits eligible combinations with independent modules; the source components retain their own licenses. The GNU runtime and MinGW notices are preserved.
 
-The user installs official Python/Tk separately. Windows 10/11 supplies OS libraries and .NET Framework, including the C# compiler used locally for the tiny isolation probe. Those products are subject to their own terms and are not included in the download. Supplementary Python/PyInstaller/Microsoft reference notices or public source archives retained from the earlier packaging investigation do not indicate that those binaries are shipped. Earlier MSVC candidates are not the release approved by this checklist.
+The standard Windows ZIP uses separately installed Python/Tk. Windows 10/11
+supplies OS libraries and .NET Framework, including the C# compiler used to
+build the isolation probe. Earlier MSVC emulator builds are outside this scope.
+
+The local test `-standalone.zip` variant adds an app-local CPython 3.11.9/Tcl/Tk
+runtime and the unmodified PyInstaller bootloader. The Python, Tcl/Tk, OpenSSL
+and other upstream notices and the PyInstaller exception are in
+`licenses/runtime/`. The matching runtime sources are in `runtime/` in the
+SourceDependencies ZIP. `windows-launcher-provenance.json` identifies the
+PyInstaller source tag for the bootloader. The Microsoft runtime from the
+official CPython installation retains the separate terms in
+`licenses/runtime/Microsoft-Python-Runtime-Conditions.txt`. The package uses
+Windows' UCRT and API sets.
 
 ## Source and executable licenses
 

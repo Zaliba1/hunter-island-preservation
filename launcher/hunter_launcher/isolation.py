@@ -6,7 +6,9 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import time
+from contextlib import contextmanager
 from .storage import clean_tree
 
 P = C.c_void_p
@@ -46,6 +48,7 @@ class Container:
         api(k,'InitializeProcThreadAttributeList',[P,W.DWORD,W.DWORD,C.POINTER(SZ)],W.BOOL)
         api(k,'UpdateProcThreadAttribute',[P,W.DWORD,SZ,P,SZ,P,P],W.BOOL)
         api(k,'CreateProcessW',[W.LPCWSTR,W.LPWSTR,P,P,W.BOOL,W.DWORD,P,W.LPCWSTR,C.POINTER(SIX),C.POINTER(PI)],W.BOOL)
+        api(k,'SetDllDirectoryW',[W.LPCWSTR],W.BOOL)
         api(k,'CreateJobObjectW',[P,W.LPCWSTR],W.HANDLE)
         api(k,'SetInformationJobObject',[W.HANDLE,C.c_int,P,W.DWORD],W.BOOL)
         api(k,'AssignProcessToJobObject',[W.HANDLE,W.HANDLE],W.BOOL)
@@ -85,6 +88,19 @@ class Container:
         self.k.LocalFree(C.cast(st,P))
         return value
 
+    @contextmanager
+    def system_dll_search(self):
+        # The frozen launcher needs its bundled DLLs. Its child programs use
+        # the Windows search order and their own runtime folder.
+        launcher_dlls = getattr(sys, '_MEIPASS', None)
+        if launcher_dlls is not None:
+            self.check(self.k.SetDllDirectoryW(None))
+        try:
+            yield
+        finally:
+            if launcher_dlls is not None:
+                self.check(self.k.SetDllDirectoryW(launcher_dlls))
+
     def prepare(self):
         clean_tree(self.store.run)
         target = self.store.run.resolve()
@@ -92,7 +108,8 @@ class Container:
             raise ValueError('Unerwartetes Isolationsverzeichnis')
         icacls = Path(os.environ['SystemRoot']) / 'System32/icacls.exe'
         for flags in (['/grant',f'*{self.sid_text}:(OI)(CI)(M)','/T','/Q'],['/setintegritylevel','(OI)(CI)L','/T','/Q']):
-            subprocess.run([str(icacls),str(target),*flags],check=True,capture_output=True,creationflags=0x08000000)
+            with self.system_dll_search():
+                subprocess.run([str(icacls),str(target),*flags],check=True,capture_output=True,creationflags=0x08000000)
 
     def token_info(self,token,kind):
         size = W.DWORD()
@@ -131,8 +148,9 @@ class Container:
                 USERPROFILE=str(self.store.run/'profile'),LOCALAPPDATA=str(self.store.run/'profile'),
                 APPDATA=str(self.store.run/'profile'),RUST_BACKTRACE='1')
             block = C.create_unicode_buffer('\0'.join(f'{key}={value}' for key,value in sorted(env.items()))+'\0\0')
-            self.check(k.CreateProcessW(str(executable),C.create_unicode_buffer(subprocess.list2cmdline([str(executable),*args])),None,None,True,
-                0x80000|4|0x400|0x08000000,block,str(self.store.run),C.byref(si),C.byref(pi)))
+            with self.system_dll_search():
+                self.check(k.CreateProcessW(str(executable),C.create_unicode_buffer(subprocess.list2cmdline([str(executable),*args])),None,None,True,
+                    0x80000|4|0x400|0x08000000,block,str(self.store.run),C.byref(si),C.byref(pi)))
             self.check(self.a.OpenProcessToken(pi.process,8,C.byref(token)))
             isac = C.cast(self.token_info(token,29),C.POINTER(W.DWORD))[0]
             capabilities = C.cast(self.token_info(token,30),C.POINTER(W.DWORD))[0]

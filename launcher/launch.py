@@ -9,5 +9,6 @@ if __name__ == '__main__':
         if sys.stderr is None:
             from tkinter import messagebox
             messagebox.showerror('Hunter Island',str(error))
+            raise SystemExit(1) from error
         else:
             raise

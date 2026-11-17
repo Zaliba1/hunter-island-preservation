@@ -13,14 +13,17 @@ labels; the labels below are quoted so you can find the corresponding actions.
 
 1. Download the Windows x64 ZIP from Releases and extract it completely.
    A short path such as C:/Games/HunterIsland is suitable.
-2. Install 64-bit Python 3.11 or later with Tcl/Tk using the official
-   [Windows installer](https://www.python.org/downloads/windows/).
-3. Open Start.cmd and select **Eigene IPA importieren** (import your IPA).
+2. If your ZIP contains **HunterIsland-Launcher.exe**, open it from the extracted
+   folder. Keep `_internal` and `runtime` beside it. Python and Tk are included.
+   For a ZIP with only **Start.cmd**, install 64-bit Python 3.11 or later with
+   Tcl/Tk using the [official installer](https://www.python.org/downloads/windows/),
+   then open **Start.cmd**.
+3. Select **Eigene IPA importieren** (import your IPA).
 4. Choose the display mode, game language and optional mods, then select
    **Spiel starten** (start the game).
 5. Close the game window to return to the launcher.
 
-Playing requires Python, graphics drivers and Windows components.
+Playing requires working graphics drivers and the Windows system components.
 Rust and compilers are development requirements.
 Windows runs the game in an AppContainer without network capabilities.
 If the isolation check fails, the launcher displays the error.
@@ -29,7 +32,7 @@ Windows data is stored by default in
 %LOCALAPPDATA%/HunterIslandPreservation.
 This directory contains the imported copy, settings, normal game saves and
 local backups. To update, extract the new package into its own directory and
-use its Start.cmd. It uses the same local data directory.
+open its launcher. It uses the same local data directory.
 
 ## Android
 

@@ -60,6 +60,14 @@ The package contains the portable launcher, runtime, license mapping and
 manifest. The build runs engine tests. Packaging checks sources, license
 entries and imported system libraries.
 
+For a local test ZIP with Python and Tk included, use official 64-bit
+CPython 3.11.9, matching the runtime sources in the dependency archive. Install
+`requirements-windows-launcher.txt` in the build environment as well, and add
+`--bundle-launcher` to the packaging command. The `-standalone.zip` variant opens
+through `HunterIsland-Launcher.exe` and includes its runtime inventory and
+third-party notices. Public distribution of this variant requires confirming
+redistribution terms for the app-local runtime described in LICENSES.md.
+
 ## Build and check Android
 
 Adjust the JDK, SDK and Gradle paths to your installations.
