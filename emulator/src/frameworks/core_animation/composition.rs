@@ -32,6 +32,7 @@ pub(super) struct State {
     recomposite_next: Option<Instant>,
     fps_counter: Option<FpsCounter>,
     misc_gl_objects: Option<MiscGlObjects>,
+    diagnostic_frame: u64,
 }
 
 struct MiscGlObjects {
@@ -345,6 +346,18 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
     let mut gles = window.make_internal_gl_ctx_current();
 
     // Clean up some GL state
+    if env.options.capture_frames && env.options.live_test_taps {
+        let state = &mut env.framework_state.core_animation.composition;
+        state.diagnostic_frame += 1;
+        if state.diagnostic_frame % 60 == 0 {
+            let mut pixels = vec![0; fb_width as usize * fb_height as usize * 4];
+            unsafe { gles.ReadPixels(0,0,fb_width as _,fb_height as _,gles11::RGBA,gles11::UNSIGNED_BYTE,pixels.as_mut_ptr().cast()); }
+            if let Ok(ppm) = crate::frameworks::opengles::frame_ppm(fb_width,fb_height,&pixels) {
+                // One replaceable diagnostic image, containing UIKit overlays.
+                let _ = std::fs::write("temp/composite.ppm",ppm);
+            }
+        }
+    }
     unsafe {
         gles.Viewport(0, 0, fb_width as _, fb_height as _);
         gles.Color4f(1.0, 1.0, 1.0, 1.0);
@@ -630,6 +643,31 @@ unsafe fn composite_layer_recursive(
             gles11::UNSIGNED_BYTE,
             0 as *const GLvoid,
         );
+    }
+    // CALayer borders cover the layer's contents and stay inside its bounds.
+    // Rectangular borders are sufficient here; rounded border paths remain TODO.
+    if host_obj.border_width > 0.0 {
+        let CGColorHostObject { r, g, b, a, .. } = host_obj.border_color
+            .unwrap_or(CGColorHostObject { color_space_name: "kCGColorSpaceGenericRGB", r: 0.0, g: 0.0, b: 0.0, a: 1.0 });
+        let bounds = host_obj.bounds;
+        let w = bounds.size.width;
+        let h = bounds.size.height;
+        let t = host_obj.border_width.min(w / 2.0).min(h / 2.0);
+        gles.Color4f(r*a*opacity, g*a*opacity, b*a*opacity, a*opacity);
+        gles.Enable(gles11::BLEND);
+        gles.BlendFunc(gles11::ONE, gles11::ONE_MINUS_SRC_ALPHA);
+        gles.Disable(gles11::TEXTURE_2D);
+        gles.DisableClientState(gles11::TEXTURE_COORD_ARRAY);
+        gles.EnableClientState(gles11::VERTEX_ARRAY);
+        let misc = env.framework_state.core_animation.composition.misc_gl_objects.as_ref().unwrap();
+        gles.BindBuffer(gles11::ARRAY_BUFFER, misc.basic_square_buffer);
+        gles.VertexPointer(2, gles11::FLOAT, 0, 0 as *const GLvoid);
+        for (x,y,width,height) in [(0.0,0.0,w,t), (0.0,h-t,w,t), (0.0,t,t,h-2.0*t), (w-t,t,t,h-2.0*t)] {
+            load_matrix(gles.as_mut(), Matrix::<4>::from(&Matrix::scale_2d(width,height))
+                .multiply(&Matrix::translate_3d(bounds.origin.x+x,bounds.origin.y+y,0.0))
+                .multiply(&cumulative_transform));
+            gles.DrawElements(gles11::TRIANGLES, SQUARE_INDICES.len() as _, gles11::UNSIGNED_BYTE, 0 as *const GLvoid);
+        }
     }
     std::mem::drop(gles);
 

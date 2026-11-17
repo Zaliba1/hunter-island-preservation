@@ -4,8 +4,8 @@ Matching sources accompany locally supplied Windows and Android binaries.
 Published builds provide them in
 [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
 
-- HunterIsland-Source-0.2.0-preview.4.zip
-- HunterIsland-SourceDependencies-0.2.0-preview.4.zip
+- HunterIsland-Source-0.2.0-preview.5.zip
+- HunterIsland-SourceDependencies-0.2.0-preview.5.zip
 
 Mac test artifacts use `HunterIsland-Source-test-<commit>.zip` and
 `HunterIsland-SourceDependencies-test-<commit>.zip` beside the matching app ZIP.

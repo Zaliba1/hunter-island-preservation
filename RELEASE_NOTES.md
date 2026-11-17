@@ -1,4 +1,30 @@
-# 0.2.0-preview.3
+# 0.2.0-preview.5
+
+Fix the crash when opening the gravestone question in Orlen. The original
+game's text-entry and reward logic now runs through the emulator's UIKit
+implementation, without patching the game or granting a replacement reward.
+
+- Implement CALayer border properties and rectangular border drawing.
+- Support editable UITextView responders, desktop/Android keyboard events,
+  delegate validation, Return, backspace and pasted text.
+- Handle the game's reentrant close callback without recursion or stale view
+  access. Optional mods are not required for this fix.
+- Publish Windows, Android ARM64 and experimental Apple Silicon Mac packages
+  with matching sources, dependency sources, notices and checksums.
+
+On Windows the Orlen dialog, wrong answer, cancellation and `dragon island`
+reward path were exercised using an isolated private save copy. The original
+game awarded Penguini. Android is build/package-tested; the current APK has
+not been tested on a connected physical device. The Mac build runs native
+framework, launcher, isolation and graphics tests; actual Hunter Island Mac
+gameplay remains unverified. See VALIDATION.md and the release's checks.
+
+Windows users can replace their extracted program directory while keeping
+their existing profile. Android version code is 15 and uses the existing
+project update signature. The Mac app is ad-hoc signed, not notarized.
+No IPA, game assets, player saves or private signing keys are distributed.
+
+## Previous changes: 0.2.0-preview.3
 
 Add a saved **Spiel-Sprache / Game language** dropdown to the Windows and
 Android launchers. English is the default, including for older profiles with

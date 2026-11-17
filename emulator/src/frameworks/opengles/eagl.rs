@@ -72,6 +72,7 @@ pub(super) struct EAGLContextHostObject {
     fps_counter: Option<FpsCounter>,
     present_frame_count: u64,
     last_live_test_sequence: Option<u64>,
+    last_live_text_sequence: Option<u64>,
     next_frame_due: Option<Instant>,
     pub mapped_buffers: HashMap<GLuint, (MutPtr<GLvoid>, *mut GLvoid)>,
 }
@@ -123,6 +124,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         fps_counter: None,
         present_frame_count: 0,
         last_live_test_sequence: None,
+        last_live_text_sequence: None,
         next_frame_due: None,
         mapped_buffers: HashMap::new(),
     });
@@ -351,6 +353,35 @@ pub const CLASSES: ClassExports = objc_classes! {
         context.present_frame_count += 1;
         let frame = context.present_frame_count;
         if env.options.live_test_taps && frame % 30 == 0 {
+            // Explicit opt-in guest keyboard tests. Fixed file, bounded UTF-8,
+            // no host keyboard injection and no text contents written to logs.
+            let text_command = std::fs::File::open("temp/live-test-text.txt").ok().and_then(|file| {
+                let mut command = String::new();
+                file.take(4097).read_to_string(&mut command).ok()?;
+                (command.len() <= 4096).then_some(command)
+            });
+            if let Some(command) = text_command {
+                let mut fields = command.splitn(3, '\n');
+                if let (Some(sequence), Some(kind), Some(text)) = (fields.next(),fields.next(),fields.next()) {
+                    if let Ok(sequence) = sequence.parse::<u64>() {
+                        use crate::window::TextInputEvent;
+                        let event = match kind {
+                            "text" => Some(TextInputEvent::Text(text.to_owned())),
+                            "return" if text.is_empty() => Some(TextInputEvent::Return),
+                            "backspace" if text.is_empty() => Some(TextInputEvent::Backspace),
+                            _ => None,
+                        };
+                        if let Some(event) = event {
+                            let context = env.objc.borrow_mut::<EAGLContextHostObject>(this);
+                            if context.last_live_text_sequence != Some(sequence) {
+                                context.last_live_text_sequence = Some(sequence);
+                                env.window_mut().queue_diagnostic_text(event);
+                                log!("LIVE_TEST_TEXT_ACCEPTED: sequence={sequence} frame={frame}");
+                            }
+                        }
+                    }
+                }
+            }
             #[cfg(feature = "diagnostic-live-cycles")]
             env.options.retire_completed_diagnostic_taps(frame);
             // Fixed path, bounded input, explicit opt-in. The first field is
@@ -892,7 +923,7 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
 }
 
 /// Encode actual GL bottom-to-top RGBA8 readback as top-to-bottom RGB PPM.
-fn frame_ppm(width: u32, height: u32, pixels: &[u8]) -> std::io::Result<Vec<u8>> {
+pub(crate) fn frame_ppm(width: u32, height: u32, pixels: &[u8]) -> std::io::Result<Vec<u8>> {
     let size = (width as usize)
         .checked_mul(height as usize)
         .and_then(|n| n.checked_mul(4));

@@ -30,9 +30,10 @@ cp emulator/touchHLE_default_options.txt macos/game.sb "$app/Contents/Resources/
 cp -R licenses "$app/Contents/Resources/notices/"
 cp LICENSE LICENSES.md LICENSE_REVIEW.md THIRD_PARTY.md SOURCE.md MACOS.md guest-library-provenance.json "$app/Contents/Resources/notices/"
 python3 - "$app" <<'PY'
-import pathlib,plistlib,sys
+import json,pathlib,plistlib,sys
 p=pathlib.Path(sys.argv[1])/'Contents/Info.plist'
-p.write_bytes(plistlib.dumps(dict(CFBundleIdentifier='org.hunterislandpreservation.macos.preview',CFBundleName='Hunter Island',CFBundleDisplayName='Hunter Island',CFBundleExecutable='HunterIslandLauncher',CFBundlePackageType='APPL',CFBundleShortVersionString='0.2.0',CFBundleVersion='2',LSMinimumSystemVersion='13.0',NSHighResolutionCapable=True,NSPrincipalClass='NSApplication')))
+version=json.loads(pathlib.Path('android-version.json').read_text())
+p.write_bytes(plistlib.dumps(dict(CFBundleIdentifier='org.hunterislandpreservation.macos.preview',CFBundleName='Hunter Island',CFBundleDisplayName='Hunter Island',CFBundleExecutable='HunterIslandLauncher',CFBundlePackageType='APPL',CFBundleShortVersionString='0.2.0',CFBundleVersion=str(version['version_code']),LSMinimumSystemVersion='13.0',NSHighResolutionCapable=True,NSPrincipalClass='NSApplication')))
 PY
 codesign --force --sign - --options runtime --entitlements macos/engine-entitlements.plist "$app/Contents/MacOS/touchHLE"
 codesign --force --sign - "$app/Contents/MacOS/isolation-probe"

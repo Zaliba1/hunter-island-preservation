@@ -9,7 +9,7 @@ use crate::frameworks::core_graphics::cg_context::CGContextSetRGBFillColor;
 use crate::frameworks::core_graphics::cg_geometry::CGPointZero;
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect, CGSize};
 use crate::frameworks::foundation::ns_string::to_rust_string;
-use crate::frameworks::foundation::{NSRange, NSUInteger};
+use crate::frameworks::foundation::{ns_string, NSInteger, NSRange, NSUInteger};
 use crate::frameworks::uikit::ui_color;
 use crate::frameworks::uikit::ui_font::{
     break_lines_with_font, UILineBreakModeTailTruncation, UILineBreakModeWordWrap, UITextAlignment,
@@ -21,13 +21,26 @@ use crate::objc::{
     id, impl_HostObject_with_superclass, msg, msg_class, msg_super, nil, objc_classes, release,
     retain, todo_objc_setter, ClassExports, NSZonePtr,
 };
+use crate::window::TextInputEvent;
 use crate::Environment;
+
+#[cfg(test)]
+mod tests;
+#[cfg(test)]
+pub const PROBE_CLASSES: ClassExports = tests::CLASSES;
+#[cfg(not(test))]
+pub const PROBE_CLASSES: ClassExports = &[];
 
 type UIDataDetectorTypes = NSUInteger;
 
 pub struct UITextViewHostObject {
     superclass: super::UIScrollViewHostObject,
     editable: bool,
+    delegate: id, // weak UITextViewDelegate
+    editing: bool,
+    ending: bool,
+    autocorrection: NSInteger,
+    autocapitalization: NSInteger,
     /// `NSString*`
     text: id,
     /// `UIFont*`
@@ -41,13 +54,123 @@ impl Default for UITextViewHostObject {
     fn default() -> Self {
         UITextViewHostObject {
             superclass: Default::default(),
-            editable: false,
+            editable: true,
+            delegate: nil,
+            editing: false,
+            ending: false,
+            autocorrection: 0,
+            autocapitalization: 1,
             font: nil,
             text: nil,
             text_color: nil,
             text_alignment: UITextAlignmentLeft,
         }
     }
+}
+
+fn responds(env: &mut Environment, delegate: id, name: &str) -> bool {
+    let sel = env
+        .objc
+        .register_host_selector(name.to_owned(), &mut env.mem);
+    delegate != nil && msg![env; delegate respondsToSelector:sel]
+}
+
+fn keyboard(env: &mut Environment, this: id, showing: bool) {
+    use crate::frameworks::uikit::ui_view::ui_window::*;
+    let center: id = msg_class![env; NSNotificationCenter defaultCenter];
+    let will = ns_string::get_static_str(
+        env,
+        if showing {
+            UIKeyboardWillShowNotification
+        } else {
+            UIKeyboardWillHideNotification
+        },
+    );
+    () = msg![env; center postNotificationName:will object:this userInfo:nil];
+    if env.window.is_some() {
+        env.on_parent_stack_in_coroutine(|window, _| {
+            if showing {
+                window.start_text_input();
+            } else {
+                window.stop_text_input();
+            }
+        });
+    }
+    let did = ns_string::get_static_str(
+        env,
+        if showing {
+            UIKeyboardDidShowNotification
+        } else {
+            UIKeyboardDidHideNotification
+        },
+    );
+    () = msg![env; center postNotificationName:did object:this userInfo:nil];
+}
+
+/// SDL desktop keys and Android soft-keyboard input use the same delegate path.
+/// Editing currently appends at the end; selection/marked-text input is TODO.
+pub fn handle_input(env: &mut Environment, this: id, event: TextInputEvent) {
+    if !env.objc.borrow::<UITextViewHostObject>(this).editing {
+        return;
+    }
+    retain(env, this);
+    let current: id = msg![env; this text];
+    retain(env, current);
+    let mut text = to_rust_string(env, current).into_owned();
+    let length = text.encode_utf16().count() as u32;
+    let (range, replacement) = match event {
+        TextInputEvent::Text(value) => (
+            NSRange {
+                location: length,
+                length: 0,
+            },
+            value,
+        ),
+        TextInputEvent::Return => (
+            NSRange {
+                location: length,
+                length: 0,
+            },
+            "\n".to_owned(),
+        ),
+        TextInputEvent::Backspace => {
+            let Some(last) = text.pop() else {
+                release(env, current);
+                release(env, this);
+                return;
+            };
+            let removed = last.len_utf16() as u32;
+            (
+                NSRange {
+                    location: length - removed,
+                    length: removed,
+                },
+                String::new(),
+            )
+        }
+    };
+    let replacement = ns_string::from_rust_string(env, replacement);
+    let delegate = env.objc.borrow::<UITextViewHostObject>(this).delegate;
+    retain(env, delegate);
+    let allowed = !responds(
+        env,
+        delegate,
+        "textView:shouldChangeTextInRange:replacementText:",
+    ) || msg![env; delegate textView:this shouldChangeTextInRange:range replacementText:replacement];
+    // A delegate can resign, remove and release the view while handling Return.
+    if allowed && env.objc.borrow::<UITextViewHostObject>(this).editing {
+        text.push_str(&to_rust_string(env, replacement));
+        let new_text = ns_string::from_rust_string(env, text);
+        () = msg![env; this setText:new_text];
+        release(env, new_text);
+        if responds(env, delegate, "textViewDidChange:") {
+            () = msg![env; delegate textViewDidChange:this];
+        }
+    }
+    release(env, delegate);
+    release(env, replacement);
+    release(env, current);
+    release(env, this);
 }
 
 // Update contentOffset and contentSize when anything that potentially affects
@@ -88,6 +211,8 @@ pub const CLASSES: ClassExports = objc_classes! {
     // These aren't redundant, the setters fetch the real defaults.
     () = msg![env; this setFont:nil];
     () = msg![env; this setTextColor:nil];
+    let empty = ns_string::get_static_str(env, "");
+    () = msg![env; this setText:empty];
     this
 }
 
@@ -96,17 +221,17 @@ pub const CLASSES: ClassExports = objc_classes! {
     // These aren't redundant, the setters fetch the real defaults.
     () = msg![env; this setFont:nil];
     () = msg![env; this setTextColor:nil];
+    let empty = ns_string::get_static_str(env, "");
+    () = msg![env; this setText:empty];
     this
 }
 
 - (())dealloc {
     let UITextViewHostObject {
-        superclass: _,
-        editable: _,
         font,
         text,
         text_color,
-        text_alignment: _
+        ..
     } = std::mem::take(env.objc.borrow_mut(this));
 
     release(env, font);
@@ -119,6 +244,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<UITextViewHostObject>(this).text
 }
 - (())setText:(id)new_text { // NSString*
+    let new_text = if new_text == nil { ns_string::get_static_str(env, "") } else { new_text };
     let hostobj  = env.objc.borrow_mut::<UITextViewHostObject>(this);
     let old_text = std::mem::replace(&mut hostobj.text, new_text);
     retain(env, new_text);
@@ -176,11 +302,64 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO
 }
 
-// TODO: Make editable actually do something
+- (id)delegate { env.objc.borrow::<UITextViewHostObject>(this).delegate }
+- (())setDelegate:(id)delegate { env.objc.borrow_mut::<UITextViewHostObject>(this).delegate = delegate; }
+- (bool)isFirstResponder { env.framework_state.uikit.ui_responder.first_responder == this }
+- (bool)canBecomeFirstResponder { env.objc.borrow::<UITextViewHostObject>(this).editable }
+- (bool)becomeFirstResponder {
+    if !env.objc.borrow::<UITextViewHostObject>(this).editable { return false; }
+    if env.objc.borrow::<UITextViewHostObject>(this).editing { return true; }
+    let delegate = env.objc.borrow::<UITextViewHostObject>(this).delegate;
+    if responds(env, delegate, "textViewShouldBeginEditing:") && !msg![env; delegate textViewShouldBeginEditing:this] { return false; }
+    let old = env.framework_state.uikit.ui_responder.first_responder;
+    if old != nil && old != this && !msg![env; old resignFirstResponder] { return false; }
+    retain(env, this);
+    retain(env, delegate);
+    env.objc.borrow_mut::<UITextViewHostObject>(this).editing = true;
+    env.framework_state.uikit.ui_responder.first_responder = this;
+    keyboard(env, this, true);
+    if responds(env, delegate, "textViewDidBeginEditing:") { () = msg![env; delegate textViewDidBeginEditing:this]; }
+    release(env, delegate);
+    release(env, this);
+    true
+}
+- (bool)resignFirstResponder {
+    let state = env.objc.borrow_mut::<UITextViewHostObject>(this);
+    if !state.editing || state.ending { return true; }
+    state.ending = true;
+    let delegate = state.delegate;
+    retain(env, this);
+    retain(env, delegate);
+    if responds(env, delegate, "textViewShouldEndEditing:") && !msg![env; delegate textViewShouldEndEditing:this] {
+        env.objc.borrow_mut::<UITextViewHostObject>(this).ending = false;
+        release(env, delegate); release(env, this); return false;
+    }
+    env.objc.borrow_mut::<UITextViewHostObject>(this).editing = false;
+    if env.framework_state.uikit.ui_responder.first_responder == this {
+        env.framework_state.uikit.ui_responder.first_responder = nil;
+        keyboard(env, this, false);
+    }
+    // Mark non-editing before callbacks: the game's didEnd calls resign again.
+    if responds(env, delegate, "textViewDidEndEditing:") { () = msg![env; delegate textViewDidEndEditing:this]; }
+    env.objc.borrow_mut::<UITextViewHostObject>(this).ending = false;
+    release(env, delegate); release(env, this);
+    true
+}
+- (())touchesBegan:(id)_touches withEvent:(id)_event {
+    let _: bool = msg![env; this becomeFirstResponder];
+    if env.objc.borrow::<UITextViewHostObject>(this).editing && env.window.is_some() {
+        env.on_parent_stack_in_coroutine(|window,_| window.start_text_input());
+    }
+}
+- (NSInteger)autocorrectionType { env.objc.borrow::<UITextViewHostObject>(this).autocorrection }
+- (())setAutocorrectionType:(NSInteger)value { env.objc.borrow_mut::<UITextViewHostObject>(this).autocorrection = value; }
+- (NSInteger)autocapitalizationType { env.objc.borrow::<UITextViewHostObject>(this).autocapitalization }
+- (())setAutocapitalizationType:(NSInteger)value { env.objc.borrow_mut::<UITextViewHostObject>(this).autocapitalization = value; }
 - (bool)isEditable {
     env.objc.borrow::<UITextViewHostObject>(this).editable
 }
 - (())setEditable:(bool)editable {
+    if !editable { let _: bool = msg![env; this resignFirstResponder]; }
     env.objc.borrow_mut::<UITextViewHostObject>(this).editable = editable;
 }
 
@@ -253,12 +432,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     let context = UIGraphicsGetCurrentContext(env);
 
     let &mut UITextViewHostObject {
-        superclass: _,
-        editable: _,
         font,
         text,
         text_color,
-        text_alignment
+        text_alignment,
+        ..
     } = env.objc.borrow_mut(this);
 
     let (r, g, b, a) = ui_color::get_rgba(&env.objc, text_color);

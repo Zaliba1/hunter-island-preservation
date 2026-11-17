@@ -927,7 +927,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     let responder: id = env.framework_state.uikit.ui_responder.first_responder;
     let class = msg![env; responder class];
     let ui_text_field_class = env.objc.get_known_class("UITextField", &mut env.mem);
-    if responder != nil && env.objc.class_is_subclass_of(class, ui_text_field_class) {
+    let ui_text_view_class = env.objc.get_known_class("UITextView", &mut env.mem);
+    if responder != nil && (env.objc.class_is_subclass_of(class, ui_text_field_class)
+        || env.objc.class_is_subclass_of(class, ui_text_view_class)) {
         // we need to check if text field is in the current view hierarchy
         let mut to_find = responder;
         while to_find != nil {

@@ -6,17 +6,26 @@ on:
         description: Successful Apple Silicon Mac preview run ID
         required: true
         type: string
+      release_tag:
+        description: Optional existing draft release tag; leave empty for artifact only
+        required: false
+        default: ''
+        type: string
 permissions:
   actions: read
   contents: read
 jobs:
   package:
+    permissions:
+      actions: read
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       GH_TOKEN: ${{ github.token }}
       SOURCE_RUN: ${{ inputs.source_run }}
       REPOSITORY: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
     steps:
       - name: Download the verified Mac build
         shell: bash
@@ -54,6 +63,33 @@ jobs:
           (out/'SHA256SUMS.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n'
               for p in sorted(out.iterdir()) if p.is_file() and p.name!='SHA256SUMS.txt'))
           PY
+      - name: Attach verified Mac assets to the requested draft release
+        if: inputs.release_tag != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v0\.2\.0-preview\.[0-9]+$ ]]
+          gh release view "$RELEASE_TAG" --repo "$REPOSITORY" --json isDraft,targetCommitish > release.json
+          gh api "repos/$REPOSITORY/commits/$RELEASE_TAG" --jq .sha > release-commit.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,shutil
+          assert json.load(open('release.json'))['isDraft'] is True
+          root=Path('original');checks=json.loads((root/'checks.json').read_text())
+          assert checks['source_commit']==Path('release-commit.txt').read_text().strip()
+          for gate in ['native_launcher_ui_smoke_tested','ipa_fixture_import_tested','graphics_shader_render_readback_tested','isolated_engine_graphics_tested']:
+              assert checks[gate] is True,gate
+          assert checks['original_game_included'] is False
+          assert checks['privacy']['private_markers_found'] is False
+          out=Path('release-mac');out.mkdir()
+          archives=list(root.glob('*.zip'));assert len(archives)==3
+          for p in archives:shutil.copy2(p,out/p.name)
+          for src,dst in [('checks.json','macos-checks.json'),('dependency-checks.json','macos-dependency-checks.json'),('README.md','MACOS-INSTALL.md')]:
+              shutil.copy2(root/src,out/dst)
+          (out/'MACOS-SHA256SUMS.txt').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n'
+              for p in sorted(out.iterdir()) if p.is_file()))
+          PY
+          gh release upload "$RELEASE_TAG" --repo "$REPOSITORY" release-mac/*
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: HunterIsland-macOS-arm64-app

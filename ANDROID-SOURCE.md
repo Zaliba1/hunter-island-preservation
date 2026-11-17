@@ -1,9 +1,9 @@
 # Matching Android sources
 
-Windows and Android share one source tree. The preview.4 APK is accompanied by:
+Windows and Android share one source tree. The preview.5 APK is accompanied by:
 
-- HunterIsland-Source-0.2.0-preview.4.zip
-- HunterIsland-SourceDependencies-0.2.0-preview.4.zip
+- HunterIsland-Source-0.2.0-preview.5.zip
+- HunterIsland-SourceDependencies-0.2.0-preview.5.zip
 
 Keep both archives alongside locally supplied APKs. Published builds provide
 them in [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).

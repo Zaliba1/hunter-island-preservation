@@ -10,6 +10,7 @@
 //! topic.
 
 mod eagl;
+pub(crate) use eagl::frame_ppm;
 mod gles2_guest;
 mod gles_guest;
 mod texture_cleanup;

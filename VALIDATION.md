@@ -1,4 +1,29 @@
-# Validation for 0.2.0-preview.3
+# Validation for 0.2.0-preview.5
+
+Verified on 17 November 2026 on the Windows build PC. Detailed private game
+captures and saves are excluded from source and release packages.
+
+- Baseline crash reproduced at the Orlen gravestone: CALayer did not respond
+  to `setBorderColor:`. Static inspection also identified missing editable
+  UITextView keyboard/delegate support behind that first failure.
+- Windows native framework tests: 171 passed, 2 pre-existing ignored.
+  New tests cover multi-character input, UTF-16 delegate ranges, surrogate-pair
+  backspace, vetoes, responder switching and a delegate that resigns again and
+  releases its view while Return is being handled.
+- Windows launcher/package tests: 34 passed.
+- Real-game Windows Orlen test: dialog opens and renders; an incorrect answer
+  produces "Nothing happened"; tapping outside closes safely; `dragon island`
+  follows the original reward path to Penguini. A saved private test copy
+  contains one Mafiapenguin01. All optional mods were disabled.
+
+The exact distributed Windows ZIP is extracted and run before publication;
+its engine digest and result are recorded in release-checks.json. Android
+unit-test/package evidence accompanies the APK. Mac native test evidence is
+in macos-checks.json. Neither a physical Android Orlen run nor actual Mac
+Hunter Island gameplay is claimed. Full text selection, marked-text/IME
+composition and rounded CALayer border paths remain incomplete.
+
+## Previous validation: 0.2.0-preview.3
 
 Verified on 15 November 2026 on the Windows build PC.
 

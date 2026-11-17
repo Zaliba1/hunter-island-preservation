@@ -1,41 +1,33 @@
 {
-  "version": "0.2.0-preview.2",
+  "version": "0.2.0-preview.5",
   "status": "prerelease",
-  "review_date": "2026-11-15",
+  "review_date": "2026-11-17",
   "windows": {
-    "fresh_source_build": true,
-    "new_output_directory": true,
-    "engine_tests_passed": 151,
+    "engine_tests_passed": 171,
     "engine_tests_ignored": 2,
-    "launcher_tests_passed": 28,
-    "engine_sha256": "236bb7f65235378643f03011ec7cf7c8e783893f06700786f1c016b41c6fc8e8",
+    "launcher_tests_passed": 34,
+    "engine_sha256": "5a9183c17d70f18d98ad41b3710f4856a96153af6043d728b2a4876808781e0f",
     "isolated_no_network": true,
-    "rewards_open_scroll_close_reopen_verified": true,
-    "clean_game_exit": true,
+    "orlen_wrong_answer_cancel_reward_tested": true,
+    "original_game_reward": "Penguini",
     "original_save_seed_unchanged": true
   },
   "android": {
-    "fresh_source_build": true,
-    "new_output_directory": true,
-    "framework_tests_passed": 36,
-    "apk_sha256": "f125a4f9a588d343f93c1adf04c409459eb26b2f9b96b6de5b11d60199ea67de",
+    "framework_tests_passed": 42,
+    "apk_sha256": "1656c5eb4c905594cae26dba37cf0f8c3b4c809fe57e0487facca88b150cc9d4",
     "signature_verified": true,
     "apk_and_elf_16k_alignment_verified": true,
-    "signer_matches_preview1": true,
     "no_internet_or_broad_storage_permission": true,
     "physical_device_execution_tested": false
   },
-  "source_inputs": {
-    "archives": 23,
-    "rust_packages": 148,
-    "rust_files": 9974,
-    "all_checksums_verified": true
+  "macos": {
+    "native_checks": "See macos-checks.json accompanying the release",
+    "actual_game_start_tested": false
   },
-  "code_matches_fresh_build_inputs": true,
   "known_limits": [
-    "New APK physical-device execution and update installation not tested.",
-    "Rewards close control can display Button; table clipping and modal composition are incomplete.",
-    "Full story, all devices, long sessions and a second Windows PC not verified.",
+    "Actual Orlen gameplay not tested on a physical Android device or a Mac.",
+    "Full text selection, marked-text input and rounded border rendering remain incomplete.",
+    "Full story and all devices not verified.",
     "Historical guest binaries not independently bit-reproduced."
   ]
 }

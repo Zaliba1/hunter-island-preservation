@@ -890,6 +890,11 @@ impl Window {
         });
     }
 
+    /// Guest keyboard counterpart of queue_diagnostic_touch; explicit test opt-in.
+    pub(crate) fn queue_diagnostic_text(&mut self, event: TextInputEvent) {
+        self.event_queue.push_back(Event::TextInput(event));
+    }
+
     /// Pop an event from the queue (in FIFO order, except for high priority
     /// events)
     pub fn pop_event(&mut self) -> Option<Event> {

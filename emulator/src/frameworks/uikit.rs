@@ -66,6 +66,7 @@ pub const DYLIB: crate::dyld::HostDylib = crate::dyld::HostDylib {
         ui_view::ui_scroll_view::CLASSES,
         ui_view::ui_scroll_view::ui_table_view::CLASSES,
         ui_view::ui_scroll_view::ui_text_view::CLASSES,
+        ui_view::ui_scroll_view::ui_text_view::PROBE_CLASSES,
         ui_view::ui_web_view::CLASSES,
         ui_view::ui_window::CLASSES,
         ui_view::ui_window::PROBE_CLASSES,
@@ -153,6 +154,11 @@ pub fn handle_events(env: &mut Environment) -> Option<Instant> {
                 let responder = env.framework_state.uikit.ui_responder.first_responder;
                 let class = msg![env; responder class];
                 let ui_text_field_class = env.objc.get_known_class("UITextField", &mut env.mem);
+                let ui_text_view_class = env.objc.get_known_class("UITextView", &mut env.mem);
+                if !responder.is_null() && env.objc.class_is_subclass_of(class, ui_text_view_class) {
+                    ui_view::ui_scroll_view::ui_text_view::handle_input(env, responder, text_event);
+                    continue;
+                }
                 if !responder.is_null() && env.objc.class_is_subclass_of(class, ui_text_field_class)
                 {
                     match text_event {

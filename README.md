@@ -4,14 +4,15 @@ An unofficial project for preserving Hunter Island 2.02 offline on Windows
 and Android, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
 Import your own compatible, already decrypted 32-bit IPA locally.
 
-This test branch also contains an experimental native **Apple Silicon Mac**
+The shared source tree also contains an experimental native **Apple Silicon Mac**
 app for macOS 13 or later. See [MACOS.md](MACOS.md) for test-build downloads,
 installation, data locations and the remaining gameplay checks.
 
 ## Current release
 
-**0.2.0-preview.3** adds a saved game-language selector on Windows and Android,
-with English as the default. It includes the arena Rewards fix from preview.2.
+**0.2.0-preview.5** repairs the Orlen gravestone text-entry dialog. It includes
+the optional mods, local save history, fusion lineage and saved game-language
+selector, with English as the default.
 The release includes matching sources, dependency sources and license
 inventories. See VALIDATION.md for the checks performed and remaining limits.
 
@@ -22,8 +23,9 @@ Download the package for your device from
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.3.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
-| Android | HunterIsland-Android-arm64-0.2.0-preview.3.apk | Android 8+, ARM64, OpenGL ES 3.0 |
+| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.5.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
+| Android | HunterIsland-Android-arm64-0.2.0-preview.5.apk | Android 8+, ARM64, OpenGL ES 3.0 |
+| Apple Silicon Mac | HunterIsland-macOS-arm64-test-….zip | macOS 13+, ARM64; experimental, ad-hoc signed |
 
 **Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
 the game. Install Python with Tcl/Tk from

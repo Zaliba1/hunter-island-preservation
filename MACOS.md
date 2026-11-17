@@ -9,9 +9,10 @@ or a Windows `.cmd` file. Developers need the tools described below.
 
 ## Using a successful test build
 
-1. Open the **Apple Silicon Mac preview** run for the desired commit in GitHub
-   Actions. Download the `HunterIsland-macOS-arm64-preview` artifact.
-2. Extract the artifact, then the `HunterIsland-macOS-arm64-test-….zip` inside.
+1. Open [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases)
+   and download `HunterIsland-macOS-arm64-test-….zip` from the desired release.
+   A public release download does not require a GitHub account.
+2. Extract the downloaded ZIP.
    Move **Hunter Island.app** to a local folder such as Applications.
 3. Open the app and select **Import your IPA…**. Supply your own already
    decrypted Hunter Island 2.02 IPA. Other games and encrypted executables
@@ -50,7 +51,7 @@ a replacement. The launcher itself needs access to user-selected import files.
 
 ## Building and source delivery
 
-Use the source ZIP matching the test artifact's commit. Its source dependencies
+Use the source ZIP matching the app's commit. Its source dependencies
 are included as `HunterIsland-SourceDependencies-test-<commit>.zip` in the same
 artifact. This includes the added SHA-2 source, unlike the older preview.2
 dependency archive alone. Retain both source archives when sharing this build.

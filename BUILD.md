@@ -39,7 +39,7 @@ excessively long native CPU-core dependency paths in GCC.
 ~~~powershell
 rustup toolchain install 1.90.0-x86_64-pc-windows-gnu --profile minimal
 rustup target add aarch64-linux-android --toolchain 1.90.0-x86_64-pc-windows-gnu
-python tools/prepare_offline_sources.py C:/Downloads/HunterIsland-SourceDependencies-0.2.0-preview.4.zip
+python tools/prepare_offline_sources.py C:/Downloads/HunterIsland-SourceDependencies-0.2.0-preview.5.zip
 python -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r requirements-build.txt
 ~~~
@@ -96,7 +96,7 @@ Use the supplied tools to inspect the Android package.
 
 ~~~powershell
 python tools/verify_android_apk.py --apk PATH/TO/app-debug.apk --sdk-root C:/Android/sdk --java-home C:/Java17 --out .build/android-review
-python tools/android_license_inventory.py .build/android-review/HunterIsland-Android-arm64-0.2.0-preview.4.apk --out .build/android-license-inventory.json
+python tools/android_license_inventory.py .build/android-review/HunterIsland-Android-arm64-0.2.0-preview.5.apk --out .build/android-license-inventory.json
 python tools/audit_public.py .
 ~~~
 
