@@ -87,12 +87,12 @@ public class PreservationFrameworkTest {
     }
     @Test public void launcherModsDefaultOffAndReachTheGameIndependently() {
         String[] labels = {
-            "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)",
-            "Silber gegen Gold tauschen (50:1)",
-            "Kolosseum ohne 12-Stunden-Wartezeit",
-            "Testspielstand erstellen / verwenden (separate Kopie)",
-            "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni",
-            "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S",
+            "Find rare starter dragons more often (5% per wild battle)",
+            "Exchange silver for gold (50:1)",
+            "Skip the 12-hour arena wait",
+            "Full collection and resources (separate save copy)",
+            "New game with all monsters at level 1",
+            "New game with 3 of each monster, level 99, rank S",
         };
         String[] flags = {
             "--hunter-rare-dragons", "--hunter-silver-exchange", "--hunter-no-arena-cooldown",
@@ -156,7 +156,7 @@ public class PreservationFrameworkTest {
     }
     @Test public void launcherRefreshesImportWhenReturning() throws Exception {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {
-            LauncherActivity activity=controller.get();Button start=button(activity.getWindow().getDecorView(),"Spiel starten");
+            LauncherActivity activity=controller.get();Button start=button(activity.getWindow().getDecorView(),"Play");
             assertNotNull(start);assertFalse(start.isEnabled());controller.pause();
             new GameStore(activity).importGame(register(fixture(IpaInspector.BUNDLE)));
             controller.resume();assertTrue("Stale disabled Play button after returning",start.isEnabled());
@@ -173,7 +173,7 @@ public class PreservationFrameworkTest {
     @Test public void launcherOpensOfflineLicenseBrowser() {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {
             LauncherActivity activity=controller.get();
-            button(activity.getWindow().getDecorView(),"Hinweise und Lizenzen").performClick();
+            button(activity.getWindow().getDecorView(),"Licenses and source information").performClick();
             assertEquals(LicenseActivity.class.getName(),Shadows.shadowOf(activity).getNextStartedActivity().getComponent().getClassName());
         }
     }
