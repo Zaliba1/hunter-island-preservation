@@ -48,9 +48,13 @@ last arena victory.
 
 ## Separate collections
 
-The full testing collection and fresh level-one campaign are optional,
-mutually exclusive profiles. Both can be combined with the three rules above.
+The full testing collection, fresh level-one campaign and fresh triple
+level-99 campaign are optional, mutually exclusive profiles. Each can be
+combined with the three rules above.
 The fresh campaign grants all regular forms at level 1 only when creating
 a new slot. Loading or restarting never resets levels. It grants no additional
-resources or summon unlocks. See TEST_PROFILE.md for profile paths and the
+resources or summon unlocks. The triple level-99 campaign starts with exactly
+three copies of each regular form, all level 99 and S, without extra resources.
+New full and level-one collections also start at S; existing saves are not
+upgraded. All four save areas are separate. See TEST_PROFILE.md for profile paths and the
 persistent local testing marker.

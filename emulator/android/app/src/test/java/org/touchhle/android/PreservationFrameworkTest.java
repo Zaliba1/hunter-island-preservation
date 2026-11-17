@@ -92,11 +92,13 @@ public class PreservationFrameworkTest {
             "Kolosseum ohne 12-Stunden-Wartezeit",
             "Testspielstand erstellen / verwenden (separate Kopie)",
             "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni",
+            "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S",
         };
         String[] flags = {
             "--hunter-rare-dragons", "--hunter-silver-exchange", "--hunter-no-arena-cooldown",
             "--hunter-test-save",
             "--hunter-level1-save",
+            "--hunter-triple99-save",
         };
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {
@@ -114,7 +116,7 @@ public class PreservationFrameworkTest {
                     boxes[i].setChecked(enabled);
                 }
                 for (int i=0;i<flags.length;i++) if(boxes[i].isChecked()) expected.add(flags[i]);
-                assertFalse(boxes[3].isChecked() && boxes[4].isChecked());
+                assertTrue((boxes[3].isChecked()?1:0)+(boxes[4].isChecked()?1:0)+(boxes[5].isChecked()?1:0)<=1);
                 List<String> arguments = new ArrayList<>();
                 ModOptions.appendArguments(activity, arguments);
                 assertEquals(expected, arguments);
@@ -124,7 +126,7 @@ public class PreservationFrameworkTest {
                 android.widget.CheckBox box = (android.widget.CheckBox)
                     button(controller.get().getWindow().getDecorView(), label);
                 assertNotNull(box);
-                assertEquals(!label.equals(labels[3]),box.isChecked());
+                assertEquals(!label.equals(labels[3]) && !label.equals(labels[4]),box.isChecked());
                 box.setChecked(false);
             }
         }
@@ -138,6 +140,19 @@ public class PreservationFrameworkTest {
         assertEquals(Arrays.asList("--hunter-rare-dragons","--hunter-level1-save"),arguments);
         p.edit().putBoolean("--hunter-test-save",true).commit();
         try {ModOptions.selectedProfile(context);fail("Conflicting testing profiles accepted");}catch(IllegalStateException expected){}
+    }
+    @Test public void triple99NeedsNoSeedPersistsAndRejectsEveryOtherCollection() throws Exception {
+        android.content.SharedPreferences p=context.getSharedPreferences("mods",Context.MODE_PRIVATE);
+        p.edit().putBoolean("--hunter-triple99-save",true).commit();
+        ModOptions.requireTestingSeed(context);
+        assertEquals("pockettrend.hunterisland-triple99-v1",ModOptions.selectedProfile(context));
+        List<String> arguments=new ArrayList<>();ModOptions.appendArguments(context,arguments);
+        assertEquals(Arrays.asList("--hunter-triple99-save"),arguments);
+        for(String flag:Arrays.asList("--hunter-test-save","--hunter-level1-save")) {
+            p.edit().putBoolean(flag,true).commit();
+            try{ModOptions.selectedProfile(context);fail("Conflicting collections accepted");}catch(IllegalStateException expected){}
+            p.edit().putBoolean(flag,false).commit();
+        }
     }
     @Test public void launcherRefreshesImportWhenReturning() throws Exception {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {

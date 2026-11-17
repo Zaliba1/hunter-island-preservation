@@ -169,11 +169,12 @@ func inspectIPA(_ url: URL) throws -> GameInfo {
 }
 
 let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français"), ("es", "Español"), ("it", "Italiano"), ("ja", "日本語"), ("system", "System language")]
-let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources")]
+let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank")]
+let collectionProfiles = [("--hunter-test-save", "pockettrend.hunterisland-test-v1"), ("--hunter-level1-save", "pockettrend.hunterisland-level1-v1"), ("--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1")]
 func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
-    let full = mods["--hunter-test-save"] == true, level1 = mods["--hunter-level1-save"] == true
-    try require(!(full && level1), "Choose only one testing collection.")
-    return level1 ? "pockettrend.hunterisland-level1-v1" : full ? "pockettrend.hunterisland-test-v1" : "pockettrend.hunterisland"
+    let selected = collectionProfiles.filter { mods[$0.0] == true }
+    try require(selected.count <= 1, "Choose only one testing collection.")
+    return selected.first?.1 ?? "pockettrend.hunterisland"
 }
 func gameArguments(language: String, device: String, mods: [String: Bool]) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]

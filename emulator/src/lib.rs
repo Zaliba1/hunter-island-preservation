@@ -246,7 +246,7 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
         log!("Warning: The bundle path has a trailing quotation mark! This often happens accidentally on Windows when tab-completing, because '\\\"' gets interpreted by Rust in the wrong way. Did you meant to write {:?}?", fixed);
     }
 
-    let test_mode = test_profile::Mode::from_flags(options.hunter_test_save,options.hunter_level1_save)?;
+    let test_mode = test_profile::Mode::from_options(&options)?;
     let test_sandbox = if !just_info {
         test_mode.map(|mode|test_profile::prepare(&bundle_path,&paths::user_data_base_path(),mode)).transpose()?
     } else {None};
@@ -377,7 +377,7 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
         let parse_result = options.parse_argument(&option_arg);
         assert!(parse_result == Ok(true));
     }
-    if test_profile::Mode::from_flags(options.hunter_test_save,options.hunter_level1_save)? != test_mode {
+    if test_profile::Mode::from_options(&options)? != test_mode {
         return Err("Select the testing collection in the launcher or command line; options files cannot change its save directory.".into());
     }
 
@@ -408,9 +408,9 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             std::panic::resume_unwind(e)
         }
     };
-    if options.hunter_level1_save {
-        let catalog = test_profile::level_one_catalog(&bundle_path)?;
-        objc::hunter_history::configure_level_one(&mut env, catalog)?;
+    if test_mode.is_some_and(test_profile::Mode::fresh) {
+        let catalog = test_profile::fresh_catalog(&bundle_path)?;
+        objc::hunter_history::configure_fresh_collection(&mut env, catalog)?;
     }
     env.run();
     Ok(())

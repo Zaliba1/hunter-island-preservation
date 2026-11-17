@@ -1,14 +1,19 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 use super::*;
 
+fn properties(monster: &mut Value) -> &mut Dictionary {
+    let custom = nested(monster, "customSaveData").unwrap();
+    let entity = nested(custom, "entitySaveData").unwrap();
+    dict(nested(entity, "properties").unwrap()).unwrap()
+}
+
 fn save() -> Value {
     let mut d = Dictionary::new();
     let mut player = Dictionary::new();
     let mut props = Dictionary::new();
-    player.insert(
-        "savedMonsters".into(),
-        Value::Array(vec![object("Normal.Owned", "Monsters.plist", true, LEVEL)]),
-    );
+    let mut owned = object("Normal.Owned", "Monsters.plist", true, LEVEL);
+    properties(&mut owned).insert("tier".into(), 0.into());
+    player.insert("savedMonsters".into(), Value::Array(vec![owned]));
     player.insert("savedItems".into(), Value::Array(vec![]));
     player.insert(
         "savedGemsInLicense".into(),
@@ -25,10 +30,13 @@ fn save() -> Value {
     d.insert("props".into(), props.into());
     d.insert("goldSpent".into(), 7.into());
     d.insert("goldPurchased".into(), 0.into());
-    d.insert("adw".into(),30.into());
+    d.insert("adw".into(), 30.into());
     d.insert("flags".into(), Dictionary::new().into());
     d.insert("poiData".into(), Dictionary::new().into());
-    d.insert("seeders".into(),Value::Array(vec![Value::Dictionary(Dictionary::new())]));
+    d.insert(
+        "seeders".into(),
+        Value::Array(vec![Value::Dictionary(Dictionary::new())]),
+    );
     d.into()
 }
 fn catalog() -> Catalog {
@@ -47,18 +55,58 @@ fn catalog() -> Catalog {
 }
 #[test]
 fn profiles_are_exclusive_but_independent_from_the_other_mods() {
-    assert_eq!(Mode::from_flags(false,false).unwrap(),None);
-    assert_eq!(Mode::from_flags(true,false).unwrap(),Some(Mode::Full));
-    assert_eq!(Mode::from_flags(false,true).unwrap(),Some(Mode::LevelOne));
-    assert!(Mode::from_flags(true,true).is_err());
-    assert_ne!(Mode::Full.folder(),Mode::LevelOne.folder());
-    let unit=object("Dragon.Test","Monsters.plist",true,1);
-    assert_eq!(unit.as_dictionary().unwrap()["creationArguments"].as_dictionary().unwrap()["jobArguments"].as_dictionary().unwrap()["level"].as_unsigned_integer(),Some(1));
+    assert_eq!(Mode::from_flags(false, false, false).unwrap(), None);
+    assert_eq!(
+        Mode::from_flags(true, false, false).unwrap(),
+        Some(Mode::Full)
+    );
+    assert_eq!(
+        Mode::from_flags(false, true, false).unwrap(),
+        Some(Mode::LevelOne)
+    );
+    assert!(Mode::from_flags(true, true, false).is_err());
+    assert_eq!(
+        Mode::from_flags(false, false, true).unwrap(),
+        Some(Mode::Triple99)
+    );
+    assert!(Mode::from_flags(true, false, true).is_err());
+    assert!(Mode::from_flags(false, true, true).is_err());
+    assert!(Mode::from_flags(true, true, true).is_err());
+    assert_ne!(Mode::Triple99.folder(), Mode::LevelOne.folder());
+    assert_ne!(Mode::Triple99.folder(), Mode::Full.folder());
+    assert_eq!(
+        (
+            Mode::Triple99.level(),
+            Mode::Triple99.copies(),
+            Mode::Triple99.bit()
+        ),
+        (99, 3, 4)
+    );
+    assert_ne!(Mode::Full.folder(), Mode::LevelOne.folder());
+    let unit = object("Dragon.Test", "Monsters.plist", true, 1);
+    assert_eq!(
+        unit.as_dictionary().unwrap()["creationArguments"]
+            .as_dictionary()
+            .unwrap()["jobArguments"]
+            .as_dictionary()
+            .unwrap()["level"]
+            .as_unsigned_integer(),
+        Some(1)
+    );
 }
 #[test]
 fn test_collection_is_idempotent_and_preserves_party_story_and_equipment() {
     let mut data = save();
+    // An ordinary seed unit starts below S. Only the new copy is promoted;
+    // its original level, equipment and party position remain intact.
     let original = data.clone();
+    let mut promoted = original.as_dictionary().unwrap()["playerData"]
+        .as_dictionary()
+        .unwrap()["savedMonsters"]
+        .as_array()
+        .unwrap()[0]
+        .clone();
+    properties(&mut promoted).insert("tier".into(), MONSTER_TIER.into());
     populate(&mut data, &catalog(), Mode::Full).unwrap();
     let d = data.as_dictionary().unwrap();
     let p = d["playerData"].as_dictionary().unwrap();
@@ -70,19 +118,24 @@ fn test_collection_is_idempotent_and_preserves_party_story_and_equipment() {
         d["props"].as_dictionary().unwrap()["lastTown"],
         "unchanged-town".into()
     );
-    assert_eq!(
-        p["savedMonsters"].as_array().unwrap()[0],
-        old["playerData"].as_dictionary().unwrap()["savedMonsters"]
-            .as_array()
-            .unwrap()[0]
-    );
+    assert_eq!(p["savedMonsters"].as_array().unwrap()[0], promoted);
     assert_eq!(
         p["savedGemsInLicense"],
         old["playerData"].as_dictionary().unwrap()["savedGemsInLicense"]
     );
     assert_eq!(p["savedMonsters"].as_array().unwrap().len(), 2);
+    for monster in p["savedMonsters"].as_array().unwrap() {
+        let mut monster = monster.clone();
+        assert_eq!(
+            properties(&mut monster)["tier"].as_signed_integer(),
+            Some(5)
+        );
+    }
     assert_eq!(p["savedItems"].as_array().unwrap().len(), 1);
-    assert_eq!(d["goldFound"].as_unsigned_integer(), Some(MONEY as u64 * 30 + 7));
+    assert_eq!(
+        d["goldFound"].as_unsigned_integer(),
+        Some(MONEY as u64 * 30 + 7)
+    );
     let r = Record::decode(d[preservation::FIELD].as_data().unwrap()).unwrap();
     assert!(r.test_profile);
     assert_eq!(r.counts, [0; 9]);
@@ -91,6 +144,22 @@ fn test_collection_is_idempotent_and_preserves_party_story_and_equipment() {
     let before = data.clone();
     populate(&mut data, &catalog(), Mode::Full).unwrap();
     assert_eq!(before, data);
+}
+#[test]
+fn only_monster_grants_receive_s_rarity_at_the_requested_starting_level() {
+    for level in [1, 50, 99] {
+        let mut monster = object("Dragon.Test", "Monsters.plist", true, level);
+        assert_eq!(
+            properties(&mut monster)["tier"].as_signed_integer(),
+            Some(5)
+        );
+        assert_eq!(
+            properties(&mut monster)["JobLevelProp"].as_real(),
+            Some(level as f64)
+        );
+        let mut item = object("Gems.Uniques.Test", "Items.plist", false, level);
+        assert!(!properties(&mut item).contains_key("tier"));
+    }
 }
 #[test]
 fn catalog_keeps_bonus_monsters_but_routes_summons_separately() {

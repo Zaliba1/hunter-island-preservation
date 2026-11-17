@@ -64,7 +64,7 @@ class Store:
 
     def require_testing_seed(self):
         selected = selected_test_directory(self.settings())
-        if selected in (None, 'pockettrend.hunterisland-level1-v1'):
+        if selected in (None, 'pockettrend.hunterisland-level1-v1', 'pockettrend.hunterisland-triple99-v1'):
             return
         if (self.bundle / 'test-profile.json').is_file():
             return

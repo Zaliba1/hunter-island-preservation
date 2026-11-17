@@ -1,4 +1,36 @@
-# Validation for 0.2.0-preview.8
+# Validation for 0.2.0-preview.9
+
+Verified using private, isolated copies. No game data or player saves are
+included in the source or runtime packages.
+
+- Windows native library: 184 tests passed, 2 pre-existing ignored. Launcher:
+  38 tests passed, including actual Tk controls, mutual exclusion across all
+  three collection modes, profile routing and normal-save isolation.
+- Fresh triple level-99 campaign: exactly 353 forms with three copies each,
+  1,059 monsters at level 99 and S rarity. The original tutorial starter is
+  included in that total. Starting balances remain 1,000 silver and 250 gold;
+  no summons or other bonus resources are granted.
+- Saving, restarting, loading and writing another checkpoint preserve the
+  collection without granting extra copies or changing its levels. Normal,
+  full and level-one profile files retain their original hashes.
+- New full collections: all 353 regular forms are S; copied party levels stay
+  unchanged. New level-one campaigns: all 353 granted forms plus the original
+  starter are level 1 and S. Older full and level-one campaigns resume without
+  changing their existing rarity or level values.
+- Separate sticky history modes roundtrip, including the new triple-level-99
+  identifier. Artificial grants do not increment capture or exchange counters.
+- Android: 54 Robolectric/JUnit tests passed, covering launcher controls and
+  separate exports for the fourth save area. Version code 19 keeps the existing
+  project signer. Static signature, permissions, ARM64/16-KiB alignment,
+  assets, notices and known-private-marker checks are performed on the APK.
+
+Final source correspondence, fresh-source rebuild evidence, exact Windows ZIP
+execution and package hashes accompany the release as release-checks.json and
+TEST_PROFILE_CHECKS.json. Native Mac evidence is in macos-checks.json. Actual
+Hunter Island gameplay on Mac and the new collection flow on a physical Android
+device remain unverified. Bit-identical reproducibility is not claimed.
+
+## Previous validation: 0.2.0-preview.8
 
 Verified using separate private copies; original player data is excluded.
 

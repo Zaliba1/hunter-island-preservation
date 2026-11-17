@@ -17,6 +17,7 @@ MOD_OPTIONS = (
     ("--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"),
     ("--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"),
     ("--hunter-level1-save", "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni"),
+    ("--hunter-triple99-save", "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S"),
 )
 
 def mod_arguments(settings):
@@ -68,8 +69,8 @@ def gui(store, release):
     from . import diagnostics
     root = tk.Tk()
     root.title('Hunter Island · Testlauncher')
-    root.geometry('760x880')
-    root.minsize(710,850)
+    root.geometry('760x920')
+    root.minsize(710,890)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -125,7 +126,7 @@ def gui(store, release):
                     mod_values[other].set(False)
     for flag in TEST_PROFILES:
         mod_values[flag].trace_add('write',lambda *_args, flag=flag:choose_test(flag))
-    ttk.Label(frame,text='Vollsammlung: Kopie des Normalstands. Level 1: frisches Spiel, danach normal leveln.\nJeweils eigener Save-Ordner. Beide Haken aus = normaler Spielstand.',
+    ttk.Label(frame,text='Vollsammlung: Kopie des Normalstands. Level 1 / 3-mal Level 99: neues Spiel ohne Zusatzboni.\nJede Sammlung hat eigene Saves. Alle Sammlungshaken aus = normaler Spielstand.',
         wraplength=650,font=('Segoe UI',9)).pack(anchor='w',pady=(6,0))
     ttk.Separator(frame).pack(fill='x',pady=18)
     export_button = ttk.Button(frame,text='Diagnosepaket speichern …')

@@ -80,6 +80,24 @@ public class SaveTransferTest {
         assertArrayEquals(new byte[]{50},Files.readAllBytes(full));
         assertEquals("phone-original",new String(Files.readAllBytes(normal),StandardCharsets.UTF_8));
     }
+    @Test public void triple99ExportReadsOnlyItsOwnFourthProfile()throws Exception {
+        Path normal=original();
+        Path full=root.resolveSibling("pockettrend.hunterisland-test-v1").resolve("Documents/saves0/sv_2");
+        Path level1=root.resolveSibling("pockettrend.hunterisland-level1-v1").resolve("Documents/saves0/sv_3");
+        Path triple=root.resolveSibling("pockettrend.hunterisland-triple99-v1").resolve("Documents/saves0/sv_4");
+        for(Path path:Arrays.asList(full,level1,triple)){
+            Files.createDirectories(path.getParent());Files.write(path,path.equals(triple)?new byte[]{99}:new byte[]{1});
+        }
+        context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().putBoolean("--hunter-triple99-save",true).commit();
+        Map<String,byte[]> data=contents(exported(new SaveStore(context,true),false));
+        assertArrayEquals(new byte[]{99},data.get("guest-data/Documents/saves0/sv_4"));
+        assertFalse(data.containsKey("guest-data/Documents/saves0/sv_3"));
+        assertFalse(data.containsKey("guest-data/Documents/saves0/sv_2"));
+        assertFalse(data.containsKey("guest-data/Documents/saves0/sv_1"));
+        assertArrayEquals(new byte[]{1},Files.readAllBytes(full));
+        assertArrayEquals(new byte[]{1},Files.readAllBytes(level1));
+        assertEquals("phone-original",new String(Files.readAllBytes(normal),StandardCharsets.UTF_8));
+    }
     @Test public void invalidHashAndWrongBundleKeepCurrentCheckpoint()throws Exception {
         Path p=original();SaveStore store=new SaveStore(context);Map<String,byte[]> pc=Collections.singletonMap("guest-data/Documents/saves0/sv_2",new byte[]{1});
         for(byte[] bad:new byte[][]{pack(pc,IpaInspector.BUNDLE,true),pack(pc,"other.game",false),pack(Collections.singletonMap("diagnostics/note.txt",new byte[]{1}),IpaInspector.BUNDLE,false)}){

@@ -16,20 +16,30 @@ final class ModOptions {
         {"--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"},
         {"--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"},
         {"--hunter-level1-save", "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni"},
+        {"--hunter-triple99-save", "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S"},
+    };
+
+    private static final String[][] PROFILES = {
+        {"--hunter-test-save", "pockettrend.hunterisland-test-v1"},
+        {"--hunter-level1-save", "pockettrend.hunterisland-level1-v1"},
+        {"--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1"},
     };
 
     private ModOptions() {}
 
     static String selectedProfile(Context context) {
         SharedPreferences p=preferences(context);
-        boolean full=p.getBoolean("--hunter-test-save",false), level1=p.getBoolean("--hunter-level1-save",false);
-        if(full && level1)throw new IllegalStateException("Bitte nur eine Testsammlung wählen");
-        return level1?"pockettrend.hunterisland-level1-v1":full?"pockettrend.hunterisland-test-v1":IpaInspector.BUNDLE;
+        String selected=IpaInspector.BUNDLE;
+        for (String[] profile : PROFILES) if(p.getBoolean(profile[0],false)) {
+            if(!selected.equals(IpaInspector.BUNDLE))throw new IllegalStateException("Bitte nur eine Testsammlung wählen");
+            selected=profile[1];
+        }
+        return selected;
     }
 
     static void requireTestingSeed(Context context) throws java.io.IOException {
         String selected=selectedProfile(context);
-        if (selected.equals(IpaInspector.BUNDLE) || selected.equals("pockettrend.hunterisland-level1-v1")) return;
+        if (!selected.equals("pockettrend.hunterisland-test-v1")) return;
         java.io.File external=context.getExternalFilesDir(null);
         if(external==null) throw new java.io.IOException("Spielstand-Speicher nicht verfügbar");
         java.io.File parent=new java.io.File(external,"touchHLE_sandbox");
@@ -56,17 +66,18 @@ final class ModOptions {
             checkbox.setChecked(preferences.getBoolean(flag, false));
             boxes.put(flag,checkbox);
             checkbox.setOnCheckedChangeListener((button, checked) -> {
-                if(checked && (flag.equals("--hunter-test-save") || flag.equals("--hunter-level1-save"))) {
-                    String other=flag.equals("--hunter-test-save")?"--hunter-level1-save":"--hunter-test-save";
-                    preferences.edit().putBoolean(other,false).apply();
-                    if(boxes.containsKey(other))boxes.get(other).setChecked(false);
+                if(checked) for(String[] profile:PROFILES) if(profile[0].equals(flag)) {
+                    for(String[] other:PROFILES) if(!other[0].equals(flag)) {
+                        preferences.edit().putBoolean(other[0],false).apply();
+                        if(boxes.containsKey(other[0]))boxes.get(other[0]).setChecked(false);
+                    }
                 }
                 preferences.edit().putBoolean(flag,checked).apply();
             });
             root.addView(checkbox);
         }
         TextView explanation = new TextView(context);
-        explanation.setText("Vollsammlung: Kopie des Normalstands. Level 1: frisches Spiel, danach normal leveln. Jeweils eigener Save-Ordner. Beide Haken aus = normaler Spielstand.");
+        explanation.setText("Vollsammlung: Kopie des Normalstands. Level 1 / 3-mal Level 99: neues Spiel ohne Zusatzboni. Jede Sammlung hat eigene Saves. Alle Sammlungshaken aus = normaler Spielstand.");
         root.addView(explanation);
     }
 

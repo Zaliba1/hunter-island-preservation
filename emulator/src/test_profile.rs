@@ -10,24 +10,33 @@ use std::path::{Path, PathBuf};
 const BUNDLE: &str = "pockettrend.hunterisland";
 pub(crate) const PROFILE: &str = "pockettrend.hunterisland-test-v1";
 pub(crate) const LEVEL_ONE_PROFILE: &str = "pockettrend.hunterisland-level1-v1";
+pub(crate) const TRIPLE_99_PROFILE: &str = "pockettrend.hunterisland-triple99-v1";
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Mode { Full, LevelOne }
+pub(crate) enum Mode { Full, LevelOne, Triple99 }
 impl Mode {
-    pub(crate) fn from_flags(full: bool, level_one: bool) -> Result<Option<Self>, String> {
-        match (full,level_one) {
-            (true,true) => Err("Choose only one testing collection. / Bitte nur eine Testsammlung wählen.".into()),
-            (true,false) => Ok(Some(Self::Full)),
-            (false,true) => Ok(Some(Self::LevelOne)),
-            (false,false) => Ok(None),
+    pub(crate) fn from_flags(full: bool, level_one: bool, triple99: bool) -> Result<Option<Self>, String> {
+        match (full,level_one,triple99) {
+            (false,false,false) => Ok(None),
+            (true,false,false) => Ok(Some(Self::Full)),
+            (false,true,false) => Ok(Some(Self::LevelOne)),
+            (false,false,true) => Ok(Some(Self::Triple99)),
+            _ => Err("Choose only one testing collection. / Bitte nur eine Testsammlung wählen.".into()),
         }
     }
-    fn folder(self) -> &'static str { match self {Self::Full=>PROFILE,Self::LevelOne=>LEVEL_ONE_PROFILE} }
-    fn key(self) -> &'static str { match self {Self::Full=>"full",Self::LevelOne=>"level1"} }
-    fn level(self) -> u32 { match self {Self::Full=>LEVEL,Self::LevelOne=>1} }
-    fn bit(self) -> u32 { match self {Self::Full=>1,Self::LevelOne=>2} }
+    pub(crate) fn from_options(options: &crate::options::Options) -> Result<Option<Self>, String> {
+        Self::from_flags(options.hunter_test_save, options.hunter_level1_save, options.hunter_triple99_save)
+    }
+    fn folder(self) -> &'static str { match self {Self::Full=>PROFILE,Self::LevelOne=>LEVEL_ONE_PROFILE,Self::Triple99=>TRIPLE_99_PROFILE} }
+    fn key(self) -> &'static str { match self {Self::Full=>"full",Self::LevelOne=>"level1",Self::Triple99=>"triple99"} }
+    pub(crate) fn level(self) -> u32 { match self {Self::Full=>LEVEL,Self::LevelOne=>1,Self::Triple99=>99} }
+    pub(crate) fn bit(self) -> u32 { match self {Self::Full=>1,Self::LevelOne=>2,Self::Triple99=>4} }
+    pub(crate) fn fresh(self) -> bool { self != Self::Full }
+    pub(crate) fn copies(self) -> u32 { if self == Self::Triple99 {3} else {1} }
 }
 const MARKER: &str = "test-profile.json";
 const LEVEL: u32 = 50;
+/// The game's six rarity tiers run from E (0) to S (5).
+pub(crate) const MONSTER_TIER: i32 = 5;
 const MONEY: u32 = 9_999_999;
 const LIMIT: u64 = 64 * 1024 * 1024;
 
@@ -51,7 +60,7 @@ fn object(name: &str, file: &str, monster: bool, level: u32) -> Value {
     let mut arguments = Dictionary::new();
     if monster {
         properties.insert("JobLevelProp".into(), (level as f64).into());
-        properties.insert("tier".into(), 0.into());
+        properties.insert("tier".into(), MONSTER_TIER.into());
         let mut job = Dictionary::new();
         job.insert("level".into(), level.into());
         arguments.insert("jobArguments".into(), job.into());
@@ -199,11 +208,17 @@ impl Catalog {
 }
 
 fn populate(save: &mut Value, catalog: &Catalog, mode: Mode) -> Result<(), String> {
-    // Preserve the original party/order, individual monsters and story state.
+    // Only a newly created test copy reaches this function. Keep its party,
+    // levels and story; give the copied and added monsters the same S rarity.
     let player = nested(save, "playerData")?;
     let owned = nested(player, "savedMonsters")?
         .as_array_mut()
         .ok_or("Invalid monster collection")?;
+    for monster in owned.iter_mut() {
+        let custom = nested(monster, "customSaveData")?;
+        let entity = nested(custom, "entitySaveData")?;
+        dict(nested(entity, "properties")?)?.insert("tier".into(), MONSTER_TIER.into());
+    }
     let mut present: BTreeSet<_> = owned
         .iter()
         .filter_map(|v| {
@@ -387,7 +402,7 @@ pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode) -> Result<PathBuf, St
         log!("Using existing separate testing collection.");
         return Ok(target);
     }
-    if mode == Mode::LevelOne {
+    if mode.fresh() {
         // Empty sandbox: the game itself creates each new slot. Grant its
         // collection through the verified new-player hook, never from a copy
         // of an existing campaign and never during load/save operations.
@@ -397,7 +412,7 @@ pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode) -> Result<PathBuf, St
             for dir in ["Documents","Library","tmp"] {
                 std::fs::create_dir(staging.join(dir)).map_err(|e|e.to_string())?;
             }
-            let marker=serde_json::json!({"schema":1,"mode":mode.key(),"test_profile":true,"fresh_game":true});
+            let marker=serde_json::json!({"schema":1,"mode":mode.key(),"test_profile":true,"fresh_game":true,"new_monster_level":mode.level(),"copies_per_form":mode.copies(),"new_monster_rarity":"S"});
             std::fs::write(staging.join(MARKER),serde_json::to_vec_pretty(&marker).unwrap()).map_err(|e|e.to_string())?;
             std::fs::rename(&staging,&target).map_err(|e|e.to_string())
         })();
@@ -492,7 +507,7 @@ pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode) -> Result<PathBuf, St
     Ok(target)
 }
 
-pub(crate) fn level_one_catalog(ipa: &Path) -> Result<Vec<String>,String> {
+pub(crate) fn fresh_catalog(ipa: &Path) -> Result<Vec<String>,String> {
     let key=preservation::save_key(ipa)?;
     Ok(Catalog::load(ipa,&key)?.monsters.into_iter().map(|(_,short)|short).collect())
 }

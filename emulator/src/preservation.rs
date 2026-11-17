@@ -314,7 +314,7 @@ impl Record {
         if !matches!(self.version, 1 | 2)
             || self.origin > 2
             || self.ever_enabled & !7 != 0
-            || self.test_profile_modes & !3 != 0
+            || self.test_profile_modes & !7 != 0
             || (self.test_profile_modes != 0 && !self.test_profile)
             || self.events.len() > JOURNAL
             || self.lineages.len() > 16384
@@ -422,7 +422,7 @@ impl Record {
             "counts":{"generated_encounters":self.counts[0],"hatchlings_selected_in_generated_packs":self.counts[1],"entered_affected_encounters":self.entered_encounters,"hatchlings_seen":self.hatchlings_seen,"hatchlings_captured_while_enabled":self.counts[2],"hatchlings_captured_from_affected_encounters":self.counts[3],"successful_exchanges":self.counts[4],"silver_exchanged":self.counts[5],"gold_received":self.counts[6],"arena_begin_overrides":self.counts[7],"skipped_arena_milliseconds":self.counts[8],"marked_fusions":self.marked_fusions},
             "spawned_species":self.spawned_species,"captured_species":self.captured_species,"lineages":self.lineages.iter().map(|(id,l)|serde_json::json!({"id":id,"original_species":l.origin_species,"current_species":l.current_species,"captured_while_enabled":l.captured_at_event!=0 && l.flags&1!=0,"inherited_rare_provenance_flags":l.flags,"contains_mod_enabled_capture":l.flags&1!=0,"contains_affected_encounter_capture":l.flags&2!=0,"affected_encounter":l.encounter,"evolutions":l.evolutions,"fusion_event":l.fused_at_event,"parents":l.parents,"ingredients":l.ingredients,"ancestor_lineage_ids":self.ancestors(id)})).collect::<Vec<_>>(),
             "event_count":self.event_sequence,"retained_events":self.events.len(),"observed_loaded_runtime_ms":self.observed_milliseconds,
-            "test_profile":self.test_profile,"test_profile_modes":{"all_inclusive":self.test_profile_modes&1!=0,"level_one":self.test_profile_modes&2!=0},"source_version":self.source_version,"local_history_is_not_authenticated":true})
+            "test_profile":self.test_profile,"test_profile_modes":{"all_inclusive":self.test_profile_modes&1!=0,"level_one":self.test_profile_modes&2!=0,"triple_level99":self.test_profile_modes&4!=0},"source_version":self.source_version,"local_history_is_not_authenticated":true})
     }
 }
 
@@ -895,6 +895,9 @@ mod tests {
         let mut json=serde_json::to_value(&r).unwrap();json.as_object_mut().unwrap().remove("23");
         let old:Record=serde_json::from_value(json).unwrap();old.verify().unwrap();
         assert!(old.test_profile);assert_eq!(old.test_profile_modes,0);
-        r.test_profile_modes=4;assert!(r.verify().is_err());
+        r.test_profile_modes=4;
+        let triple=Record::decode(&r.encode().unwrap()).unwrap();
+        assert_eq!(triple.report()["test_profile_modes"]["triple_level99"],true);
+        r.test_profile_modes=8;assert!(r.verify().is_err());
     }
 }

@@ -3,6 +3,7 @@
 TEST_PROFILES = {
     '--hunter-test-save': 'pockettrend.hunterisland-test-v1',
     '--hunter-level1-save': 'pockettrend.hunterisland-level1-v1',
+    '--hunter-triple99-save': 'pockettrend.hunterisland-triple99-v1',
 }
 
 def selected_test_directory(settings):

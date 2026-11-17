@@ -1,18 +1,19 @@
 {
-  "version": "0.2.0-preview.8",
+  "version": "0.2.0-preview.9",
   "status": "prerelease",
   "review_date": "2026-11-17",
   "windows": {
-    "engine_tests_passed": 182,
+    "engine_tests_passed": 184,
     "engine_tests_ignored": 2,
-    "launcher_tests_passed": 37,
-    "engine_sha256": "58544693362a201a2ca26ccfd64c717d7b9982bc316c3f6e500c0cb24f29a1bf",
-    "save_deletion_gameplay_tested": true,
-    "cancel_keeps_save_files": true,
-    "neighbor_and_other_profiles_unchanged": true
+    "launcher_tests_passed": 38,
+    "engine_sha256": "0838581c281c860096ce9a2639e6031772234fe7df752a6e7bce73da33087622",
+    "test_collections_gameplay_tested": true,
+    "three_copies_level99_s_verified": true,
+    "save_load_tested": true,
+    "other_profiles_unchanged": true
   },
   "android": {
-    "framework_tests_passed": 50,
+    "framework_tests_passed": 54,
     "physical_device_execution_tested": false
   },
   "macos": {
@@ -20,8 +21,8 @@
     "actual_game_start_tested": false
   },
   "known_limits": [
-    "Actual Hunter Island Mac gameplay and physical Android deletion flow unverified.",
-    "Fresh-source build checks do not establish bit-identical reproducibility.",
+    "Physical Android collection gameplay and actual Mac Hunter Island gameplay unverified.",
+    "Fresh-source checks do not establish bit-identical reproducibility.",
     "Full-story and all-device coverage unverified."
   ]
 }

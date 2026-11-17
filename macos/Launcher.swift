@@ -55,7 +55,7 @@ final class LauncherBackground: NSView {
                 box.identifier = NSUserInterfaceItemIdentifier(flag)
                 box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); stack.addArrangedSubview(box)
             }
-            stack.addArrangedSubview(label("Full test save: expands a copy of your normal campaign.\nLevel 1: a fresh campaign; monsters level normally afterwards.\nBoth unchecked: normal saves. Each collection has its own folder."))
+            stack.addArrangedSubview(label("Full test save: expands a copy of your normal campaign.\nLevel 1 / 3 each at level 99: fresh campaigns, no bonus resources.\nAll collection boxes unchecked: normal saves. Each has its own folder."))
             stack.addArrangedSubview(button("Open saves, backups and local logs", #selector(openData)))
             stack.addArrangedSubview(button("Licenses and source information", #selector(openLicenses)))
             let privacy = label("Import your own decrypted Hunter Island 2.02 IPA. Your game and saves stay local.\nThis preview includes no game copy and does not upload your data.")
@@ -101,7 +101,7 @@ final class LauncherBackground: NSView {
         if !busy { status?.stringValue = store.settings["gameHash"] is String ? "Hunter Island 2.02 imported. Ready to play." : "Import your compatible IPA to begin." }
     }
     @objc func saveMod(_ sender: NSButton) {
-        let profiles = ["--hunter-test-save", "--hunter-level1-save"]
+        let profiles = collectionProfiles.map { $0.0 }
         if sender.state == .on && profiles.contains(sender.identifier?.rawValue ?? "") {
             for box in mods where box !== sender && profiles.contains(box.identifier?.rawValue ?? "") { box.state = .off }
         }

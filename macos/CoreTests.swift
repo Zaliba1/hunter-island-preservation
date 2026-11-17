@@ -59,6 +59,19 @@ import Darwin
         store.settings["language"] = "ja"; try store.save()
         try require(try selectedProfileDirectory([:]) == "pockettrend.hunterisland", "Wrong normal profile.")
         try require(try selectedProfileDirectory(["--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1", "Wrong level-one profile.")
+        try require(try selectedProfileDirectory(["--hunter-triple99-save": true]) == "pockettrend.hunterisland-triple99-v1", "Wrong triple-99 profile.")
+        for mask in 0..<(1 << collectionProfiles.count) {
+            let selected = collectionProfiles.enumerated().filter { mask & (1 << $0.offset) != 0 }.map { $0.element }
+            let flags = Dictionary(uniqueKeysWithValues: selected.map { ($0.0, true) })
+            if selected.count <= 1 {
+                try require(try selectedProfileDirectory(flags) == (selected.first?.1 ?? "pockettrend.hunterisland"), "Wrong independent save profile.")
+            } else {
+                do {
+                    _ = try selectedProfileDirectory(flags)
+                    throw PreviewError.invalid("Incompatible testing profiles accepted")
+                } catch PreviewError.invalid(let message) { try require(message == "Choose only one testing collection.", "Wrong conflict error.") }
+            }
+        }
         do {
             _ = try selectedProfileDirectory(["--hunter-level1-save": true, "--hunter-test-save": true])
             throw PreviewError.invalid("Incompatible testing profiles accepted")

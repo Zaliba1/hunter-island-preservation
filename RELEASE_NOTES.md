@@ -1,4 +1,28 @@
-# 0.2.0-preview.8
+# 0.2.0-preview.9
+
+Add an optional fresh campaign with exactly three independent copies of each
+of the 353 regular monster forms: 1,059 monsters at level 99 and S rarity. The
+original tutorial starter counts toward its form's three copies. No extra
+money, tickets, summons, items, recipes or story progress is granted.
+
+New full testing copies and fresh level-one campaigns also give their initial
+monsters S rarity. Existing normal and testing campaigns keep their current
+rarities, levels and progress. These are initial grants only: loading does not
+refill collections, reset levels or force later captures and eggs to S.
+
+The three collection controls are mutually exclusive in the Windows, Android
+and Apple Silicon Mac launchers. Each collection has its own save directory
+and persistent local history mode, and can be combined with the three ordinary
+gameplay mods. All collection boxes off selects normal saves. See TEST_PROFILE.md.
+
+Android version code is 19 and keeps the project's existing update signature.
+Matching sources, dependency sources, licenses and checksums accompany the
+packages. No IPA, private saves, game catalogs or signing keys are included.
+Windows game checks cover creation, save/load and unchanged other profiles;
+Android host/package and native Mac checks are reported separately. The new
+collection has not been tested on a physical Android device or in Mac gameplay.
+
+# Previous changes: 0.2.0-preview.8
 
 Fix the crash after confirming **Erase Game?** for an occupied save slot.
 The shared Foundation adapter now removes nonempty save directories, including
@@ -92,8 +116,8 @@ No IPA, game assets, player saves or private signing keys are distributed.
 
 Add a saved **Spiel-Sprache / Game language** dropdown to the Windows and
 Android launchers. English is the default, including for older profiles with
-no explicit language choice. Available choices are English, Deutsch, FranÃƒÂ§ais,
-EspaÃƒÂ±ol, Italiano, Ã¦â€”Â¥Ã¦Å“Â¬Ã¨ÂªÅ¾, and the device's preferred system languages.
+no explicit language choice. Available choices are English, Deutsch, Français,
+Español, Italiano, 日本語, and the device's preferred system languages.
 
 Changes are saved immediately and apply on the next game start. Users do not
 need to enter launch arguments. This setting affects the original game;

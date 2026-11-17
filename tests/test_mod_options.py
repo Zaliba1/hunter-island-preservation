@@ -5,6 +5,7 @@ from itertools import product
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "launcher"))
 from hunter_launcher.app import MOD_OPTIONS, mod_arguments
+from hunter_launcher.profiles import TEST_PROFILES
 from hunter_launcher.storage import Store, atomic_json
 import tempfile
 from unittest.mock import patch
@@ -26,7 +27,12 @@ class ModOptionsTest(unittest.TestCase):
                 try:
                     box=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Testspielstand'))
                     level1=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Neues Spiel:'))
-                    box.invoke(); level1.invoke()
+                    triple=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and 'je 3-mal' in str(w.cget('text')))
+                    box.invoke(); triple.invoke()
+                    self.assertFalse(bool(root.getvar(str(box.cget('variable')))))
+                    self.assertTrue(bool(root.getvar(str(triple.cget('variable')))))
+                    level1.invoke()
+                    self.assertFalse(bool(root.getvar(str(triple.cget('variable')))))
                     self.assertFalse(bool(root.getvar(str(box.cget('variable')))))
                     self.assertTrue(bool(root.getvar(str(level1.cget('variable')))))
                     box.invoke()
@@ -75,7 +81,7 @@ class ModOptionsTest(unittest.TestCase):
         for states in product((False, True), repeat=len(MOD_OPTIONS)):
             config = dict(zip((flag for flag, _ in MOD_OPTIONS), states))
             config["--unapproved-flag"] = True
-            if config['--hunter-test-save'] and config['--hunter-level1-save']:
+            if sum(config[flag] for flag in TEST_PROFILES) > 1:
                 with self.assertRaises(ValueError): mod_arguments({'mods': config})
                 continue
             self.assertEqual(mod_arguments({"mods": config}),
@@ -90,6 +96,24 @@ class ModOptionsTest(unittest.TestCase):
             self.assertEqual(store.bundle.name,'pockettrend.hunterisland-level1-v1')
             self.assertFalse(normal.exists())
             self.assertEqual(mod_arguments(store.settings()),['--hunter-rare-dragons','--hunter-level1-save'])
+
+    def test_triple99_is_a_fresh_fourth_profile_and_keeps_other_campaigns_intact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store=Store(directory)
+            normal=store.bundle
+            normal.mkdir(parents=True)
+            (normal/'original').write_bytes(b'normal')
+            paths={normal}
+            for flag in TEST_PROFILES:
+                atomic_json(store.config,{'mods':{flag:True}})
+                paths.add(store.bundle)
+                if flag=='--hunter-test-save':continue
+                store.require_testing_seed()
+            atomic_json(store.config,{'mods':{'--hunter-triple99-save':True,'--hunter-silver-exchange':True}})
+            self.assertEqual(len(paths),4)
+            self.assertEqual(store.bundle.name,'pockettrend.hunterisland-triple99-v1')
+            self.assertEqual(mod_arguments(store.settings()),['--hunter-silver-exchange','--hunter-triple99-save'])
+            self.assertEqual((normal/'original').read_bytes(),b'normal')
 
     def test_invalid_settings_are_rejected(self):
         for mods in (None, [], {"--hunter-rare-dragons": "false"}):

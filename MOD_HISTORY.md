@@ -8,7 +8,8 @@ archive matching the particular application build.
 ## What is recorded
 
 - A permanent save-wide testing-profile marker for the separate all-inclusive
-  collection. The inspector reports `test_profile`, including after export or
+  collection, with separate full, level-one and triple-level-99 mode bits.
+  The inspector reports `test_profile`, including after export or
   when the file is loaded with the option disabled. Artificial additions are
   not reported as captures, exchanges or legitimate progression events.
 
