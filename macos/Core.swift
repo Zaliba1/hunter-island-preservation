@@ -169,7 +169,12 @@ func inspectIPA(_ url: URL) throws -> GameInfo {
 }
 
 let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français"), ("es", "Español"), ("it", "Italiano"), ("ja", "日本語"), ("system", "System language")]
-let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate test save")]
+let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources")]
+func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
+    let full = mods["--hunter-test-save"] == true, level1 = mods["--hunter-level1-save"] == true
+    try require(!(full && level1), "Choose only one testing collection.")
+    return level1 ? "pockettrend.hunterisland-level1-v1" : full ? "pockettrend.hunterisland-test-v1" : "pockettrend.hunterisland"
+}
 func gameArguments(language: String, device: String, mods: [String: Bool]) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
     let code = languageChoices.contains(where: { $0.0 == language }) ? language : "en"
@@ -217,7 +222,8 @@ final class MacStore {
         }
         let url = root.appendingPathComponent("games/" + hash + ".ipa")
         try require(try digest(url) == hash, "The imported IPA was modified. Please import it again.")
-        if (settings["mods"] as? [String: Bool])?["--hunter-test-save"] == true {
+        let profile = try selectedProfileDirectory(settings["mods"] as? [String: Bool] ?? [:])
+        if profile == "pockettrend.hunterisland-test-v1" {
             let parent = run.appendingPathComponent("touchHLE_sandbox")
             let marker = parent.appendingPathComponent("pockettrend.hunterisland-test-v1/test-profile.json")
             if !FileManager.default.fileExists(atPath: marker.path) {
@@ -239,8 +245,8 @@ final class MacStore {
         return fd
     }
     func backup() throws {
-        let testing = (settings["mods"] as? [String: Bool])?["--hunter-test-save"] == true
-        let bundle = run.appendingPathComponent("touchHLE_sandbox/" + (testing ? "pockettrend.hunterisland-test-v1" : "pockettrend.hunterisland"), isDirectory: true)
+        let profile = try selectedProfileDirectory(settings["mods"] as? [String: Bool] ?? [:])
+        let bundle = run.appendingPathComponent("touchHLE_sandbox/" + profile, isDirectory: true)
         guard FileManager.default.fileExists(atPath: bundle.path) else { return }
         var count = 0, total = 0
         guard let items = FileManager.default.enumerator(at: bundle, includingPropertiesForKeys: [.isSymbolicLinkKey, .fileSizeKey]) else { throw PreviewError.invalid("Cannot inspect save files.") }

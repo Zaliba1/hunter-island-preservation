@@ -1,4 +1,30 @@
-# Validation for 0.2.0-preview.6
+# Validation for 0.2.0-preview.7
+
+Verified on 17 November 2026 using private, isolated QA profiles.
+
+- Windows native library: 177 tests passed, 2 pre-existing ignored.
+- Windows launcher/package: 37 tests passed, including real Tk mutual exclusion
+  and all valid combinations with the other gameplay mods.
+- Android: 50 Robolectric/JUnit tests passed on API 26 and 35, including
+  profile selection, persistence, fresh-start preflight and exports of each
+  independent collection. The signed update uses version code 17.
+- A fresh Windows profile with no normal seed reached the original tutorial,
+  starter selection, open world and first capture. Its first world save had
+  353 granted regular forms plus the original tutorial starter, all at level 1,
+  and 353 monsterpedia records. No items, equipment, recipes or summons were
+  granted. Original starting resources were 1,000 silver, 250 gold and 400 tickets;
+  subsequent original tutorial rewards still apply.
+- The first tutorial checkpoint retained the level-one history marker, including
+  checkpoints without a quest-flags dictionary. All three other gameplay mods
+  were enabled; artificial grants did not increment their action counters.
+
+Exact package hashes, source correspondence, save/reload checks, fresh-source
+Android rebuild checks and native Mac results accompany the release. See
+release-checks.json and macos-checks.json for the completed checks and limits.
+Actual Hunter Island Mac gameplay and physical Android testing of this new
+collection remain unverified. Bit-identical rebuilds are not claimed.
+
+## Previous validation: 0.2.0-preview.6
 
 Verified on 17 November 2026 using separate private QA copies.
 

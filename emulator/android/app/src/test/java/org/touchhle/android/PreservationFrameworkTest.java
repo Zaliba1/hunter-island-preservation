@@ -91,10 +91,12 @@ public class PreservationFrameworkTest {
             "Silber gegen Gold tauschen (50:1)",
             "Kolosseum ohne 12-Stunden-Wartezeit",
             "Testspielstand erstellen / verwenden (separate Kopie)",
+            "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni",
         };
         String[] flags = {
             "--hunter-rare-dragons", "--hunter-silver-exchange", "--hunter-no-arena-cooldown",
             "--hunter-test-save",
+            "--hunter-level1-save",
         };
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {
@@ -110,8 +112,9 @@ public class PreservationFrameworkTest {
                 for (int i = 0; i < flags.length; i++) {
                     boolean enabled = (mask & (1 << i)) != 0;
                     boxes[i].setChecked(enabled);
-                    if (enabled) expected.add(flags[i]);
                 }
+                for (int i=0;i<flags.length;i++) if(boxes[i].isChecked()) expected.add(flags[i]);
+                assertFalse(boxes[3].isChecked() && boxes[4].isChecked());
                 List<String> arguments = new ArrayList<>();
                 ModOptions.appendArguments(activity, arguments);
                 assertEquals(expected, arguments);
@@ -121,10 +124,20 @@ public class PreservationFrameworkTest {
                 android.widget.CheckBox box = (android.widget.CheckBox)
                     button(controller.get().getWindow().getDecorView(), label);
                 assertNotNull(box);
-                assertTrue(box.isChecked());
+                assertEquals(!label.equals(labels[3]),box.isChecked());
                 box.setChecked(false);
             }
         }
+    }
+    @Test public void levelOneProfileNeedsNoNormalSaveAndConflictingProfilesAreRejected() throws Exception {
+        android.content.SharedPreferences p=context.getSharedPreferences("mods",Context.MODE_PRIVATE);
+        p.edit().putBoolean("--hunter-level1-save",true).putBoolean("--hunter-rare-dragons",true).commit();
+        ModOptions.requireTestingSeed(context);
+        assertEquals("pockettrend.hunterisland-level1-v1",ModOptions.selectedProfile(context));
+        List<String> arguments=new ArrayList<>();ModOptions.appendArguments(context,arguments);
+        assertEquals(Arrays.asList("--hunter-rare-dragons","--hunter-level1-save"),arguments);
+        p.edit().putBoolean("--hunter-test-save",true).commit();
+        try {ModOptions.selectedProfile(context);fail("Conflicting testing profiles accepted");}catch(IllegalStateException expected){}
     }
     @Test public void launcherRefreshesImportWhenReturning() throws Exception {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {

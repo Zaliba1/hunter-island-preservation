@@ -9,6 +9,23 @@ use std::path::{Path, PathBuf};
 
 const BUNDLE: &str = "pockettrend.hunterisland";
 pub(crate) const PROFILE: &str = "pockettrend.hunterisland-test-v1";
+pub(crate) const LEVEL_ONE_PROFILE: &str = "pockettrend.hunterisland-level1-v1";
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Mode { Full, LevelOne }
+impl Mode {
+    pub(crate) fn from_flags(full: bool, level_one: bool) -> Result<Option<Self>, String> {
+        match (full,level_one) {
+            (true,true) => Err("Choose only one testing collection. / Bitte nur eine Testsammlung wählen.".into()),
+            (true,false) => Ok(Some(Self::Full)),
+            (false,true) => Ok(Some(Self::LevelOne)),
+            (false,false) => Ok(None),
+        }
+    }
+    fn folder(self) -> &'static str { match self {Self::Full=>PROFILE,Self::LevelOne=>LEVEL_ONE_PROFILE} }
+    fn key(self) -> &'static str { match self {Self::Full=>"full",Self::LevelOne=>"level1"} }
+    fn level(self) -> u32 { match self {Self::Full=>LEVEL,Self::LevelOne=>1} }
+    fn bit(self) -> u32 { match self {Self::Full=>1,Self::LevelOne=>2} }
+}
 const MARKER: &str = "test-profile.json";
 const LEVEL: u32 = 50;
 const MONEY: u32 = 9_999_999;
@@ -28,15 +45,15 @@ fn ensure_dictionary<'a>(value: &'a mut Dictionary, key: &str) -> Result<&'a mut
     if !value.contains_key(key) { value.insert(key.into(),Dictionary::new().into()); }
     dict(value.get_mut(key).unwrap())
 }
-fn object(name: &str, file: &str, monster: bool) -> Value {
+fn object(name: &str, file: &str, monster: bool, level: u32) -> Value {
     let mut properties = Dictionary::new();
     let mut custom = Dictionary::new();
     let mut arguments = Dictionary::new();
     if monster {
-        properties.insert("JobLevelProp".into(), (LEVEL as f64).into());
+        properties.insert("JobLevelProp".into(), (level as f64).into());
         properties.insert("tier".into(), 0.into());
         let mut job = Dictionary::new();
-        job.insert("level".into(), LEVEL.into());
+        job.insert("level".into(), level.into());
         arguments.insert("jobArguments".into(), job.into());
         custom.insert("monsterSaveData".into(), Dictionary::new().into());
     }
@@ -181,7 +198,7 @@ impl Catalog {
     }
 }
 
-fn populate(save: &mut Value, catalog: &Catalog) -> Result<(), String> {
+fn populate(save: &mut Value, catalog: &Catalog, mode: Mode) -> Result<(), String> {
     // Preserve the original party/order, individual monsters and story state.
     let player = nested(save, "playerData")?;
     let owned = nested(player, "savedMonsters")?
@@ -198,9 +215,10 @@ fn populate(save: &mut Value, catalog: &Catalog) -> Result<(), String> {
         .collect();
     for (full, _) in &catalog.monsters {
         if present.insert(full.clone()) {
-            owned.push(object(full, "Monsters.plist", true));
+            owned.push(object(full, "Monsters.plist", true, mode.level()));
         }
     }
+    if mode == Mode::Full {
     let equipped = dict(player)?
         .get("savedGemsInLicense")
         .and_then(Value::as_array)
@@ -225,8 +243,9 @@ fn populate(save: &mut Value, catalog: &Catalog) -> Result<(), String> {
     }));
     for name in &catalog.items {
         if items.insert(name.clone()) {
-            inventory.push(object(name, "Items.plist", false));
+            inventory.push(object(name, "Items.plist", false, mode.level()));
         }
+    }
     }
     let props = dict(nested(save, "props")?)?;
     let highest = ensure_dictionary(props,"highestLevelMonsters")?;
@@ -234,15 +253,16 @@ fn populate(save: &mut Value, catalog: &Catalog) -> Result<(), String> {
         .monsters
         .iter()
         .map(|(_, s)| s)
-        .chain(catalog.summons.iter())
+        .chain(catalog.summons.iter().filter(|_| mode == Mode::Full))
     {
         let level = highest
             .get(short)
             .and_then(Value::as_unsigned_integer)
             .unwrap_or(0)
-            .max(LEVEL as u64);
+            .max(mode.level() as u64);
         highest.insert(short.clone(), level.into());
     }
+    if mode == Mode::Full {
     let spirits = ensure_dictionary(props,"spiritsData")?;
     for short in &catalog.summons {
         let spirit = ensure_dictionary(spirits,short)?;
@@ -272,13 +292,16 @@ fn populate(save: &mut Value, catalog: &Catalog) -> Result<(), String> {
     for name in ["tickets"] {
         d.insert(name.into(), 9_999u32.into());
     }
+    }
+    let d = dict(save)?;
     let previous = d
         .get(preservation::FIELD)
         .and_then(Value::as_data)
         .and_then(|b| Record::decode(b).ok());
     let mut record = previous.unwrap_or_else(|| Record::new(*uuid::Uuid::new_v4().as_bytes(), 0));
-    if !record.test_profile { record.id = *uuid::Uuid::new_v4().as_bytes(); }
+    if !record.test_profile || record.test_profile_modes & mode.bit() == 0 { record.id = *uuid::Uuid::new_v4().as_bytes(); }
     record.test_profile = true;
+    record.test_profile_modes |= mode.bit();
     record.game_hash = preservation::game_hash(save)?;
     dict(save)?.insert(preservation::FIELD.into(), Value::Data(record.encode()?));
     Ok(())
@@ -334,13 +357,14 @@ fn number(name: &str, prefix: &str) -> Option<u64> {
     s.parse().ok()
 }
 
-pub(crate) fn prepare(ipa: &Path, base: &Path) -> Result<PathBuf, String> {
+pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode) -> Result<PathBuf, String> {
     let key = preservation::save_key(ipa).map_err(|e|format!("Test-profile IPA inspection failed: {e}"))?;
     log!("Test profile: IPA metadata and data key checked.");
     let sandbox = base.join(crate::paths::SANDBOX_DIR);
+    std::fs::create_dir_all(&sandbox).map_err(|e|e.to_string())?;
     plain_file(&sandbox)?;
     let source = sandbox.join(BUNDLE);
-    let target = sandbox.join(PROFILE);
+    let target = sandbox.join(mode.folder());
     if target.exists() {
         plain_file(&target)?;
         let marker = target.join(MARKER);
@@ -355,9 +379,30 @@ pub(crate) fn prepare(ipa: &Path, base: &Path) -> Result<PathBuf, String> {
         if marker["schema"] != 1 || marker["test_profile"] != true {
             return Err("Unrecognized test profile".into());
         }
+        if marker.get("mode").and_then(serde_json::Value::as_str).unwrap_or("full") != mode.key() {
+            return Err("This directory belongs to a different testing mode".into());
+        }
         // Validate all children before handing the directory to the guest FS.
         validate_tree(&target, &mut 0, &mut 0)?;
         log!("Using existing separate testing collection.");
+        return Ok(target);
+    }
+    if mode == Mode::LevelOne {
+        // Empty sandbox: the game itself creates each new slot. Grant its
+        // collection through the verified new-player hook, never from a copy
+        // of an existing campaign and never during load/save operations.
+        let staging = sandbox.join(format!(".test-profile-{}", uuid::Uuid::new_v4().simple()));
+        std::fs::create_dir(&staging).map_err(|e|e.to_string())?;
+        let result = (|| -> Result<(),String> {
+            for dir in ["Documents","Library","tmp"] {
+                std::fs::create_dir(staging.join(dir)).map_err(|e|e.to_string())?;
+            }
+            let marker=serde_json::json!({"schema":1,"mode":mode.key(),"test_profile":true,"fresh_game":true});
+            std::fs::write(staging.join(MARKER),serde_json::to_vec_pretty(&marker).unwrap()).map_err(|e|e.to_string())?;
+            std::fs::rename(&staging,&target).map_err(|e|e.to_string())
+        })();
+        if result.is_err() { let _=std::fs::remove_dir_all(&staging); }
+        result?;
         return Ok(target);
     }
     let documents = source.join("Documents");
@@ -400,7 +445,7 @@ pub(crate) fn prepare(ipa: &Path, base: &Path) -> Result<PathBuf, String> {
             let data = std::fs::read(latest).map_err(|e| e.to_string())?;
             let data = decode_local_save(&key, &data)?;
             let mut value = Value::from_reader(Cursor::new(data)).map_err(|e| e.to_string())?;
-            populate(&mut value, &catalog)?;
+            populate(&mut value, &catalog, mode)?;
             let mut plain = Vec::new();
             value
                 .to_writer_binary(&mut plain)
@@ -419,7 +464,8 @@ pub(crate) fn prepare(ipa: &Path, base: &Path) -> Result<PathBuf, String> {
         if slots == 0 {
             return Err("First create and save a normal game, then enable the separate test save. / Bitte zuerst ein normales Spiel speichern.".into());
         }
-        let marker = serde_json::json!({"schema":1,"test_profile":true,"normal_save_untouched":true,"slots":slots,"monsters":catalog.monsters.len(),"summons":catalog.summons.len(),"equipment":catalog.items.len(),"recipes":catalog.recipes.len(),"new_monster_level":LEVEL,"silver":MONEY,"gold_found_bonus":MONEY});
+        let full=mode == Mode::Full;
+        let marker = serde_json::json!({"schema":1,"mode":mode.key(),"test_profile":true,"normal_save_untouched":true,"slots":slots,"monsters":catalog.monsters.len(),"summons":if full{catalog.summons.len()}else{0},"equipment":if full{catalog.items.len()}else{0},"recipes":if full{catalog.recipes.len()}else{0},"new_monster_level":mode.level(),"silver":if full{MONEY}else{0},"gold_found_bonus":if full{MONEY}else{0}});
         let mut file = std::fs::OpenOptions::new()
             .write(true)
             .create_new(true)
@@ -444,6 +490,11 @@ pub(crate) fn prepare(ipa: &Path, base: &Path) -> Result<PathBuf, String> {
         return Err(error);
     }
     Ok(target)
+}
+
+pub(crate) fn level_one_catalog(ipa: &Path) -> Result<Vec<String>,String> {
+    let key=preservation::save_key(ipa)?;
+    Ok(Catalog::load(ipa,&key)?.monsters.into_iter().map(|(_,short)|short).collect())
 }
 fn validate_tree(path: &Path, count: &mut usize, total: &mut u64) -> Result<(), String> {
     let m = plain_file(path)?;

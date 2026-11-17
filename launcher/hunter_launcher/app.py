@@ -9,12 +9,14 @@ import threading
 from . import VERSION, ipa
 from .storage import Store, atomic_json
 from .language import LANGUAGES, language_arguments, selected_language
+from .profiles import TEST_PROFILES, selected_test_directory
 
 MOD_OPTIONS = (
     ("--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"),
     ("--hunter-silver-exchange", "Silber gegen Gold tauschen (50:1)"),
     ("--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"),
     ("--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"),
+    ("--hunter-level1-save", "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni"),
 )
 
 def mod_arguments(settings):
@@ -23,6 +25,7 @@ def mod_arguments(settings):
         raise ValueError("Ungültige Mod-Einstellungen")
     if any(not isinstance(value, bool) for value in mods.values()):
         raise ValueError("Mod-Einstellungen müssen Wahrheitswerte sein")
+    selected_test_directory(settings)
     return [flag for flag, _ in MOD_OPTIONS if mods.get(flag, False)]
 
 def release_root():
@@ -65,8 +68,8 @@ def gui(store, release):
     from . import diagnostics
     root = tk.Tk()
     root.title('Hunter Island · Testlauncher')
-    root.geometry('760x830')
-    root.minsize(710,800)
+    root.geometry('760x880')
+    root.minsize(710,850)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -115,7 +118,14 @@ def gui(store, release):
         control.pack(anchor='w', pady=2)
         mod_values[flag] = value
         mod_controls.append(control)
-    ttk.Label(frame,text='Testspielstand: Beim ersten Start wird dein normaler Stand kopiert und erweitert.\nHaken entfernen = normal weiterspielen. Die Testkopie bleibt erhalten.',
+    def choose_test(flag):
+        if mod_values[flag].get():
+            for other in TEST_PROFILES:
+                if other != flag:
+                    mod_values[other].set(False)
+    for flag in TEST_PROFILES:
+        mod_values[flag].trace_add('write',lambda *_args, flag=flag:choose_test(flag))
+    ttk.Label(frame,text='Vollsammlung: Kopie des Normalstands. Level 1: frisches Spiel, danach normal leveln.\nJeweils eigener Save-Ordner. Beide Haken aus = normaler Spielstand.',
         wraplength=650,font=('Segoe UI',9)).pack(anchor='w',pady=(6,0))
     ttk.Separator(frame).pack(fill='x',pady=18)
     export_button = ttk.Button(frame,text='Diagnosepaket speichern …')

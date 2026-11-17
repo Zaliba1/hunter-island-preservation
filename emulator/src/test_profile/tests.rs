@@ -7,7 +7,7 @@ fn save() -> Value {
     let mut props = Dictionary::new();
     player.insert(
         "savedMonsters".into(),
-        Value::Array(vec![object("Normal.Owned", "Monsters.plist", true)]),
+        Value::Array(vec![object("Normal.Owned", "Monsters.plist", true, LEVEL)]),
     );
     player.insert("savedItems".into(), Value::Array(vec![]));
     player.insert(
@@ -16,6 +16,7 @@ fn save() -> Value {
             "Gems.Uniques.EquippedOcarina",
             "Items.plist",
             false,
+            LEVEL,
         )]),
     );
     player.insert("savedLicenseName".into(), "Novice".into());
@@ -45,10 +46,20 @@ fn catalog() -> Catalog {
     }
 }
 #[test]
+fn profiles_are_exclusive_but_independent_from_the_other_mods() {
+    assert_eq!(Mode::from_flags(false,false).unwrap(),None);
+    assert_eq!(Mode::from_flags(true,false).unwrap(),Some(Mode::Full));
+    assert_eq!(Mode::from_flags(false,true).unwrap(),Some(Mode::LevelOne));
+    assert!(Mode::from_flags(true,true).is_err());
+    assert_ne!(Mode::Full.folder(),Mode::LevelOne.folder());
+    let unit=object("Dragon.Test","Monsters.plist",true,1);
+    assert_eq!(unit.as_dictionary().unwrap()["creationArguments"].as_dictionary().unwrap()["jobArguments"].as_dictionary().unwrap()["level"].as_unsigned_integer(),Some(1));
+}
+#[test]
 fn test_collection_is_idempotent_and_preserves_party_story_and_equipment() {
     let mut data = save();
     let original = data.clone();
-    populate(&mut data, &catalog()).unwrap();
+    populate(&mut data, &catalog(), Mode::Full).unwrap();
     let d = data.as_dictionary().unwrap();
     let p = d["playerData"].as_dictionary().unwrap();
     let old = original.as_dictionary().unwrap();
@@ -78,7 +89,7 @@ fn test_collection_is_idempotent_and_preserves_party_story_and_equipment() {
     assert_eq!(r.game_hash, preservation::game_hash(&data).unwrap());
     assert_eq!(r.report()["status"], "test_profile");
     let before = data.clone();
-    populate(&mut data, &catalog()).unwrap();
+    populate(&mut data, &catalog(), Mode::Full).unwrap();
     assert_eq!(before, data);
 }
 #[test]

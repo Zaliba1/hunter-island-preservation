@@ -25,7 +25,12 @@ class ModOptionsTest(unittest.TestCase):
             def click():
                 try:
                     box=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Testspielstand'))
+                    level1=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Neues Spiel:'))
+                    box.invoke(); level1.invoke()
+                    self.assertFalse(bool(root.getvar(str(box.cget('variable')))))
+                    self.assertTrue(bool(root.getvar(str(level1.cget('variable')))))
                     box.invoke()
+                    self.assertFalse(bool(root.getvar(str(level1.cget('variable')))))
                     next(w for w in controls(root) if isinstance(w,ttk.Button) and w.cget('text')=='Spiel starten').invoke()
                 except BaseException as error:failures.append(error)
             def check():
@@ -70,8 +75,21 @@ class ModOptionsTest(unittest.TestCase):
         for states in product((False, True), repeat=len(MOD_OPTIONS)):
             config = dict(zip((flag for flag, _ in MOD_OPTIONS), states))
             config["--unapproved-flag"] = True
+            if config['--hunter-test-save'] and config['--hunter-level1-save']:
+                with self.assertRaises(ValueError): mod_arguments({'mods': config})
+                continue
             self.assertEqual(mod_arguments({"mods": config}),
                              [flag for (flag, _), enabled in zip(MOD_OPTIONS, states) if enabled])
+
+    def test_level_one_starts_fresh_without_a_normal_seed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store=Store(directory)
+            normal=store.bundle
+            atomic_json(store.config,{'mods':{'--hunter-level1-save':True,'--hunter-rare-dragons':True}})
+            store.require_testing_seed()
+            self.assertEqual(store.bundle.name,'pockettrend.hunterisland-level1-v1')
+            self.assertFalse(normal.exists())
+            self.assertEqual(mod_arguments(store.settings()),['--hunter-rare-dragons','--hunter-level1-save'])
 
     def test_invalid_settings_are_rejected(self):
         for mods in (None, [], {"--hunter-rare-dragons": "false"}):

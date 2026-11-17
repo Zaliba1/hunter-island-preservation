@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 const INIT: u32 = 0xdc761;
+const NEW_PLAYER: u32 = 0x7b4e1;
 const LOAD: u32 = 0xdccc1;
 const SAVE: u32 = 0xdd7cd;
 const READ: u32 = 0x163c49;
@@ -43,6 +44,7 @@ struct Frame {
 
 #[derive(Default)]
 pub(crate) struct State {
+    level_one_catalog: Vec<String>,
     compatible: Option<bool>,
     pub(super) record: Option<Record>,
     slot: Option<u32>,
@@ -125,6 +127,13 @@ fn compatible(env: &mut Environment) -> bool {
     env.objc.hunter_history.compatible = Some(yes);
     yes
 }
+pub(crate) fn configure_level_one(env: &mut Environment, catalog: Vec<String>) -> Result<(),String> {
+    if !compatible(env) || env.mem.get_bytes_fallible(crate::mem::Ptr::from_bits(0x7b4e0),4) != Some(&[0x70,0x47,0x00,0xbf][..]) {
+        return Err("The level-one collection requires the supported Hunter Island 2.02 executable layout.".into());
+    }
+    env.objc.hunter_history.level_one_catalog=catalog;
+    Ok(())
+}
 fn save_slot(path: &str) -> Option<u32> {
     let parts: Vec<_> = path.split('/').collect();
     let n = parts.len();
@@ -144,7 +153,9 @@ fn save_slot(path: &str) -> Option<u32> {
 }
 fn is_save(root: &Value) -> bool {
     root.as_dictionary().is_some_and(|d| {
-        ["props", "playerData", "flags", "silver", "goldFound"]
+        // A fresh tutorial checkpoint legitimately has no flags dictionary.
+        // The verified Saving frame and slot still scope this to game saves.
+        ["props", "playerData", "silver", "goldFound", "goldSpent", "adw"]
             .iter()
             .all(|k| d.contains_key(*k))
     })
@@ -222,7 +233,7 @@ pub(super) struct Hook {
 pub(super) fn interesting(address: u32) -> bool {
     matches!(
         address,
-        INIT | LOAD
+        INIT | NEW_PLAYER | LOAD
             | SAVE
             | READ
             | WRITE
@@ -255,7 +266,10 @@ pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Optio
     let flags = enabled(env);
     env.objc.hunter_history.tick();
     match address {
-        INIT => env.objc.hunter_history.begin(args[0], flags),
+        INIT => {
+            env.objc.hunter_history.begin(args[0], flags);
+            if env.options.capture_frames {log!("SAVE_HISTORY_INIT slot={}",args[0]);}
+        }
         LOAD => {
             *env.objc
                 .hunter_history
@@ -274,6 +288,7 @@ pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Optio
             let path_id = id::from_bits(if address == READ { args[0] } else { args[1] });
             if path_id != nil {
                 let path = ns_string::to_rust_string(env, path_id).into_owned();
+                if env.options.capture_frames && env.options.hunter_level1_save {log!("SAVE_HISTORY_IO write={} slot={:?} path={path}",address==WRITE,env.objc.hunter_history.slot);}
                 if let Some(slot) = save_slot(&path) {
                     let s = &mut env.objc.hunter_history;
                     if s.slot == Some(slot)
@@ -369,6 +384,38 @@ pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Optio
 pub(super) fn after(env: &mut Environment, hook: Hook) {
     let result = id::from_bits(env.cpu.regs()[0]);
     match hook.address {
+        NEW_PLAYER if env.options.hunter_level1_save => {
+            // setupForNewPlayer is called only for a new campaign, after
+            // Player.init has created its empty bench. Never touch loaded units.
+            let catalog=env.objc.hunter_history.level_one_catalog.clone();
+            assert!(!catalog.is_empty(), "Missing level-one testing catalog");
+            if let Some(record)=env.objc.hunter_history.record.as_mut() {
+                record.test_profile=true;
+                record.test_profile_modes |= 2;
+            }
+            let bench: id=msg![env;(hook.receiver) monstersOnBench];
+            let save: id=crate::objc::msg_class![env;UserSavedData sharedInstance];
+            let mut highest: id=msg![env;save highestLevelsByMonsterType];
+            if highest == nil {
+                highest=crate::objc::msg_class![env;NSMutableDictionary dictionary];
+                let name=ns_string::from_rust_string(env,"highestLevelMonsters".into());
+                ()=msg![env;save setPropertyValue:highest forKey:name];
+                release(env,name);
+            }
+            let level: id=crate::objc::msg_class![env;NSNumber numberWithInt:1i32];
+            for short in &catalog {
+                let name=ns_string::from_rust_string(env,short.clone());
+                let monster: id=crate::objc::msg_class![env;Monster monsterOfShortType:name level:1i32];
+                assert_ne!(monster,nil,"Cannot create testing monster");
+                // A grant is not a capture: do not trigger encounter, tutorial
+                // or collection-reward dialogs from addBenchMonster here.
+                ()=msg![env;bench addObject:monster];
+                ()=msg![env;highest setObject:level forKey:name];
+                release(env,name);
+            }
+            ()=msg![env;save setSaveFileDirty];
+            log!("Created fresh level-one testing collection: {} monsters; no bonus resources.",catalog.len());
+        }
         PICK_INGREDIENT | PICK_INGREDIENT_BASE => {
             if let Some(nodes) = env
                 .objc
@@ -598,7 +645,8 @@ pub(crate) fn read_plist(env: &mut Environment, root: &Value) {
         },
     };
     record.activate(flags);
-    record.test_profile |= env.options.hunter_test_save;
+    record.test_profile |= env.options.hunter_test_save || env.options.hunter_level1_save;
+    record.test_profile_modes |= u32::from(env.options.hunter_test_save) | u32::from(env.options.hunter_level1_save)<<1;
     let s = &mut env.objc.hunter_history;
     s.record = Some(record);
     s.last_saved = data.map(preservation::hash).unwrap_or([0; 32]);
@@ -606,6 +654,7 @@ pub(crate) fn read_plist(env: &mut Environment, root: &Value) {
 }
 
 pub(crate) fn write_plist(env: &mut Environment, root: &mut Value) -> Result<(), String> {
+    if env.options.capture_frames && env.options.hunter_level1_save && is_save(root) { log!("SAVE_HISTORY_WRITE_PLIST frames={} thread={:?}",env.objc.hunter_history.frames.len(),env.current_thread); }
     if !is_save(root)
         || !env
             .objc
@@ -625,7 +674,8 @@ pub(crate) fn write_plist(env: &mut Environment, root: &mut Value) -> Result<(),
         return Err("Save provenance was not initialized".into());
     };
     record.activate(flags);
-    record.test_profile |= env.options.hunter_test_save;
+    record.test_profile |= env.options.hunter_test_save || env.options.hunter_level1_save;
+    record.test_profile_modes |= u32::from(env.options.hunter_test_save) | u32::from(env.options.hunter_level1_save)<<1;
     let mut staged = record.clone();
     staged.save_sequence = staged
         .save_sequence
@@ -799,7 +849,7 @@ mod tests {
         for name in ["props", "playerData", "flags"] {
             d.insert(name.into(), Value::Dictionary(Default::default()));
         }
-        for name in ["silver", "goldFound"] {
+        for name in ["silver", "goldFound", "goldSpent", "adw"] {
             d.insert(name.into(), 0u64.into());
         }
         Value::Dictionary(d)
@@ -824,6 +874,18 @@ mod tests {
                 ingredients: None,
             },
         );
+    }
+    #[test]
+    fn fresh_checkpoint_without_flags_keeps_the_level_one_marker_on_reload() {
+        let mut env=environment();env.options.hunter_level1_save=true;
+        let flags=enabled(&env);env.objc.hunter_history.begin(0,flags);
+        let mut saved=root();saved.as_dictionary_mut().unwrap().remove("flags");
+        frame(&mut env,true);write_plist(&mut env,&mut saved).unwrap();complete(&mut env,true);
+        assert_eq!(preservation::inspect_plist(&saved)["test_profile_modes"]["level_one"],true);
+        assert_eq!(preservation::inspect_plist(&saved)["counts"]["hatchlings_captured_while_enabled"],0);
+        env.options.hunter_level1_save=false;frame(&mut env,false);read_plist(&mut env,&saved);
+        assert!(env.objc.hunter_history.record.as_ref().unwrap().test_profile);
+        assert_eq!(env.objc.hunter_history.record.as_ref().unwrap().test_profile_modes,2);
     }
     #[test]
     fn save_commit_failure_reload_and_mod_disable_preserve_consistency() {

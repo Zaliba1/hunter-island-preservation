@@ -9,6 +9,7 @@ import stat
 import uuid
 import zipfile
 from . import ipa
+from .profiles import selected_test_directory
 
 def atomic_json(path, value):
     temp = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
@@ -58,12 +59,12 @@ class Store:
 
     @property
     def bundle(self):
-        testing = self.settings().get('mods', {}).get('--hunter-test-save', False)
-        name = 'pockettrend.hunterisland-test-v1' if testing else ipa.BUNDLE
+        name = selected_test_directory(self.settings()) or ipa.BUNDLE
         return self.run / 'touchHLE_sandbox' / name
 
     def require_testing_seed(self):
-        if not self.settings().get('mods', {}).get('--hunter-test-save', False):
+        selected = selected_test_directory(self.settings())
+        if selected in (None, 'pockettrend.hunterisland-level1-v1'):
             return
         if (self.bundle / 'test-profile.json').is_file():
             return

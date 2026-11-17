@@ -45,3 +45,12 @@ This option bypasses the 12-hour check between local tournament rounds.
 The game's existing routines handle results, progression and rewards.
 When you disable the option, the game again uses its recorded time of the
 last arena victory.
+
+## Separate collections
+
+The full testing collection and fresh level-one campaign are optional,
+mutually exclusive profiles. Both can be combined with the three rules above.
+The fresh campaign grants all regular forms at level 1 only when creating
+a new slot. Loading or restarting never resets levels. It grants no additional
+resources or summon unlocks. See TEST_PROFILE.md for profile paths and the
+persistent local testing marker.

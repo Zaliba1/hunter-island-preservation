@@ -1,4 +1,24 @@
-# 0.2.0-preview.6
+# 0.2.0-preview.7
+
+Add an optional fresh campaign with all 353 regular monster forms initially
+at level 1. This collection is created only when starting a new in-game slot;
+monsters level normally afterwards. It grants no extra money, tickets, items,
+recipes, ocarinas or summons. Original tutorial rewards still apply.
+
+Normal campaigns, full level-50 test copies and fresh level-one campaigns use
+three separate save directories. The two collection controls are mutually
+exclusive; either can be combined with the other three gameplay mods. The local
+save history preserves which testing mode was used, including early tutorial
+checkpoints that do not yet contain quest flags.
+
+The controls are available in the Windows, Android and Apple Silicon Mac
+launchers. See TEST_PROFILE.md for usage, save transfer behavior and metadata
+limits. Matching sources, dependency sources and licenses accompany the builds.
+Native and game checks are described in VALIDATION.md and release-checks.json.
+Actual Hunter Island gameplay on Mac and the physical Android collection flow
+remain unverified.
+
+# Previous changes: 0.2.0-preview.6
 
 Add an optional **Create / use separate test save** launcher checkbox on
 Windows, Android and Apple Silicon Mac. Create and save a normal game first.
@@ -58,8 +78,8 @@ No IPA, game assets, player saves or private signing keys are distributed.
 
 Add a saved **Spiel-Sprache / Game language** dropdown to the Windows and
 Android launchers. English is the default, including for older profiles with
-no explicit language choice. Available choices are English, Deutsch, Français,
-Español, Italiano, 日本語, and the device's preferred system languages.
+no explicit language choice. Available choices are English, Deutsch, FranÃ§ais,
+EspaÃ±ol, Italiano, æ—¥æœ¬èªž, and the device's preferred system languages.
 
 Changes are saved immediately and apply on the next game start. Users do not
 need to enter launch arguments. This setting affects the original game;

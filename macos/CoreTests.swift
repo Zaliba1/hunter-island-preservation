@@ -57,6 +57,12 @@ import Darwin
             for (flag, _) in modChoices { try require(arguments.contains(flag) == flags[flag], "Wrong mod arguments.") }
         }
         store.settings["language"] = "ja"; try store.save()
+        try require(try selectedProfileDirectory([:]) == "pockettrend.hunterisland", "Wrong normal profile.")
+        try require(try selectedProfileDirectory(["--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1", "Wrong level-one profile.")
+        do {
+            _ = try selectedProfileDirectory(["--hunter-level1-save": true, "--hunter-test-save": true])
+            throw PreviewError.invalid("Incompatible testing profiles accepted")
+        } catch PreviewError.invalid(let message) { try require(message == "Choose only one testing collection.", "Wrong conflict error.") }
         try require(try MacStore(root: temporary).settings["language"] as? String == "ja", "Language did not persist.")
         try require(!String(data: before, encoding: .utf8)!.contains(root.path), "Import retained its original source path.")
         print("Mac core tests passed: \(cases.count) import fixtures, profile lock, transactional import, language/mod settings.")

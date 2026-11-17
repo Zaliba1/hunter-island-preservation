@@ -28,8 +28,8 @@ final class LauncherBackground: NSView {
         do {
             let explicit = ProcessInfo.processInfo.environment["HI_MAC_TEST_DATA"].map { URL(fileURLWithPath: $0) }
             store = try MacStore(root: explicit)
-            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 800), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-            window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: 800))
+            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 850), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: 850))
             window.title = "Hunter Island · Mac Preview"; window.delegate = self; window.center()
             let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 13
             stack.translatesAutoresizingMaskIntoConstraints = false; window.contentView!.addSubview(stack)
@@ -51,10 +51,11 @@ final class LauncherBackground: NSView {
             stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
-                let box = NSButton(checkboxWithTitle: text, target: self, action: #selector(saveOptions))
+                let box = NSButton(checkboxWithTitle: text, target: self, action: #selector(saveMod(_:)))
+                box.identifier = NSUserInterfaceItemIdentifier(flag)
                 box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); stack.addArrangedSubview(box)
             }
-            stack.addArrangedSubview(label("Test save: copies and expands your normal save on first use.\nUncheck to play normally; the separate test copy is kept."))
+            stack.addArrangedSubview(label("Full test save: expands a copy of your normal campaign.\nLevel 1: a fresh campaign; monsters level normally afterwards.\nBoth unchecked: normal saves. Each collection has its own folder."))
             stack.addArrangedSubview(button("Open saves, backups and local logs", #selector(openData)))
             stack.addArrangedSubview(button("Licenses and source information", #selector(openLicenses)))
             let privacy = label("Import your own decrypted Hunter Island 2.02 IPA. Your game and saves stay local.\nThis preview includes no game copy and does not upload your data.")
@@ -98,6 +99,13 @@ final class LauncherBackground: NSView {
         buttons.forEach { $0.isEnabled = !busy }
         playButton?.isEnabled = !busy && store.settings["gameHash"] is String
         if !busy { status?.stringValue = store.settings["gameHash"] is String ? "Hunter Island 2.02 imported. Ready to play." : "Import your compatible IPA to begin." }
+    }
+    @objc func saveMod(_ sender: NSButton) {
+        let profiles = ["--hunter-test-save", "--hunter-level1-save"]
+        if sender.state == .on && profiles.contains(sender.identifier?.rawValue ?? "") {
+            for box in mods where box !== sender && profiles.contains(box.identifier?.rawValue ?? "") { box.state = .off }
+        }
+        saveOptions()
     }
     @objc func saveOptions() {
         store.settings["language"] = languageChoices[language.indexOfSelectedItem].0

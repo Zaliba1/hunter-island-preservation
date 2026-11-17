@@ -29,8 +29,9 @@ final class SaveStore {
         this.context=context;
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new IOException("Spielstand-Speicher nicht verfügbar");
-        boolean testing=selectedProfile && context.getSharedPreferences("mods",Context.MODE_PRIVATE).getBoolean("--hunter-test-save",false);
-        parent=external.toPath().resolve("touchHLE_sandbox");root=parent.resolve(testing?"pockettrend.hunterisland-test-v1":IpaInspector.BUNDLE);
+        String profile=selectedProfile?ModOptions.selectedProfile(context):IpaInspector.BUNDLE;
+        boolean testing=!profile.equals(IpaInspector.BUNDLE);
+        parent=external.toPath().resolve("touchHLE_sandbox");root=parent.resolve(profile);
         backups=context.getFilesDir().toPath().resolve("save-backups");
         journal=context.getFilesDir().toPath().resolve(testing?"test-save-import-journal.json":"save-import-journal.json");
     }

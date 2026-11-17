@@ -246,9 +246,10 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
         log!("Warning: The bundle path has a trailing quotation mark! This often happens accidentally on Windows when tab-completing, because '\\\"' gets interpreted by Rust in the wrong way. Did you meant to write {:?}?", fixed);
     }
 
-    let test_sandbox = if options.hunter_test_save && !just_info {
-        Some(test_profile::prepare(&bundle_path, &paths::user_data_base_path())?)
-    } else { None };
+    let test_mode = test_profile::Mode::from_flags(options.hunter_test_save,options.hunter_level1_save)?;
+    let test_sandbox = if !just_info {
+        test_mode.map(|mode|test_profile::prepare(&bundle_path,&paths::user_data_base_path(),mode)).transpose()?
+    } else {None};
     let bundle_data = fs::BundleData::open_any(&bundle_path)
         .map_err(|e| format!("Could not open app bundle: {e}"))?;
     let (bundle, fs) = match bundle::Bundle::new_with_sandbox(
@@ -376,11 +377,14 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
         let parse_result = options.parse_argument(&option_arg);
         assert!(parse_result == Ok(true));
     }
+    if test_profile::Mode::from_flags(options.hunter_test_save,options.hunter_level1_save)? != test_mode {
+        return Err("Select the testing collection in the launcher or command line; options files cannot change its save directory.".into());
+    }
 
     let res = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         Environment::new(bundle, fs, options.clone(), app_args.unwrap_or_default())
     }));
-    let env = match res {
+    let mut env = match res {
         Ok(ret) => match ret {
             Ok(env) => env,
             Err(e) => {
@@ -404,6 +408,10 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             std::panic::resume_unwind(e)
         }
     };
+    if options.hunter_level1_save {
+        let catalog = test_profile::level_one_catalog(&bundle_path)?;
+        objc::hunter_history::configure_level_one(&mut env, catalog)?;
+    }
     env.run();
     Ok(())
 }

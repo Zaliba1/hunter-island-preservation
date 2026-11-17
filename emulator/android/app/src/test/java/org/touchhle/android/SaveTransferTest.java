@@ -67,6 +67,19 @@ public class SaveTransferTest {
         Files.createDirectories(marker.getParent());Files.write(marker,"{}".getBytes(StandardCharsets.UTF_8));
         ModOptions.requireTestingSeed(context); // Full marker validation belongs to the shared core.
     }
+    @Test public void levelOneExportIsSeparateFromBothOtherCollections()throws Exception {
+        Path normal=original();
+        Path full=root.resolveSibling("pockettrend.hunterisland-test-v1").resolve("Documents/saves0/sv_2");
+        Path level1=root.resolveSibling("pockettrend.hunterisland-level1-v1").resolve("Documents/saves0/sv_3");
+        for(Path p:Arrays.asList(full,level1)){Files.createDirectories(p.getParent());Files.write(p,p.equals(full)?new byte[]{50}:new byte[]{1});}
+        context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().putBoolean("--hunter-level1-save",true).commit();
+        Map<String,byte[]> data=contents(exported(new SaveStore(context,true),false));
+        assertArrayEquals(new byte[]{1},data.get("guest-data/Documents/saves0/sv_3"));
+        assertFalse(data.containsKey("guest-data/Documents/saves0/sv_2"));
+        assertFalse(data.containsKey("guest-data/Documents/saves0/sv_1"));
+        assertArrayEquals(new byte[]{50},Files.readAllBytes(full));
+        assertEquals("phone-original",new String(Files.readAllBytes(normal),StandardCharsets.UTF_8));
+    }
     @Test public void invalidHashAndWrongBundleKeepCurrentCheckpoint()throws Exception {
         Path p=original();SaveStore store=new SaveStore(context);Map<String,byte[]> pc=Collections.singletonMap("guest-data/Documents/saves0/sv_2",new byte[]{1});
         for(byte[] bad:new byte[][]{pack(pc,IpaInspector.BUNDLE,true),pack(pc,"other.game",false),pack(Collections.singletonMap("diagnostics/note.txt",new byte[]{1}),IpaInspector.BUNDLE,false)}){
