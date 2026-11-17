@@ -68,9 +68,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$RELEASE_TAG" =~ ^v0\.2\.0-preview\.[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v0\.2\.0-preview\.[0-9]+(-[a-z]+\.[0-9]+)?$ ]]
           gh release view "$RELEASE_TAG" --repo "$REPOSITORY" --json isDraft,targetCommitish > release.json
-          gh api "repos/$REPOSITORY/commits/$RELEASE_TAG" --jq .sha > release-commit.txt
+          # A draft can target an exact commit before GitHub creates its tag.
+          if ! gh api "repos/$REPOSITORY/commits/$RELEASE_TAG" --jq .sha > release-commit.txt; then
+              target=$(jq -er 'select(.isDraft) | .targetCommitish' release.json)
+              [[ "$target" =~ ^[0-9a-f]{40}$ ]]
+              gh api "repos/$REPOSITORY/commits/$target" --jq .sha > release-commit.txt
+          fi
           python3 - <<'PY'
           from pathlib import Path
           import hashlib,json,shutil
