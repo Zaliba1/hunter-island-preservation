@@ -60,8 +60,11 @@ profile. No emulator CPU/RAM savestate is created.
 The metadata is local consistency evidence, not authenticated anti-cheat proof:
 the machine owner can modify the open-source client and complete save data.
 
-## Local development status
+## Release and validation
 
-This feature is being developed locally on `codex/test-save`. The public
-preview.5 packages predate it. Test/build results are reported separately;
-platform source support alone does not establish a physical-device game test.
+This feature is included in preview.6. Earlier public preview.5 packages
+predate it. See VALIDATION.md and the release's TEST_PROFILE_CHECKS.json for
+the Windows game tests, independent save folders and marker persistence.
+Mac native build/launcher/isolation/graphics evidence is supplied separately
+as macos-checks.json. Actual Hunter Island gameplay on Mac and the physical
+Android test-collection flow remain unverified.

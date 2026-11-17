@@ -10,7 +10,10 @@ installation, data locations and the remaining gameplay checks.
 
 ## Current release
 
-**0.2.0-preview.5** repairs the Orlen gravestone text-entry dialog. It includes
+**0.2.0-preview.6** adds a separate, optional testing collection with all regular
+monsters, summons, ocarinas, fusion recipes and generous resources. Normal saves
+remain separate and return when the option is unticked. See [TEST_PROFILE.md](TEST_PROFILE.md).
+It also includes the Orlen gravestone fix,
 the optional mods, local save history, fusion lineage and saved game-language
 selector, with English as the default.
 The release includes matching sources, dependency sources and license
@@ -23,8 +26,8 @@ Download the package for your device from
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.5.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
-| Android | HunterIsland-Android-arm64-0.2.0-preview.5.apk | Android 8+, ARM64, OpenGL ES 3.0 |
+| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.6.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
+| Android | HunterIsland-Android-arm64-0.2.0-preview.6.apk | Android 8+, ARM64, OpenGL ES 3.0 |
 | Apple Silicon Mac | HunterIsland-macOS-arm64-test-….zip | macOS 13+, ARM64; experimental, ad-hoc signed |
 
 **Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
@@ -36,7 +39,7 @@ Android may ask you to allow APK installation from your download or file app.
 
 The [setup guide](SETUP.md) covers installation, updates, display modes,
 save transfer and bug reports. It identifies the current launchers' German
-button labels. All three [optional mods](MODS.md) are disabled initially.
+button labels. The [optional mods and testing collection](MODS.md) are disabled initially.
 Both launchers remember your choices.
 
 ## Develop

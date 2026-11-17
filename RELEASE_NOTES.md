@@ -1,4 +1,34 @@
-# 0.2.0-preview.5
+# 0.2.0-preview.6
+
+Add an optional **Create / use separate test save** launcher checkbox on
+Windows, Android and Apple Silicon Mac. Create and save a normal game first.
+The first test start copies its checkpoints into a separate directory; later
+starts resume that testing collection without refilling resources. Unticking
+the option returns to normal saves, independently of the other three mods.
+
+The Hunter Island 2.02 collection includes 353 regular monster forms, 360
+monsterpedia records, seven summons, all 57 ocarinas and other unique equipment,
+58 fusion recipes, 9,999,999 silver, a 9,999,999 gold allowance and 9,999 tickets.
+Newly added monsters are level 50. Existing party members, equipped items,
+quest progress and random-generator state are retained. Summon bosses use
+their original summon system rather than joining the regular monster bench.
+
+The test save has its own profile identifier and a persistent local testing
+marker. Artificial grants do not count as captures or currency exchanges.
+See TEST_PROFILE.md for paths, save transfer behavior and metadata limits.
+
+Windows gameplay verified creation, party selection, equipment ownership,
+spending, save/reload, switching to normal saves with other mods and returning
+to the same testing collection. Android is build/package-tested; the new flow
+has not been exercised on a physical device. Mac native test evidence is
+attached separately; actual Hunter Island Mac gameplay remains unverified.
+
+Android version code is 16 and retains the existing project update signature.
+The Mac app is experimental and ad-hoc signed, not notarized. Matching sources,
+dependency sources, notices and checksums accompany the packages. No IPA,
+game catalogs, player saves or private signing keys are included.
+
+## Previous changes: 0.2.0-preview.5
 
 Fix the crash when opening the gravestone question in Orlen. The original
 game's text-entry and reward logic now runs through the emulator's UIKit

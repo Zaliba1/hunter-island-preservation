@@ -1,4 +1,34 @@
-# Validation for 0.2.0-preview.5
+# Validation for 0.2.0-preview.6
+
+Verified on 17 November 2026 using separate private QA copies.
+
+- Windows emulator library tests: 174 passed, 2 pre-existing ignored.
+- Windows launcher/package tests: 36 passed, including the actual Tk test-save
+  checkbox, option persistence and independent normal/test profile paths.
+- Android Robolectric/JUnit tests on API 26 and 35: 46 passed, including
+  independent option combinations, selected-profile exports, baseline-save
+  preflight and recovery/import behavior.
+- Windows game test: 353 regular forms, 360 monsterpedia entries, seven summons,
+  57 ocarinas, 58 named unique equipment items and 58 recipes survive a real
+  game save. A level-50 added monster was selected into the line-up. Shop
+  ownership labels and both 9,999,999 currency balances were checked.
+- Test gold spent on an egg remains spent after restarting; the collection is
+  not recreated or refilled. The original normal files stayed unchanged while
+  testing. With only the three other mods enabled, normal saves loaded with
+  their original collection and balances, leaving the test directory unchanged.
+- The testing marker and distinct profile identifier survive game save/reload;
+  artificial additions do not increment capture or exchange counters.
+- The exact local Windows ZIP was extracted, manifest-checked and run to its
+  populated test save in a zero-capability AppContainer. APK signature, native
+  architecture/alignment, notices and private-data checks passed.
+
+Release checks and engine/APK hashes accompany the final packages. Mac CI
+performs native framework, Swift core, launcher layout, isolation and graphics
+tests; its actual results are in macos-checks.json. Actual Hunter Island Mac
+gameplay and the physical Android testing-collection flow remain unverified.
+Bit-identical reproducibility and full-story/all-device coverage are not claimed.
+
+## Previous validation: 0.2.0-preview.5
 
 Verified on 17 November 2026 on the Windows build PC. Detailed private game
 captures and saves are excluded from source and release packages.

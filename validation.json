@@ -1,33 +1,34 @@
 {
-  "version": "0.2.0-preview.5",
+  "version": "0.2.0-preview.6",
   "status": "prerelease",
   "review_date": "2026-11-17",
   "windows": {
-    "engine_tests_passed": 171,
+    "engine_tests_passed": 174,
     "engine_tests_ignored": 2,
-    "launcher_tests_passed": 34,
-    "engine_sha256": "5a9183c17d70f18d98ad41b3710f4856a96153af6043d728b2a4876808781e0f",
+    "launcher_tests_passed": 36,
+    "engine_sha256": "d2d8e970af3f298ddc9bb381fa38fbc5a5aa913be985730aabaadc67f58c5b31",
     "isolated_no_network": true,
-    "orlen_wrong_answer_cancel_reward_tested": true,
-    "original_game_reward": "Penguini",
+    "test_collection_gameplay_tested": true,
+    "normal_and_test_folders_independent": true,
+    "persistent_test_marker_verified": true,
     "original_save_seed_unchanged": true
   },
   "android": {
-    "framework_tests_passed": 42,
-    "apk_sha256": "1656c5eb4c905594cae26dba37cf0f8c3b4c809fe57e0487facca88b150cc9d4",
+    "framework_tests_passed": 46,
+    "native_library_sha256": "485028ada0062f2c41ebfc4c0b6c556f919b19be034fc9d75a413131a6a84008",
     "signature_verified": true,
     "apk_and_elf_16k_alignment_verified": true,
-    "no_internet_or_broad_storage_permission": true,
-    "physical_device_execution_tested": false
+    "physical_device_execution_tested": false,
+    "apk_digest": "See final release-checks.json; packaging notices can change the APK without changing native code."
   },
   "macos": {
-    "native_checks": "See macos-checks.json accompanying the release",
+    "native_checks": "See macos-checks.json accompanying this release",
     "actual_game_start_tested": false
   },
   "known_limits": [
-    "Actual Orlen gameplay not tested on a physical Android device or a Mac.",
-    "Full text selection, marked-text input and rounded border rendering remain incomplete.",
-    "Full story and all devices not verified.",
+    "Actual Hunter Island gameplay on Mac and physical Android test-collection interaction unverified.",
+    "Fresh-source build checks do not establish bit-identical reproducibility.",
+    "Full-story and all-device coverage unverified.",
     "Historical guest binaries not independently bit-reproduced."
   ]
 }
