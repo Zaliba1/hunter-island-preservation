@@ -7,7 +7,7 @@
 
 use super::{ns_array, ns_string, NSUInteger};
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
-use crate::frameworks::foundation::ns_error::{NSCocoaErrorDomain, NSFileReadNoSuchFileError};
+use crate::frameworks::foundation::ns_error::{NSCocoaErrorDomain, NSFileReadNoSuchFileError, NSFileNoSuchFileError, NSFileWriteUnknownError, NSFileWriteNoPermissionError};
 use crate::frameworks::foundation::ns_string::get_static_str;
 use crate::fs::{FsError, GuestPath, GuestPathBuf};
 use crate::mem::{ConstPtr, MutPtr, Ptr};
@@ -31,6 +31,22 @@ const NSFileSystemFreeSize: &str = "NSFileSystemFreeSize";
 pub const NSFileType: &str = "NSFileType";
 pub const NSFileTypeDirectory: &str = "NSFileTypeDirectory";
 pub const NSFileTypeRegular: &str = "NSFileTypeRegular";
+
+fn removal_error_code(error: &FsError) -> super::NSInteger {
+    match error {
+        FsError::DoesNotExist | FsError::NonexistentParentDir | FsError::InvalidParentDir => NSFileNoSuchFileError,
+        FsError::AccessDenied | FsError::ReadonlyParentDir => NSFileWriteNoPermissionError,
+        FsError::IoError(error) => match error.kind() {
+            std::io::ErrorKind::NotFound => NSFileNoSuchFileError,
+            std::io::ErrorKind::PermissionDenied => NSFileWriteNoPermissionError,
+            _ => NSFileWriteUnknownError,
+        },
+        _ => NSFileWriteUnknownError,
+    }
+}
+
+#[cfg(test)]
+mod removal_tests;
 
 pub const CONSTANTS: ConstantExports = &[
     (
@@ -189,21 +205,16 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (bool)removeItemAtPath:(id)path // NSString*
                    error:(MutPtr<id>)out_error { // NSError**
     // TODO: call delegate
-    let path = ns_string::to_rust_string(env, path); // TODO: avoid copy
-    match env.fs.remove(GuestPath::new(&path)) {
+    let path = if path == nil { String::new() } else { ns_string::to_rust_string(env, path).into_owned() };
+    let result = if path.is_empty() { Err(FsError::DoesNotExist) } else { env.fs.remove_recursively(GuestPath::new(&path)) };
+    match result {
         Ok(()) => true,
         Err(err) => {
             if !out_error.is_null() {
-                match err {
-                    FsError::DoesNotExist => {
-                        let domain = get_static_str(env, NSCocoaErrorDomain);
-                        let error = msg_class![env; NSError alloc];
-                        let error = msg![env; error initWithDomain:domain code:NSFileReadNoSuchFileError userInfo:nil];
-                        autorelease(env, error);
-                        env.mem.write(out_error, error);
-                    }
-                    _ => unimplemented!()
-                }
+                let code = removal_error_code(&err);
+                let domain = get_static_str(env, NSCocoaErrorDomain);
+                let error: id = msg_class![env; NSError errorWithDomain:domain code:code userInfo:nil];
+                env.mem.write(out_error, error);
             }
             false
         }

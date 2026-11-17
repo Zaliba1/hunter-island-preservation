@@ -25,6 +25,7 @@
 //! See also [crate::paths], which has paths for host files used by touchHLE.
 
 mod bundle;
+mod removal;
 
 pub use bundle::BundleData;
 
@@ -1271,7 +1272,7 @@ impl Fs {
                     FileLocation::IpaFileRef(_) | FileLocation::ResourceFilePath(_) => panic!(),
                 };
 
-                handle_open_err(std::fs::remove_file(host_path), host_path);
+                std::fs::remove_file(host_path).map_err(FsError::IoError)?;
                 log_dbg!(
                     "Deleted file at path {:?} (host path: {:?})",
                     path,
@@ -1292,7 +1293,7 @@ impl Fs {
                     return Err(FsError::AccessDenied);
                 };
 
-                handle_open_err(std::fs::remove_dir(host_path), host_path);
+                std::fs::remove_dir(host_path).map_err(FsError::IoError)?;
                 log_dbg!(
                     "Deleted directory at path {:?} (host path: {:?})",
                     path,

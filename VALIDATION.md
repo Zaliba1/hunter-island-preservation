@@ -1,4 +1,34 @@
-# Validation for 0.2.0-preview.7
+# Validation for 0.2.0-preview.8
+
+Verified using separate private copies; original player data is excluded.
+
+- Reproduced the game crash after selecting a populated slot's trash icon and
+  confirming **Erase Game?**. The original build panicked in NSFileManager's
+  unimplemented error handling for a nonempty directory. Its test files remained
+  unchanged after the failed operation.
+- The corrected Windows build returned safely to the title screen after
+  confirmation and removed the selected slot's checkpoint directory. A second
+  occupied slot and both other save collections retained identical file hashes.
+  Cancelling the confirmation retained identical hashes for every save file.
+- Windows native library: 182 tests passed, 2 pre-existing ignored. New tests
+  exercise populated/nested directories, hidden files, reuse of a removed path,
+  protected descendants, unrelated host mappings and host I/O failures. The
+  guest NSFileManager API returns ordinary NSError objects for failures.
+- Windows launcher/package: 37 tests passed. Android framework: 50 tests passed
+  on API 26 and 35; the signed update uses version code 18.
+
+The operation follows Foundation's documented recursive removal behavior:
+[removeItem(atPath:)](https://developer.apple.com/documentation/foundation/filemanager/removeitem(atpath:)).
+POSIX unlink still uses the existing nonrecursive primitive. Linked directories
+remain unsupported and are rejected before traversing the tree.
+
+Final package hashes, game-test details and source correspondence accompany the
+release as release-checks.json and DELETE_SAVE_CHECKS.json. Native Mac tests and
+package evidence are supplied as macos-checks.json. Actual Hunter Island gameplay
+on Mac and this new deletion flow on a physical Android device remain unverified.
+Fresh-source builds do not establish bit-identical reproducibility.
+
+## Previous validation: 0.2.0-preview.7
 
 Verified on 17 November 2026 using private, isolated QA profiles.
 

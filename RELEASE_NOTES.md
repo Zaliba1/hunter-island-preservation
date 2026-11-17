@@ -1,4 +1,18 @@
-# 0.2.0-preview.7
+# 0.2.0-preview.8
+
+Fix the crash after confirming **Erase Game?** for an occupied save slot.
+The shared Foundation adapter now removes nonempty save directories, including
+old checkpoints, and returns an NSError on failures instead of panicking.
+Removal is scoped to the selected writable guest subtree; protected entries,
+linked directories and unrelated host mappings are rejected. POSIX unlink
+retains its existing nonrecursive behavior.
+
+The fix applies to Windows, Android and Apple Silicon Mac. Original game
+rules and the optional collection settings are unchanged. No IPA or player
+saves are included. See VALIDATION.md and the release's DELETE_SAVE_CHECKS.json
+for the actual game checks and remaining platform limits.
+
+# Previous changes: 0.2.0-preview.7
 
 Add an optional fresh campaign with all 353 regular monster forms initially
 at level 1. This collection is created only when starting a new in-game slot;
@@ -78,8 +92,8 @@ No IPA, game assets, player saves or private signing keys are distributed.
 
 Add a saved **Spiel-Sprache / Game language** dropdown to the Windows and
 Android launchers. English is the default, including for older profiles with
-no explicit language choice. Available choices are English, Deutsch, FranÃ§ais,
-EspaÃ±ol, Italiano, æ—¥æœ¬èªž, and the device's preferred system languages.
+no explicit language choice. Available choices are English, Deutsch, FranÃƒÂ§ais,
+EspaÃƒÂ±ol, Italiano, Ã¦â€”Â¥Ã¦Å“Â¬Ã¨ÂªÅ¾, and the device's preferred system languages.
 
 Changes are saved immediately and apply on the next game start. Users do not
 need to enter launch arguments. This setting affects the original game;

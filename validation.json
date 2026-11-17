@@ -1,15 +1,15 @@
 {
-  "version": "0.2.0-preview.7",
+  "version": "0.2.0-preview.8",
   "status": "prerelease",
   "review_date": "2026-11-17",
   "windows": {
-    "engine_tests_passed": 177,
+    "engine_tests_passed": 182,
     "engine_tests_ignored": 2,
     "launcher_tests_passed": 37,
-    "engine_sha256": "0b1eee323daee709f868320e138707364a4a3ead6a3a9c12052dae6b08699ac3",
-    "fresh_level_one_campaign_gameplay_tested": true,
-    "level_one_marker_in_early_checkpoint_verified": true,
-    "other_three_mods_combinable": true
+    "engine_sha256": "58544693362a201a2ca26ccfd64c717d7b9982bc316c3f6e500c0cb24f29a1bf",
+    "save_deletion_gameplay_tested": true,
+    "cancel_keeps_save_files": true,
+    "neighbor_and_other_profiles_unchanged": true
   },
   "android": {
     "framework_tests_passed": 50,
@@ -20,7 +20,7 @@
     "actual_game_start_tested": false
   },
   "known_limits": [
-    "Actual Hunter Island Mac gameplay and physical Android collection flow unverified.",
+    "Actual Hunter Island Mac gameplay and physical Android deletion flow unverified.",
     "Fresh-source build checks do not establish bit-identical reproducibility.",
     "Full-story and all-device coverage unverified."
   ]

@@ -22,6 +22,9 @@ const NSLocalizedDescriptionKey: &str = "NSLocalizedDescriptionKey";
 const NSLocalizedFailureReasonErrorKey: &str = "NSLocalizedFailureReasonErrorKey";
 
 pub const NSFileReadNoSuchFileError: NSInteger = 260;
+pub const NSFileNoSuchFileError: NSInteger = 4;
+pub const NSFileWriteUnknownError: NSInteger = 512;
+pub const NSFileWriteNoPermissionError: NSInteger = 513;
 
 struct ErrorHostObject {
     domain: NSErrorDomain,
