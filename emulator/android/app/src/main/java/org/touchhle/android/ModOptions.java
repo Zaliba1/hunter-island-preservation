@@ -14,9 +14,25 @@ final class ModOptions {
         {"--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"},
         {"--hunter-silver-exchange", "Silber gegen Gold tauschen (50:1)"},
         {"--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"},
+        {"--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"},
     };
 
     private ModOptions() {}
+
+    static void requireTestingSeed(Context context) throws java.io.IOException {
+        if (!preferences(context).getBoolean("--hunter-test-save", false)) return;
+        java.io.File external=context.getExternalFilesDir(null);
+        if(external==null) throw new java.io.IOException("Spielstand-Speicher nicht verfügbar");
+        java.io.File parent=new java.io.File(external,"touchHLE_sandbox");
+        if(new java.io.File(parent,"pockettrend.hunterisland-test-v1/test-profile.json").isFile()) return;
+        java.io.File[] slots=new java.io.File(parent,IpaInspector.BUNDLE+"/Documents").listFiles();
+        if(slots!=null) for(java.io.File slot:slots) {
+            if(!slot.isDirectory() || !slot.getName().matches("saves[0-9]+")) continue;
+            java.io.File[] saves=slot.listFiles();
+            if(saves!=null) for(java.io.File save:saves) if(save.isFile() && save.getName().matches("sv_[0-9]+")) return;
+        }
+        throw new java.io.IOException("Bitte zuerst ohne Testspielstand-Haken ein normales Spiel starten und speichern. Danach kann die separate Testkopie erstellt werden.");
+    }
 
     static void addControls(Context context, LinearLayout root) {
         TextView heading = new TextView(context);
@@ -32,6 +48,9 @@ final class ModOptions {
                 preferences.edit().putBoolean(flag, checked).apply());
             root.addView(checkbox);
         }
+        TextView explanation = new TextView(context);
+        explanation.setText("Testspielstand: Beim ersten Start wird dein normaler Stand kopiert und erweitert. Haken entfernen = normal weiterspielen. Die Testkopie bleibt erhalten.");
+        root.addView(explanation);
     }
 
     static void appendArguments(Context context, List<String> arguments) {

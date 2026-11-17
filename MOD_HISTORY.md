@@ -7,6 +7,11 @@ archive matching the particular application build.
 
 ## What is recorded
 
+- A permanent save-wide testing-profile marker for the separate all-inclusive
+  collection. The inspector reports `test_profile`, including after export or
+  when the file is loaded with the option disabled. Artificial additions are
+  not reported as captures, exchanges or legitimate progression events.
+
 - Persistent "ever enabled" bits for the three existing mods, set only for a
   loaded/created game profile. Launcher checkbox changes without loading a
   game do not affect an unrelated save.

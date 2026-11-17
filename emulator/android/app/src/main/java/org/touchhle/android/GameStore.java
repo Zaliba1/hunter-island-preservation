@@ -63,7 +63,9 @@ final class GameStore {
         return exclusive(this::verifiedGame);
     }
     private File verifiedGame() throws Exception {
+        if(MainActivity.gameThreadRunning())throw new IOException("Bitte zuerst das laufende Spiel vollständig beenden.");
         new SaveStore(context).recoverLocked();
+        ModOptions.requireTestingSeed(context);
         String sha=settings().optString("sha256");
         if(!sha.matches("[0-9a-f]{64}"))throw new IOException("Bitte zuerst deine IPA importieren");
         File file=new File(games,sha+".ipa");

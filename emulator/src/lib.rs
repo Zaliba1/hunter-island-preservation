@@ -52,6 +52,7 @@ mod objc;
 mod options;
 mod paths;
 pub mod preservation;
+mod test_profile;
 mod stack;
 mod window;
 
@@ -245,11 +246,15 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
         log!("Warning: The bundle path has a trailing quotation mark! This often happens accidentally on Windows when tab-completing, because '\\\"' gets interpreted by Rust in the wrong way. Did you meant to write {:?}?", fixed);
     }
 
+    let test_sandbox = if options.hunter_test_save && !just_info {
+        Some(test_profile::prepare(&bundle_path, &paths::user_data_base_path())?)
+    } else { None };
     let bundle_data = fs::BundleData::open_any(&bundle_path)
         .map_err(|e| format!("Could not open app bundle: {e}"))?;
-    let (bundle, fs) = match bundle::Bundle::new_bundle_and_fs_from_host_path(
+    let (bundle, fs) = match bundle::Bundle::new_with_sandbox(
         bundle_data,
         /* read_only_mode: */ false,
+        test_sandbox.as_deref(),
     ) {
         Ok(bundle) => bundle,
         Err(err) => {

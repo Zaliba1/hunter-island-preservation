@@ -72,6 +72,7 @@ pub struct Options {
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_no_arena_cooldown: bool,
+    pub hunter_test_save: bool,
     pub fps_limit: Option<f64>,
     pub force_composition: bool,
     pub network_access: bool,
@@ -117,6 +118,7 @@ impl Default for Options {
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
             hunter_no_arena_cooldown: false,
+            hunter_test_save: false,
             fps_limit: Some(60.0), // Original iPhone is 60Hz and uses v-sync,
             force_composition: false,
             network_access: false,
@@ -277,6 +279,8 @@ impl Options {
             self.live_test_taps = true;
         } else if arg == "--hunter-no-arena-cooldown" {
             self.hunter_no_arena_cooldown = true;
+        } else if arg == "--hunter-test-save" {
+            self.hunter_test_save = true;
         } else if arg == "--hunter-silver-exchange" {
             self.hunter_silver_exchange = true;
         } else if arg == "--hunter-rare-dragons" {

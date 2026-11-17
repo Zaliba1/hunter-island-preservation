@@ -27,8 +27,15 @@ pub struct Bundle {
 impl Bundle {
     /// See [Fs::new] for meaning of `read_only_mode`.
     pub fn new_bundle_and_fs_from_host_path(
+        bundle_data: BundleData,
+        read_only_mode: bool,
+    ) -> Result<(Bundle, Fs), String> {
+        Self::new_with_sandbox(bundle_data, read_only_mode, None)
+    }
+    pub(crate) fn new_with_sandbox(
         mut bundle_data: BundleData,
         read_only_mode: bool,
+        sandbox: Option<&std::path::Path>,
     ) -> Result<(Bundle, Fs), String> {
         let plist_bytes = bundle_data.read_plist()?;
 
@@ -49,7 +56,7 @@ impl Bundle {
         );
         let bundle_id = plist["CFBundleIdentifier"].as_string().unwrap();
 
-        let (fs, guest_path) = Fs::new(bundle_data, bundle_name, bundle_id, read_only_mode);
+        let (fs, guest_path) = Fs::new_with_sandbox(bundle_data, bundle_name, bundle_id, read_only_mode, sandbox);
 
         let bundle = Bundle {
             path: guest_path,

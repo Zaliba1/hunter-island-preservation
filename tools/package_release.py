@@ -57,6 +57,7 @@ def main():
     for name in ('README.md','LICENSE','LICENSES.md','PRIVACY.md','KNOWN_ISSUES.md','THIRD_PARTY.md','SOURCE.md','RELEASE_NOTES.md','guest-library-provenance.json','toolchain-provenance.json','SETUP.md','MODS.md','BUILD.md','LICENSE_REVIEW.md'):
         shutil.copyfile(root/name,package/name)
     if (root/'VALIDATION.md').exists():shutil.copyfile(root/'VALIDATION.md',package/'VALIDATION.md')
+    if (root/'TEST_PROFILE.md').exists():shutil.copyfile(root/'TEST_PROFILE.md',package/'TEST_PROFILE.md')
     licenses=package/'licenses';licenses.mkdir()
     shutil.copytree(root/'licenses',licenses,dirs_exist_ok=True)
     component_inventory=inventory(package)

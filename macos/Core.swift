@@ -169,7 +169,7 @@ func inspectIPA(_ url: URL) throws -> GameInfo {
 }
 
 let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français"), ("es", "Español"), ("it", "Italiano"), ("ja", "日本語"), ("system", "System language")]
-let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown")]
+let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate test save")]
 func gameArguments(language: String, device: String, mods: [String: Bool]) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
     let code = languageChoices.contains(where: { $0.0 == language }) ? language : "en"
@@ -217,6 +217,19 @@ final class MacStore {
         }
         let url = root.appendingPathComponent("games/" + hash + ".ipa")
         try require(try digest(url) == hash, "The imported IPA was modified. Please import it again.")
+        if (settings["mods"] as? [String: Bool])?["--hunter-test-save"] == true {
+            let parent = run.appendingPathComponent("touchHLE_sandbox")
+            let marker = parent.appendingPathComponent("pockettrend.hunterisland-test-v1/test-profile.json")
+            if !FileManager.default.fileExists(atPath: marker.path) {
+                let documents = parent.appendingPathComponent("pockettrend.hunterisland/Documents")
+                let files = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: nil)
+                var found = false
+                while let file = files?.nextObject() as? URL {
+                    if file.deletingLastPathComponent().lastPathComponent.range(of: "^saves[0-9]+$", options: .regularExpression) != nil && file.lastPathComponent.range(of: "^sv_[0-9]+$", options: .regularExpression) != nil { found = true; break }
+                }
+                try require(found, "Start and save a normal game first, then enable the separate test save.")
+            }
+        }
         return url
     }
     func lock() throws -> Int32 {
@@ -226,7 +239,8 @@ final class MacStore {
         return fd
     }
     func backup() throws {
-        let bundle = run.appendingPathComponent("touchHLE_sandbox/pockettrend.hunterisland", isDirectory: true)
+        let testing = (settings["mods"] as? [String: Bool])?["--hunter-test-save"] == true
+        let bundle = run.appendingPathComponent("touchHLE_sandbox/" + (testing ? "pockettrend.hunterisland-test-v1" : "pockettrend.hunterisland"), isDirectory: true)
         guard FileManager.default.fileExists(atPath: bundle.path) else { return }
         var count = 0, total = 0
         guard let items = FileManager.default.enumerator(at: bundle, includingPropertiesForKeys: [.isSymbolicLinkKey, .fileSizeKey]) else { throw PreviewError.invalid("Cannot inspect save files.") }

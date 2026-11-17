@@ -23,12 +23,16 @@ final class SaveStore {
     private final Context context;
     private final Path parent,root,backups,journal;
     SaveStore(Context context) throws IOException {
+        this(context, false);
+    }
+    SaveStore(Context context, boolean selectedProfile) throws IOException {
         this.context=context;
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new IOException("Spielstand-Speicher nicht verfügbar");
-        parent=external.toPath().resolve("touchHLE_sandbox");root=parent.resolve(IpaInspector.BUNDLE);
+        boolean testing=selectedProfile && context.getSharedPreferences("mods",Context.MODE_PRIVATE).getBoolean("--hunter-test-save",false);
+        parent=external.toPath().resolve("touchHLE_sandbox");root=parent.resolve(testing?"pockettrend.hunterisland-test-v1":IpaInspector.BUNDLE);
         backups=context.getFilesDir().toPath().resolve("save-backups");
-        journal=context.getFilesDir().toPath().resolve("save-import-journal.json");
+        journal=context.getFilesDir().toPath().resolve(testing?"test-save-import-journal.json":"save-import-journal.json");
     }
     private static void stopped() throws IOException {
         if(MainActivity.gameThreadRunning())throw new IOException("Bitte das Spiel zuerst vollständig beenden und den Starter erneut öffnen.");

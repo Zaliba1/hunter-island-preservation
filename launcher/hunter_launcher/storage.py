@@ -37,7 +37,6 @@ class Store:
         self.logs = self.root / 'logs'
         self.backups = self.root / 'backups'
         self.config = self.root / 'settings.json'
-        self.bundle = self.run / 'touchHLE_sandbox' / ipa.BUNDLE
         self.root.mkdir(parents=True, exist_ok=True)
 
     @contextmanager
@@ -56,6 +55,21 @@ class Store:
             finally:
                 stream.seek(0)
                 msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+
+    @property
+    def bundle(self):
+        testing = self.settings().get('mods', {}).get('--hunter-test-save', False)
+        name = 'pockettrend.hunterisland-test-v1' if testing else ipa.BUNDLE
+        return self.run / 'touchHLE_sandbox' / name
+
+    def require_testing_seed(self):
+        if not self.settings().get('mods', {}).get('--hunter-test-save', False):
+            return
+        if (self.bundle / 'test-profile.json').is_file():
+            return
+        normal = self.run / 'touchHLE_sandbox' / ipa.BUNDLE / 'Documents'
+        if not any(p.is_file() and p.name[3:].isdigit() for p in normal.glob('saves*/sv_*')):
+            raise ValueError('Bitte zuerst ohne Testspielstand-Haken ein normales Spiel starten und speichern. Danach kann daraus die separate Testkopie erstellt werden.')
 
     def settings(self):
         if not self.config.exists():

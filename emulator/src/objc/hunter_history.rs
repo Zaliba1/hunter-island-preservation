@@ -598,6 +598,7 @@ pub(crate) fn read_plist(env: &mut Environment, root: &Value) {
         },
     };
     record.activate(flags);
+    record.test_profile |= env.options.hunter_test_save;
     let s = &mut env.objc.hunter_history;
     s.record = Some(record);
     s.last_saved = data.map(preservation::hash).unwrap_or([0; 32]);
@@ -624,6 +625,7 @@ pub(crate) fn write_plist(env: &mut Environment, root: &mut Value) -> Result<(),
         return Err("Save provenance was not initialized".into());
     };
     record.activate(flags);
+    record.test_profile |= env.options.hunter_test_save;
     let mut staged = record.clone();
     staged.save_sequence = staged
         .save_sequence

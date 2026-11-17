@@ -49,6 +49,24 @@ public class SaveTransferTest {
         String backup=store.latestBackup().getName();Map<String,byte[]> after=contents(exported(store,false));assertTrue(after.containsKey("guest-data/Documents/saves0/sv_2"));assertEquals(backup,store.latestBackup().getName());
         JSONObject m=new JSONObject(new String(after.get("manifest.json"),StandardCharsets.UTF_8));assertEquals(SaveStore.SCHEMA,m.getString("schema"));assertFalse(m.getBoolean("emulator_savestate"));assertFalse(m.toString().contains("content://"));assertEquals(1,m.getJSONObject("files").length());
     }
+    @Test public void selectedTestExportDoesNotReadOrModifyNormalProfile()throws Exception {
+        Path normal=original();Path test=root.resolveSibling("pockettrend.hunterisland-test-v1").resolve("Documents/saves0/sv_8");
+        Files.createDirectories(test.getParent());Files.write(test,"test-checkpoint".getBytes(StandardCharsets.UTF_8));
+        context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().putBoolean("--hunter-test-save",true).commit();
+        Map<String,byte[]> selected=contents(exported(new SaveStore(context,true),false));
+        assertEquals("test-checkpoint",new String(selected.get("guest-data/Documents/saves0/sv_8"),StandardCharsets.UTF_8));
+        assertFalse(selected.containsKey("guest-data/Documents/saves0/sv_1"));
+        assertEquals("phone-original",new String(Files.readAllBytes(normal),StandardCharsets.UTF_8));
+        assertTrue(contents(exported(new SaveStore(context),false)).containsKey("guest-data/Documents/saves0/sv_1"));
+    }
+    @Test public void testingRequiresASeedAndCanResumeWithoutNormalSave()throws Exception {
+        context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().putBoolean("--hunter-test-save",true).commit();
+        try{ModOptions.requireTestingSeed(context);fail("Missing seed accepted");}catch(IOException expected){}
+        Path p=original();ModOptions.requireTestingSeed(context);Files.delete(p);
+        Path marker=root.resolveSibling("pockettrend.hunterisland-test-v1").resolve("test-profile.json");
+        Files.createDirectories(marker.getParent());Files.write(marker,"{}".getBytes(StandardCharsets.UTF_8));
+        ModOptions.requireTestingSeed(context); // Full marker validation belongs to the shared core.
+    }
     @Test public void invalidHashAndWrongBundleKeepCurrentCheckpoint()throws Exception {
         Path p=original();SaveStore store=new SaveStore(context);Map<String,byte[]> pc=Collections.singletonMap("guest-data/Documents/saves0/sv_2",new byte[]{1});
         for(byte[] bad:new byte[][]{pack(pc,IpaInspector.BUNDLE,true),pack(pc,"other.game",false),pack(Collections.singletonMap("diagnostics/note.txt",new byte[]{1}),IpaInspector.BUNDLE,false)}){

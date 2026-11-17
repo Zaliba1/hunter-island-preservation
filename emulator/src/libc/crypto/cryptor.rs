@@ -15,7 +15,7 @@ const DECODE: i32 = -4304;
 const UNIMPLEMENTED: i32 = -4305;
 const LIMIT: usize = 64 * 1024 * 1024;
 
-pub(super) fn transform(
+pub(crate) fn transform(
     op: u32,
     options: u32,
     key: &[u8],

@@ -110,7 +110,7 @@ public final class LauncherActivity extends Activity {
             ui(()->new AlertDialog.Builder(this).setTitle("Spielstand importiert").setMessage(files+" Dateien übernommen. Der vorherige Handy-Stand ist lokal gesichert und kann über ‚Sicherung vor Import exportieren‘ gesichert werden.").setPositiveButton("OK",null).show());
         });
         if(request==SAVE_EXPORT || request==BACKUP_EXPORT)run(()->{
-            SaveStore saves=new SaveStore(this);if(request==SAVE_EXPORT)saves.exportCurrent(uri);else saves.exportLatestBackup(uri);
+            SaveStore saves=new SaveStore(this,request==SAVE_EXPORT);if(request==SAVE_EXPORT)saves.exportCurrent(uri);else saves.exportLatestBackup(uri);
             ui(()->new AlertDialog.Builder(this).setTitle("Sicherung exportiert").setMessage("Die private ZIP-Sicherung wurde im gewählten Speicherort abgelegt. Keine IPA und kein Emulator-Savestate enthalten.").setPositiveButton("OK",null).show());
         });
     }

@@ -90,9 +90,11 @@ public class PreservationFrameworkTest {
             "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)",
             "Silber gegen Gold tauschen (50:1)",
             "Kolosseum ohne 12-Stunden-Wartezeit",
+            "Testspielstand erstellen / verwenden (separate Kopie)",
         };
         String[] flags = {
             "--hunter-rare-dragons", "--hunter-silver-exchange", "--hunter-no-arena-cooldown",
+            "--hunter-test-save",
         };
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {

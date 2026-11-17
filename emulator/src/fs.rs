@@ -544,6 +544,17 @@ impl Fs {
         bundle_id: &str,
         read_only_mode: bool,
     ) -> (Fs, GuestPathBuf) {
+        Self::new_with_sandbox(app_bundle, bundle_dir_name, bundle_id, read_only_mode, None)
+    }
+
+    pub(crate) fn new_with_sandbox(
+        app_bundle: BundleData,
+        bundle_dir_name: String,
+        bundle_id: &str,
+        read_only_mode: bool,
+        sandbox: Option<&Path>,
+    ) -> (Fs, GuestPathBuf) {
+        let sandbox = sandbox.map(Path::to_path_buf).unwrap_or_else(|| paths::user_data_base_path().join(paths::SANDBOX_DIR).join(bundle_id));
         const FAKE_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
         let home_directory = APPLICATIONS.join(FAKE_UUID);
@@ -554,10 +565,7 @@ impl Fs {
         let directories = ["Documents", "Library", "tmp"];
         let host_path_directories = directories.map(|dir| {
             if !read_only_mode {
-                let path = paths::user_data_base_path()
-                    .join(paths::SANDBOX_DIR)
-                    .join(bundle_id)
-                    .join(dir);
+                let path = sandbox.join(dir);
                 if dir == "tmp" {
                     // We clean temporary directory for current app at startup.
                     // This is no-op if directory doesn't exist.
@@ -585,9 +593,7 @@ impl Fs {
             // Special case: Some apps may create save files at
             // Library/Preferences at the start, thus presence of that
             // directory is expected
-            let path = paths::user_data_base_path()
-                .join(paths::SANDBOX_DIR)
-                .join(bundle_id)
+            let path = sandbox
                 .join("Library")
                 .join("Preferences");
             if let Err(e) = std::fs::create_dir_all(&path) {
@@ -595,9 +601,7 @@ impl Fs {
             }
             // Some other apps also expect a cache folder to be present.
             // TODO: figure out a way to clean caches
-            let path = paths::user_data_base_path()
-                .join(paths::SANDBOX_DIR)
-                .join(bundle_id)
+            let path = sandbox
                 .join("Library")
                 .join("Caches");
             if let Err(e) = std::fs::create_dir_all(&path) {

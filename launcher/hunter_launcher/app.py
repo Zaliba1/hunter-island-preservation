@@ -14,6 +14,7 @@ MOD_OPTIONS = (
     ("--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"),
     ("--hunter-silver-exchange", "Silber gegen Gold tauschen (50:1)"),
     ("--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"),
+    ("--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"),
 )
 
 def mod_arguments(settings):
@@ -32,6 +33,7 @@ def release_root():
 def play(store, release, timeout=None, test_taps=(), capture=False):
     from .isolation import Container
     with store.lock():
+        store.require_testing_seed()
         executable = store.stage_runtime(release)
         store.backup()
         container = Container(store)
@@ -63,8 +65,8 @@ def gui(store, release):
     from . import diagnostics
     root = tk.Tk()
     root.title('Hunter Island · Testlauncher')
-    root.geometry('710x740')
-    root.minsize(660,710)
+    root.geometry('760x830')
+    root.minsize(710,800)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -113,6 +115,8 @@ def gui(store, release):
         control.pack(anchor='w', pady=2)
         mod_values[flag] = value
         mod_controls.append(control)
+    ttk.Label(frame,text='Testspielstand: Beim ersten Start wird dein normaler Stand kopiert und erweitert.\nHaken entfernen = normal weiterspielen. Die Testkopie bleibt erhalten.',
+        wraplength=650,font=('Segoe UI',9)).pack(anchor='w',pady=(6,0))
     ttk.Separator(frame).pack(fill='x',pady=18)
     export_button = ttk.Button(frame,text='Diagnosepaket speichern …')
     export_button.pack(anchor='w')

@@ -14,6 +14,7 @@ use cryptor::CCCrypt;
 use digest::Digest;
 use md5::Md5;
 use sha1::Sha1;
+pub(crate) use cryptor::transform as transform_local;
 
 pub(crate) fn decode_local_save(key: &[u8;32], bytes:&[u8])->Result<Vec<u8>,String> {
     cryptor::transform(1,3,key,&[0;16],bytes).map_err(|_|"The game save could not be decoded with this IPA".into())

@@ -3,8 +3,8 @@
   "libraries": [
     {
       "file": "libtouchHLE.so",
-      "sha256": "7c9184de6f3545056443ea197988591deb230a4da2e2c02cf20e129fc5599b6e",
-      "bytes": 20252744
+      "sha256": "485028ada0062f2c41ebfc4c0b6c556f919b19be034fc9d75a413131a6a84008",
+      "bytes": 20334496
     },
     {
       "file": "libSDL2.so",

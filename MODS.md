@@ -1,6 +1,6 @@
 # Optional gameplay rules
 
-All three mods are disabled on first launch. Windows and Android remember your
+All gameplay mods and the test-profile option are disabled on first launch. Windows and Android remember your
 choices. Changes take effect the next time you start the game.
 The modifications target Hunter Island 2.02.
 
@@ -9,6 +9,10 @@ The modifications target Hunter Island 2.02.
 | More frequent starter dragons | 5% chance per ordinary wild encounter on the four original encounter tiles |
 | Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
 | No 12-hour colosseum cooldown | The next local arena battle can start immediately |
+| Create / use separate test save | Copies normal progress once, then uses its own expanded monster/equipment collection and resources |
+
+See [TEST_PROFILE.md](TEST_PROFILE.md) for contents, separate directories,
+switching back to normal saves and the persistent testing marker.
 
 ## Starter dragons
 
