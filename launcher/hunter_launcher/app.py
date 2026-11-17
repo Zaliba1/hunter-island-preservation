@@ -8,24 +8,25 @@ import sys
 import threading
 from . import VERSION, ipa
 from .storage import Store, atomic_json
-from .language import LANGUAGES, language_arguments, selected_language
+from .language import (LANGUAGES, LANGUAGE_CODES, active_language, issue_message,
+                       language_arguments, message, selected_language)
 from .profiles import TEST_PROFILES, selected_test_directory
 
 MOD_OPTIONS = (
-    ("--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"),
-    ("--hunter-silver-exchange", "Silber gegen Gold tauschen (50:1)"),
-    ("--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"),
-    ("--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"),
-    ("--hunter-level1-save", "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni"),
-    ("--hunter-triple99-save", "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S"),
+    ('--hunter-rare-dragons', 'rare'),
+    ('--hunter-silver-exchange', 'exchange'),
+    ('--hunter-no-arena-cooldown', 'arena'),
+    ('--hunter-test-save', 'full'),
+    ('--hunter-level1-save', 'level1'),
+    ('--hunter-triple99-save', 'triple'),
 )
 
 def mod_arguments(settings):
     mods = settings.get("mods", {})
     if not isinstance(mods, dict):
-        raise ValueError("Ungültige Mod-Einstellungen")
+        raise ValueError('Invalid mod settings')
     if any(not isinstance(value, bool) for value in mods.values()):
-        raise ValueError("Mod-Einstellungen müssen Wahrheitswerte sein")
+        raise ValueError('Mod settings must be true or false')
     selected_test_directory(settings)
     return [flag for flag, _ in MOD_OPTIONS if mods.get(flag, False)]
 
@@ -55,7 +56,7 @@ def play(store, release, timeout=None, test_taps=(), capture=False):
                 args.append('--capture-frames')
             for tap in test_taps:
                 if not __import__('re').fullmatch(r'\d+,\d+,\d+',tap):
-                    raise ValueError('Ungültige QA-Eingabe')
+                    raise ValueError('Invalid QA input')
                 args.append('--test-tap='+tap)
             result = container.launch(executable,args,timeout=timeout)
             store.backup()
@@ -67,8 +68,23 @@ def gui(store, release):
     import tkinter as tk
     from tkinter import filedialog, messagebox, ttk
     from . import diagnostics
+
+    settings = store.settings()
+    mod_arguments(settings)
+    language = active_language(settings)
+    localized = []
     root = tk.Tk()
-    root.title('Hunter Island · Testlauncher')
+
+    def text(key, **values):
+        return message(language, key, **values)
+
+    def translate(widget, key, **values):
+        localized.append((widget, key, values))
+        return widget
+
+    def error_dialog(key, error):
+        messagebox.showerror(text(key), issue_message(language, error), parent=root)
+
     root.geometry('760x920')
     root.minsize(710,890)
     root.configure(bg='#f3f5f7')
@@ -81,41 +97,55 @@ def gui(store, release):
     frame = ttk.Frame(root,padding=28)
     frame.pack(fill='both',expand=True)
     ttk.Label(frame,text='Hunter Island',style='Title.TLabel').pack(anchor='w')
-    ttk.Label(frame,text=f'Windows-Testversion {VERSION} · touchHLE').pack(anchor='w',pady=(2,18))
+    translate(ttk.Label(frame), 'version', version=VERSION).pack(anchor='w',pady=(2,18))
     status = tk.StringVar()
     ttk.Label(frame,textvariable=status,wraplength=580,justify='left').pack(anchor='w',fill='x',pady=(0,16))
     row = ttk.Frame(frame);row.pack(anchor='w',fill='x')
-    import_button = ttk.Button(row,text='Eigene IPA importieren …')
+    import_button = translate(ttk.Button(row, name='import_ipa'), 'import')
     import_button.pack(side='left')
-    start_button = ttk.Button(row,text='Spiel starten')
+    start_button = translate(ttk.Button(row, name='play'), 'play')
     start_button.pack(side='left',padx=10)
-    device = tk.StringVar(value=store.settings().get('device','ipad'))
+    device = tk.StringVar(value=settings.get('device','ipad'))
     devices = ttk.Combobox(frame,textvariable=device,values=['ipad','iphone'],state='readonly',width=12)
     devices.pack(anchor='w',pady=12)
     ttk.Label(frame,text='iPad: 1024 × 768   ·   iPhone: 480 × 320',font=('Segoe UI',9)).pack(anchor='w')
     mod_values = {}
     mod_controls = []
-    settings = store.settings()
-    mod_arguments(settings)
-    ttk.Label(frame,text='Spiel-Sprache / Game language').pack(anchor='w',pady=(14,4))
-    languages = ttk.Combobox(frame,name='game_language',values=[label for _, label in LANGUAGES],state='readonly',width=34)
-    languages.current([code for code, _ in LANGUAGES].index(selected_language(settings)))
+    translate(ttk.Label(frame), 'language').pack(anchor='w',pady=(14,4))
+    languages = ttk.Combobox(frame, name='game_language', state='readonly', width=34)
     languages.pack(anchor='w')
-    ttk.Label(frame,text='Wird gespeichert und beim nächsten Spielstart verwendet.',font=('Segoe UI',9)).pack(anchor='w',pady=(3,0))
+    translate(ttk.Label(frame, font=('Segoe UI',9), wraplength=650), 'language_hint').pack(anchor='w',pady=(3,0))
+
+    def update_language(config):
+        nonlocal language
+        language = active_language(config)
+        root.title('Hunter Island · ' + text('title'))
+        languages.configure(values=[text('system') if code == 'system' else label for code, label in LANGUAGES])
+        languages.current(LANGUAGE_CODES.index(selected_language(config)))
+        for widget, key, values in localized:
+            widget.configure(text=text(key, **values))
+
     def save_language(_event):
+        index = languages.current()
+        if index < 0:
+            return
         try:
             with store.lock():
                 config = store.settings()
-                config['language'] = LANGUAGES[languages.current()][0]
+                config['language'] = LANGUAGE_CODES[index]
                 atomic_json(store.config,config)
         except Exception as error:
-            languages.current([code for code, _ in LANGUAGES].index(selected_language(store.settings())))
-            messagebox.showerror('Sprache konnte nicht gespeichert werden',str(error),parent=root)
+            languages.current(LANGUAGE_CODES.index(selected_language(store.settings())))
+            error_dialog('language_error', error)
+            return
+        update_language(config)
+        refresh()
+
     languages.bind('<<ComboboxSelected>>',save_language)
-    ttk.Label(frame,text='Optionale Mods · gelten ab dem nächsten Spielstart').pack(anchor='w',pady=(14,4))
-    for flag, label in MOD_OPTIONS:
+    translate(ttk.Label(frame), 'mods').pack(anchor='w',pady=(14,4))
+    for flag, key in MOD_OPTIONS:
         value = tk.BooleanVar(value=settings.get('mods', {}).get(flag, False))
-        control = ttk.Checkbutton(frame, text=label, variable=value)
+        control = translate(ttk.Checkbutton(frame, variable=value, name=key), key)
         control.pack(anchor='w', pady=2)
         mod_values[flag] = value
         mod_controls.append(control)
@@ -126,38 +156,36 @@ def gui(store, release):
                     mod_values[other].set(False)
     for flag in TEST_PROFILES:
         mod_values[flag].trace_add('write',lambda *_args, flag=flag:choose_test(flag))
-    ttk.Label(frame,text='Vollsammlung: Kopie des Normalstands. Level 1 / 3-mal Level 99: neues Spiel ohne Zusatzboni.\nJede Sammlung hat eigene Saves. Alle Sammlungshaken aus = normaler Spielstand.',
-        wraplength=650,font=('Segoe UI',9)).pack(anchor='w',pady=(6,0))
+    translate(ttk.Label(frame, wraplength=650, font=('Segoe UI',9)), 'collection_hint').pack(anchor='w',pady=(6,0))
     ttk.Separator(frame).pack(fill='x',pady=18)
-    export_button = ttk.Button(frame,text='Diagnosepaket speichern …')
+    export_button = translate(ttk.Button(frame), 'export')
     export_button.pack(anchor='w')
     saves = tk.BooleanVar(value=False)
-    save_check = ttk.Checkbutton(frame,text='Meinen Spielstand ausdrücklich beilegen',variable=saves)
+    save_check = translate(ttk.Checkbutton(frame, variable=saves), 'include_save')
     save_check.pack(anchor='w',pady=8)
-    ttk.Label(frame,text='Alles bleibt lokal. Es gibt keine automatischen Uploads.\nNeue Profile beginnen ohne Spielstand.',wraplength=580,font=('Segoe UI',9)).pack(anchor='w',pady=(8,0))
+    translate(ttk.Label(frame, wraplength=580, font=('Segoe UI',9)), 'privacy').pack(anchor='w',pady=(8,0))
     busy = False
     events = queue.Queue()
     def refresh():
         game = store.settings().get('game')
         if not busy:
-            status.set(('Hunter Island '+game['version']+' ist importiert. Bereit zum Spielen.' if game else
-                'Importiere deine eigene, bereits entschlüsselte Hunter-Island-IPA. Bestätigt getestet ist Version 2.02.'))
+            status.set(text('ready', version=game['version']) if game else text('need_ipa'))
             start_button.configure(state='normal' if game else 'disabled')
-    def background(action,done):
+    def background(action, done, error_key):
         nonlocal busy
         busy = True
         for widget in (import_button,start_button,export_button,save_check,devices,languages,*mod_controls):
             widget.configure(state='disabled')
         def worker():
             try:
-                events.put((done,action(),None))
+                events.put((done, action(), None, error_key))
             except Exception as error:
-                events.put((done,None,error))
+                events.put((done, None, error, error_key))
         threading.Thread(target=worker,daemon=False).start()
     def poll():
         nonlocal busy
         try:
-            done,result,error = events.get_nowait()
+            done, result, error, error_key = events.get_nowait()
         except queue.Empty:
             pass
         else:
@@ -168,18 +196,18 @@ def gui(store, release):
             languages.configure(state='readonly')
             refresh()
             if error:
-                messagebox.showerror('Vorgang fehlgeschlagen',str(error),parent=root)
+                error_dialog(error_key, error)
             else:
                 done(result)
         root.after(150,poll)
     def choose_ipa():
-        source = filedialog.askopenfilename(title='Eigene Hunter-Island-IPA wählen',filetypes=[('iOS-App','*.ipa')],parent=root)
+        source = filedialog.askopenfilename(title=text('choose_ipa'), filetypes=[(text('ios_app'), '*.ipa')], parent=root)
         if source:
-            status.set('IPA wird kopiert und statisch geprüft …')
+            status.set(text('importing'))
             def imported(info):
                 if info['compatibility'] != 'tested-version':
-                    messagebox.showwarning('Ungetestete Spielversion','Importiert: '+info['version']+'. Bestätigt getestet ist bisher nur 2.02.',parent=root)
-            background(lambda:store.import_ipa(source),imported)
+                    messagebox.showwarning(text('untested'), text('untested_body', version=info['version']), parent=root)
+            background(lambda: store.import_ipa(source), imported, 'import_error')
     def start():
         config = store.settings();config['device']=device.get()
         config['mods'] = {flag: value.get() for flag, value in mod_values.items()}
@@ -187,30 +215,35 @@ def gui(store, release):
             with store.lock():
                 atomic_json(store.config,config)
         except Exception as error:
-            messagebox.showerror('Profil wird verwendet',str(error),parent=root)
+            error_dialog('start_error', error)
             return
-        status.set('Spiel läuft. Schließe das Spielfenster, um zum Launcher zurückzukehren.')
+        status.set(text('running'))
         def stopped(result):
             if result['exit_code']:
-                messagebox.showwarning('Spiel beendet','Das Spiel wurde mit einem Fehler beendet. Du kannst jetzt ein Diagnosepaket speichern.',parent=root)
-        background(lambda:play(store,release),stopped)
+                messagebox.showwarning(text('game_closed'), text('game_error'), parent=root)
+        background(lambda: play(store, release), stopped, 'start_error')
     def export():
         include = saves.get()
-        if include and not messagebox.askyesno('Spielstand beilegen','Der Export enthält dann deine vollständigen Gast-/Spielstanddaten. Möchtest du sie ausdrücklich beilegen?',parent=root):
+        if include and not messagebox.askyesno(text('save_confirm'), text('save_confirm_body'), parent=root):
             return
-        path = filedialog.asksaveasfilename(title='Lokales Diagnosepaket speichern',defaultextension='.zip',initialfile='HunterIsland-Diagnose.zip',filetypes=[('ZIP','*.zip')],parent=root)
+        path = filedialog.asksaveasfilename(title=text('export'), defaultextension='.zip', initialfile='HunterIsland-Diagnostics.zip', filetypes=[('ZIP','*.zip')], parent=root)
         if path:
-            background(lambda:diagnostics.export(store,path,include),lambda _:messagebox.showinfo('Gespeichert','Das Paket wurde lokal gespeichert. Es wird nicht automatisch versendet.',parent=root))
+            background(lambda: diagnostics.export(store, path, include),
+                       lambda _: messagebox.showinfo(text('saved'), text('saved_body'), parent=root),
+                       'export_error')
     def close():
         if busy:
-            messagebox.showinfo('Vorgang läuft','Bitte zuerst das Spielfenster schließen bzw. den Vorgang abwarten. Du kannst dieses Fenster minimieren.',parent=root)
+            messagebox.showinfo(text('busy'), text('busy_body'), parent=root)
         else:
             root.destroy()
     import_button.configure(command=choose_ipa)
     start_button.configure(command=start)
     export_button.configure(command=export)
     root.protocol('WM_DELETE_WINDOW',close)
-    refresh();poll();root.mainloop()
+    update_language(settings)
+    refresh()
+    poll()
+    root.mainloop()
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Local Hunter Island tester launcher')
@@ -233,7 +266,7 @@ def main(argv=None):
         store = Store(args.data_root)
         release = (args.release_root or release_root()).resolve()
         if store.root.is_relative_to(release):
-            raise ValueError('Benutzerdaten müssen außerhalb des Programm-/Quellverzeichnisses liegen')
+            raise ValueError('User data must be outside the program directory')
         if args.import_ipa:
             result = store.import_ipa(args.import_ipa)
         elif args.run:

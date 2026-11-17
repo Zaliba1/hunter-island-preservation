@@ -30,10 +30,10 @@ encounter, including encounters with different group sizes.
 
 ## Silver exchange
 
-In the shop, select **Silber tauschen** (exchange silver). Depending on your
-balance, the dialog offers 1, 10 or 100 gold for 50, 500 or 5,000 silver.
-Selecting an offer performs the displayed exchange.
-**Abbrechen** (cancel) closes the dialog.
+In the shop, select **Exchange silver**. The button and dialog use the game
+language. Depending on your balance, the dialog offers 1, 10 or 100 gold for
+50, 500 or 5,000 silver. Selecting an offer performs the displayed exchange.
+**Cancel** closes the dialog.
 
 Both the debit and credit are committed together through a normal game save.
 Completed exchanges and captured monsters remain in the save after you

@@ -51,6 +51,7 @@ import Darwin
             try require(actual == (language == "system" ? [] : ["--preferred-languages="+language]), "Wrong language arguments.")
         }
         try require(gameArguments(language: "invalid", device: "iphone", mods: ["--unapproved": true]).contains("--preferred-languages=en"), "English fallback failed.")
+        try require(gameArguments(language: nil, device: "ipad", mods: [:]).contains("--preferred-languages=en"), "English default failed.")
         for mask in 0..<(1 << modChoices.count) {
             let flags = Dictionary(uniqueKeysWithValues: modChoices.enumerated().map { ($0.element.0, mask & (1 << $0.offset) != 0) })
             let arguments = gameArguments(language: "en", device: "iphone", mods: flags)

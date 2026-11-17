@@ -9,8 +9,8 @@ TEST_PROFILES = {
 def selected_test_directory(settings):
     mods = settings.get('mods', {})
     if not isinstance(mods, dict) or any(not isinstance(value, bool) for value in mods.values()):
-        raise ValueError('Ungültige Mod-Einstellungen')
+        raise ValueError('Invalid mod settings')
     choices = [folder for flag, folder in TEST_PROFILES.items() if mods.get(flag, False)]
     if len(choices) > 1:
-        raise ValueError('Bitte nur eine Testsammlung wählen')
+        raise ValueError('Choose only one collection mode')
     return choices[0] if choices else None

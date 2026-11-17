@@ -10,6 +10,7 @@ import sys
 import time
 from contextlib import contextmanager
 from .storage import clean_tree
+from .language import LauncherRuntimeError
 
 P = C.c_void_p
 SZ = C.c_size_t
@@ -32,7 +33,7 @@ class LIMITS(C.Structure):
 class Container:
     def __init__(self, store):
         if os.name != 'nt':
-            raise RuntimeError('Windows 10/11 x64 wird benötigt')
+            raise RuntimeError('Windows 10 or 11 x64 is required')
         self.store = store
         self.name = 'HIPreservation.Tester.' + hashlib.sha256(str(store.root).encode()).hexdigest()[:20]
         self.k = k = C.WinDLL('kernel32',use_last_error=True)
@@ -64,10 +65,10 @@ class Container:
         hr = u.CreateAppContainerProfile(self.name,'Hunter Island tester','Local offline game profile',None,0,C.byref(self.sid))
         if hr < 0:
             if hr & 0xffffffff != 0x800700b7:
-                raise OSError('AppContainer konnte nicht erstellt werden: '+hex(hr & 0xffffffff))
+                raise OSError('Could not create AppContainer: '+hex(hr & 0xffffffff))
             hr = u.DeriveAppContainerSidFromAppContainerName(self.name,C.byref(self.sid))
             if hr < 0:
-                raise OSError('AppContainer-SID konnte nicht bestimmt werden')
+                raise OSError('Could not identify the AppContainer SID')
         self.sid_text = self.text_sid(self.sid)
 
     def close(self):
@@ -105,7 +106,7 @@ class Container:
         clean_tree(self.store.run)
         target = self.store.run.resolve()
         if target != self.store.root / 'profiles/default/run':
-            raise ValueError('Unerwartetes Isolationsverzeichnis')
+            raise ValueError('Unexpected isolation directory')
         icacls = Path(os.environ['SystemRoot']) / 'System32/icacls.exe'
         for flags in (['/grant',f'*{self.sid_text}:(OI)(CI)(M)','/T','/Q'],['/setintegritylevel','(OI)(CI)L','/T','/Q']):
             with self.system_dll_search():
@@ -122,7 +123,7 @@ class Container:
         import msvcrt
         executable = Path(executable).resolve()
         if executable.parent != self.store.run or executable.name not in {'touchHLE.exe','isolation-probe.exe'}:
-            raise ValueError('Nur Programme aus dem geprüften Profil dürfen starten')
+            raise ValueError('Only programs from the verified profile may start')
         self.store.logs.mkdir(exist_ok=True)
         log = self.store.logs / (label+'.log')
         fd = os.open(log,os.O_CREAT|os.O_TRUNC|os.O_WRONLY|os.O_BINARY,0o600)
@@ -157,7 +158,7 @@ class Container:
             sidbuf = self.token_info(token,31)
             actual_sid = self.text_sid(C.cast(sidbuf,C.POINTER(P))[0])
             if isac != 1 or capabilities != 0 or actual_sid != self.sid_text:
-                raise RuntimeError('Isolationsprüfung fehlgeschlagen; kein ungeschützter Ersatzstart')
+                raise LauncherRuntimeError('isolation_error')
             result.update(is_appcontainer=True,capabilities=0,sid_verified=True)
             job = self.check(k.CreateJobObjectW(None,None))
             limits = LIMITS();limits.basic.limitFlags=0x2000
@@ -170,7 +171,7 @@ class Container:
             if waited == 258:
                 self.check(k.TerminateProcess(pi.process,124));k.WaitForSingleObject(pi.process,5000)
             elif waited != 0:
-                raise RuntimeError('Warten auf den Spielprozess fehlgeschlagen')
+                raise RuntimeError('Could not wait for the game process')
             code = W.DWORD();self.check(k.GetExitCodeProcess(pi.process,C.byref(code)))
             result.update(exit_code=code.value,timed_out=waited==258)
             return result
@@ -192,6 +193,6 @@ class Container:
         try:
             result = self.launch(self.store.run/'isolation-probe.exe',[str(canary)],'probe',timeout=20,visible=False)
             if result['exit_code'] != 0 or 'ISOLATION_PROBE_PASS' not in (self.store.logs/'probe.log').read_text():
-                raise RuntimeError('Isolationsprobe fehlgeschlagen; Spiel wird nicht gestartet')
+                raise LauncherRuntimeError('isolation_error')
         finally:
             canary.unlink(missing_ok=True)

@@ -18,7 +18,8 @@ or a Windows `.cmd` file. Developers need the tools described below.
    decrypted Hunter Island 2.02 IPA. Other games and encrypted executables
    are rejected. The app contains no game files or player saves.
 4. Choose **Game language**, **Display mode**, and any optional mod checkboxes.
-   English is the default; all three optional mods default to off.
+   English is the default, and mods start off. The silver exchange, when
+   enabled, uses the selected game language.
 5. Select **Play**. Close the game window to return to the launcher.
 
 The test build is an experimental preview, **ad-hoc signed, not notarized**.

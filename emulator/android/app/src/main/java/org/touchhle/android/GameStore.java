@@ -18,11 +18,11 @@ final class GameStore {
     GameStore(Context context) throws IOException {
         this.context=context;
         games=new File(context.getFilesDir(),"games");settings=new File(context.getFilesDir(),"import.json");
-        if(!games.isDirectory() && !games.mkdirs())throw new IOException("App-Speicher nicht verfuegbar");
+        if(!games.isDirectory() && !games.mkdirs())throw new IOException("App storage is unavailable");
     }
     JSONObject settings() throws Exception {
         if(!settings.isFile())return new JSONObject();
-        if(settings.length()>16384)throw new IOException("Importdaten beschaedigt");
+        if(settings.length()>16384)throw new IOException("Corrupt import settings");
         return new JSONObject(new String(Files.readAllBytes(settings.toPath()),StandardCharsets.UTF_8));
     }
     IpaInspector.Info importGame(Uri uri) throws Exception {
@@ -31,8 +31,8 @@ final class GameStore {
     <T> T exclusive(Callable<T> action) throws Exception {
         try(RandomAccessFile file=new RandomAccessFile(new File(context.getFilesDir(),"import.lock"),"rw");FileChannel channel=file.getChannel()) {
             FileLock acquired;
-            try {acquired=channel.tryLock();}catch(OverlappingFileLockException busy){throw new IOException("Ein Import oder Startvorgang läuft bereits.");}
-            if(acquired==null)throw new IOException("Ein Import oder Startvorgang läuft bereits.");
+            try {acquired=channel.tryLock();}catch(OverlappingFileLockException busy){throw new IOException("An import or launch is already in progress.");}
+            if(acquired==null)throw new IOException("An import or launch is already in progress.");
             try(FileLock held=acquired){return action.call();}
         }
     }
@@ -40,14 +40,14 @@ final class GameStore {
         File temp=new File(games,UUID.randomUUID()+".partial");
         try {
             try(InputStream in=context.getContentResolver().openInputStream(uri);OutputStream out=new FileOutputStream(temp)) {
-                if(in==null)throw new IOException("Datei konnte nicht geoeffnet werden");
+                if(in==null)throw new IOException("Could not open the file");
                 long size=0;byte[] buffer=new byte[65536];int n;
-                while((n=in.read(buffer))!=-1){size+=n;if(size>IpaInspector.MAX_ARCHIVE)throw new IOException("IPA zu gross");out.write(buffer,0,n);}
+                while((n=in.read(buffer))!=-1){size+=n;if(size>IpaInspector.MAX_ARCHIVE)throw new IOException("IPA exceeds the import size limit");out.write(buffer,0,n);}
             }
             IpaInspector.Info info=IpaInspector.inspect(temp);
             File dest=new File(games,info.sha256+".ipa");
             if(dest.exists()) {
-                if(!IpaInspector.digest(dest).equals(info.sha256))throw new IOException("Vorhandene Kopie beschaedigt");
+                if(!IpaInspector.digest(dest).equals(info.sha256))throw new IOException("The existing IPA copy is damaged");
             } else Files.move(temp.toPath(),dest.toPath(),StandardCopyOption.ATOMIC_MOVE);
             JSONObject data=new JSONObject();data.put("bundle",IpaInspector.BUNDLE);data.put("version",info.version);
             data.put("minimum_ios",info.minimumIOS);data.put("sha256",info.sha256);
@@ -63,20 +63,20 @@ final class GameStore {
         return exclusive(this::verifiedGame);
     }
     private File verifiedGame() throws Exception {
-        if(MainActivity.gameThreadRunning())throw new IOException("Bitte zuerst das laufende Spiel vollständig beenden.");
+        if(MainActivity.gameThreadRunning())throw new IOException("Close the game first.");
         new SaveStore(context).recoverLocked();
         ModOptions.requireTestingSeed(context);
         String sha=settings().optString("sha256");
-        if(!sha.matches("[0-9a-f]{64}"))throw new IOException("Bitte zuerst deine IPA importieren");
+        if(!sha.matches("[0-9a-f]{64}"))throw new IOException("Import your IPA first");
         File file=new File(games,sha+".ipa");
-        if(!file.isFile() || !IpaInspector.digest(file).equals(sha))throw new IOException("Import beschaedigt; bitte erneut importieren");
+        if(!file.isFile() || !IpaInspector.digest(file).equals(sha))throw new IOException("The imported copy is damaged. Import your IPA again.");
         return file;
     }
     JSONObject diagnosticGame() throws Exception {
         JSONObject original=settings(),result=new JSONObject();
         if(!original.has("sha256"))return result;
         String sha=original.optString("sha256"),version=original.optString("version"),minimum=original.optString("minimum_ios");
-        if(!sha.matches("[0-9a-f]{64}") || !version.matches("[0-9]+(?:\\.[0-9]+){0,5}") || !minimum.matches("[0-9]+(?:\\.[0-9]+){0,3}"))throw new IOException("Importdaten beschaedigt");
+        if(!sha.matches("[0-9a-f]{64}") || !version.matches("[0-9]+(?:\\.[0-9]+){0,5}") || !minimum.matches("[0-9]+(?:\\.[0-9]+){0,3}"))throw new IOException("Corrupt import settings");
         result.put("bundle",IpaInspector.BUNDLE);result.put("version",version);result.put("minimum_ios",minimum);result.put("sha256",sha);
         return result;
     }

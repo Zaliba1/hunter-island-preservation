@@ -7,6 +7,7 @@ import os
 import platform
 import re
 import zipfile
+from .language import LauncherInputError, LauncherRuntimeError
 from . import VERSION, ipa
 from .storage import clean_tree
 
@@ -23,7 +24,7 @@ def redact(text, roots=()):
 def export(store, target, with_saves=False):
     target = Path(target)
     if target.exists():
-        raise ValueError('Bitte einen neuen Dateinamen wählen; vorhandene Dateien werden nicht überschrieben')
+        raise LauncherInputError('choose_new_export')
     roots = [store.root, Path.home(), os.environ.get('USERNAME', '')]
     with store.lock():
         config = store.settings()
@@ -55,10 +56,10 @@ def export(store, target, with_saves=False):
             clean_tree(store.bundle)
             files = sorted(p for p in store.bundle.rglob('*') if p.is_file()) if store.bundle.exists() else []
             if len(files) > 10000 or sum(p.stat().st_size for p in files) > 512 * 1024**2:
-                raise ValueError('Spielstandexport zu groß')
+                raise LauncherInputError('export_size')
         temp = target.with_name(target.name + '.partial')
         if temp.exists():
-            raise ValueError('Eine unvollständige Exportdatei liegt bereits am Ziel')
+            raise LauncherInputError('choose_new_export')
         try:
             with zipfile.ZipFile(temp,'x',zipfile.ZIP_DEFLATED) as archive:
                 records = {}
@@ -73,11 +74,11 @@ def export(store, target, with_saves=False):
                 for p in files:
                     before = p.stat()
                     if before.st_size > 128 * 1024**2:
-                        raise ValueError('Einzelne Spielstanddatei ist zu groß')
+                        raise LauncherInputError('export_size')
                     data = p.read_bytes()
                     after = p.stat()
                     if (before.st_size,before.st_mtime_ns) != (after.st_size,after.st_mtime_ns):
-                        raise RuntimeError('Spielstand wurde während des Exports verändert')
+                        raise LauncherRuntimeError('save_changed')
                     name = 'guest-data/'+p.relative_to(store.bundle).as_posix()
                     archive.writestr(name,data)
                     records[name] = dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest(),

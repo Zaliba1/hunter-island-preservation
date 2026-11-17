@@ -16,10 +16,10 @@ public final class LicenseActivity extends Activity {
     private static final int LIMIT=16*1024*1024;
     static String readNotice(android.content.res.AssetManager assets,String relative) throws IOException {
         if(relative.isEmpty() || relative.startsWith("/") || relative.contains("\\")
-                || Arrays.asList(relative.split("/",-1)).contains(".."))throw new IOException("Ungültiger Hinweispfad");
+                || Arrays.asList(relative.split("/",-1)).contains(".."))throw new IOException("Invalid notice path");
         try(InputStream in=assets.open(ROOT+relative);ByteArrayOutputStream out=new ByteArrayOutputStream()) {
             byte[] buffer=new byte[8192];int n;
-            while((n=in.read(buffer))!=-1){if(out.size()+n>LIMIT)throw new IOException("Hinweis zu groß");out.write(buffer,0,n);}
+            while((n=in.read(buffer))!=-1){if(out.size()+n>LIMIT)throw new IOException("Notice is too large");out.write(buffer,0,n);}
             return new String(out.toByteArray(),StandardCharsets.UTF_8);
         }
     }
@@ -37,8 +37,8 @@ public final class LicenseActivity extends Activity {
         super.onCreate(state);
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
         int pad=(int)(16*getResources().getDisplayMetrics().density);
-        TextView title=new TextView(this);title.setText("Lizenzen und Quellen");title.setTextSize(24);title.setPadding(pad,pad,pad,pad);root.addView(title);
-        Button back=new Button(this);back.setText("Zurück zum Starter");back.setOnClickListener(v->finish());root.addView(back);
+        TextView title=new TextView(this);title.setText("Licenses and source information");title.setTextSize(24);title.setPadding(pad,pad,pad,pad);root.addView(title);
+        Button back=new Button(this);back.setText("Back to launcher");back.setOnClickListener(v->finish());root.addView(back);
         ListView list=new ListView(this);root.addView(list,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
         try {
             ArrayList<String> files=new ArrayList<>();listNotices("",files);
@@ -53,8 +53,8 @@ public final class LicenseActivity extends Activity {
             String content=readNotice(getAssets(),name);TextView text=new TextView(this);text.setPadding(pad,pad,pad,pad);text.setTextIsSelectable(true);
             text.setText(name.endsWith(".html")?Html.fromHtml(content,Html.FROM_HTML_MODE_LEGACY):content);
             ScrollView scroll=new ScrollView(this);scroll.addView(text);
-            new AlertDialog.Builder(this).setTitle(name).setView(scroll).setPositiveButton("Schließen",null).show();
+            new AlertDialog.Builder(this).setTitle(name).setView(scroll).setPositiveButton("Close",null).show();
         }catch(IOException e){failure(e);}
     }
-    private void failure(IOException e){new AlertDialog.Builder(this).setTitle("Hinweis nicht verfügbar").setMessage(e.getMessage()).setPositiveButton("OK",null).show();}
+    private void failure(IOException e){new AlertDialog.Builder(this).setTitle("Notice unavailable").setMessage(e.getMessage()).setPositiveButton("OK",null).show();}
 }

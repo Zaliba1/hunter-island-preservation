@@ -12,7 +12,7 @@ final class LanguageOptions {
     private static final String[] CODES = {"en", "de", "fr", "es", "it", "ja", "system"};
     private static final String[] LABELS = {
         "English", "Deutsch", "Français", "Español", "Italiano", "日本語",
-        "Systemsprache / System language",
+        "System language",
     };
     static final String CONTROL_TAG = "hunter-game-language";
 
@@ -26,11 +26,11 @@ final class LanguageOptions {
 
     static void addControls(Context context, LinearLayout root) {
         TextView label = new TextView(context);
-        label.setText("Spiel-Sprache / Game language (ab dem nächsten Spielstart)");
+        label.setText("Game language (applies on next launch)");
         root.addView(label);
         Spinner language = new Spinner(context);
         language.setTag(CONTROL_TAG);
-        language.setContentDescription("Spiel-Sprache / Game language");
+        language.setContentDescription("Game language");
         language.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, LABELS));
         String selected = selectedLanguage(context);
         for (int i = 0; i < CODES.length; i++) if (CODES[i].equals(selected)) language.setSelection(i);

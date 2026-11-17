@@ -25,7 +25,7 @@ internal static class PortableStart
             string entry = Path.Combine(root, "launcher", "launch.py");
             string python = Path.Combine(runtime, "bin", "python3.14w.exe");
             if (!File.Exists(entry) || !File.Exists(python))
-                throw new FileNotFoundException("Bitte zuerst das gesamte ZIP entpacken und alle Dateien zusammenlassen.");
+                throw new FileNotFoundException("Extract the entire ZIP and keep all files together before starting the launcher.");
 
             var start = new ProcessStartInfo(python);
             start.Arguments = "-B -E -s -S " + Quote(entry);

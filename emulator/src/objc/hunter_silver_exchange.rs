@@ -12,13 +12,14 @@ use crate::frameworks::core_graphics::{CGPoint, CGSize};
 use crate::frameworks::foundation::ns_string::from_rust_string;
 use crate::Environment;
 
+mod locale;
+
 const CC_MENU_REGISTER_TOUCH: u32 = 0x3d5b9;
 const STORE_BECAME_ACTIVE: u32 = 0x1a8b69;
 const SAVE_WRITER: u32 = 0x163a2d;
 const SAVE_WRITER_RETURN: u32 = 0xddea1;
 const MENU_TAG: i32 = 0x4849_4558;
 const RATE: i32 = 50;
-const TITLE: &str = "Silber tauschen";
 const OPEN: &str = "touchHLEHunterOpenSilverExchange:";
 const CANCEL: &str = "touchHLEHunterCancelSilverExchange:";
 const AMOUNTS: [(i32, &str); 3] = [
@@ -66,7 +67,10 @@ pub(super) fn after_guest_call(env: &mut Environment, receiver: id, imp: GuestFu
         STORE_BECAME_ACTIVE => {
             if env.bundle.bundle_identifier() == "pockettrend.hunterisland"
                 && env.bundle.bundle_version() == "2.02"
-                && env.objc.try_get_class_name(ObjC::read_isa(receiver, &env.mem)) == Some("StoreNode")
+                && env
+                    .objc
+                    .try_get_class_name(ObjC::read_isa(receiver, &env.mem))
+                    == Some("StoreNode")
             {
                 install_menu(env, receiver);
             }
@@ -90,7 +94,10 @@ fn install_menu(env: &mut Environment, store: id) {
     // rather than the owning StoreNode to avoid a retain cycle.
     let metaclass = ObjC::read_isa(class, &env.mem);
     let open = register_action(
-        env, metaclass, OPEN, b"v12@0:4@8",
+        env,
+        metaclass,
+        OPEN,
+        b"v12@0:4@8",
         &(open_exchange as fn(&mut Environment, id, SEL, id)),
     );
     let select = &(select_amount as fn(&mut Environment, id, SEL, id));
@@ -101,7 +108,8 @@ fn install_menu(env: &mut Environment, store: id) {
 
     let director: id = msg_class![env; CCDirector sharedDirector];
     let size: CGSize = msg![env; director winSize];
-    let label = text(env, TITLE);
+    let strings = locale::preferred(env);
+    let label = text(env, strings.title);
     let item: id = msg_class![env; CCMenuItemFont itemWithString:label target:class selector:open];
     () = msg![env; item setFontSize:((size.width * 0.028).round() as u32)];
     let item_size: CGSize = msg![env; item contentSize];
@@ -124,20 +132,27 @@ fn register_action(
     signature: &[u8],
     implementation: &'static dyn HostIMP,
 ) -> SEL {
-    let selector = env.objc.register_host_selector(name.to_owned(), &mut env.mem);
+    let selector = env
+        .objc
+        .register_host_selector(name.to_owned(), &mut env.mem);
     if !env.objc.class_has_uninherited_method(class, selector) {
         let types = env.mem.alloc_and_write_cstr(signature).cast_const();
-        env.objc.add_host_instance_method_if_absent(class, selector, implementation);
-        env.objc.borrow_mut::<ClassHostObject>(class).guest_method_signatures.insert(selector, types);
+        env.objc
+            .add_host_instance_method_if_absent(class, selector, implementation);
+        env.objc
+            .borrow_mut::<ClassHostObject>(class)
+            .guest_method_signatures
+            .insert(selector, types);
     }
     selector
 }
 
-fn notice(env: &mut Environment, message: &str) {
-    let title = text(env, TITLE);
+fn notice(env: &mut Environment, title: &str, message: impl Into<String>) {
+    let title = text(env, title);
     let body = text(env, message);
     let ok = text(env, "OK");
-    let _: id = msg_class![env; MonsterHatchPopup showPopupWithTitle:title message:body closeButtonName:ok];
+    let _: id =
+        msg_class![env; MonsterHatchPopup showPopupWithTitle:title message:body closeButtonName:ok];
 }
 
 fn open_exchange(env: &mut Environment, _class: id, _selector: SEL, item: id) {
@@ -148,13 +163,20 @@ fn open_exchange(env: &mut Environment, _class: id, _selector: SEL, item: id) {
     }
     let save: id = msg_class![env; UserSavedData sharedInstance];
     let silver: i32 = msg![env; save silverAvailable];
+    let strings = locale::preferred(env);
     if silver < RATE {
-        notice(env, "Du brauchst mindestens 50 Silber für 1 Gold.");
+        notice(
+            env,
+            strings.title,
+            strings.minimum.replace("{rate}", &RATE.to_string()),
+        );
         return;
     }
 
-    let title = text(env, TITLE);
-    let message = text(env, format!("50 Silber = 1 Gold\nVerfügbar: {silver} Silber"));
+    let title = text(env, strings.title);
+    let rate = strings.rate.replace("{rate}", &RATE.to_string());
+    let balance = strings.balance.replace("{silver}", &silver.to_string());
+    let message = text(env, format!("{rate}\n{balance}"));
     // MonsterHatchPopup supplies the concrete popup skin and button layout.
     let layout: id = msg_class![env; MonsterHatchPopup popupTextConfiguration];
     let content: id = msg![env; layout generateContentWithMessage:message];
@@ -163,11 +185,15 @@ fn open_exchange(env: &mut Environment, _class: id, _selector: SEL, item: id) {
     let buttons: id = msg![env; config buttonConfigurations];
     for (gold, name) in AMOUNTS {
         if gold * RATE <= silver {
-            let title = text(env, format!("{gold} Gold ({})", gold * RATE));
+            let amount = strings
+                .amount
+                .replace("{gold}", &gold.to_string())
+                .replace("{cost}", &(gold * RATE).to_string());
+            let title = text(env, amount);
             add_popup_button(env, buttons, store, title, name);
         }
     }
-    let cancel = text(env, "Abbrechen");
+    let cancel = text(env, strings.cancel);
     add_popup_button(env, buttons, store, cancel, CANCEL);
     let _: id = msg_class![env; MonsterHatchPopup showPopupWithConfiguration:config];
 }
@@ -180,26 +206,40 @@ fn add_popup_button(env: &mut Environment, buttons: id, store: id, name: id, act
 }
 
 fn select_amount(env: &mut Environment, store: id, selector: SEL, _button: id) {
-    let Some((amount, _)) = AMOUNTS.into_iter()
+    let Some((amount, _)) = AMOUNTS
+        .into_iter()
         .find(|(_, name)| env.objc.lookup_selector(name) == Some(selector))
     else {
-        return; // Abbrechen
+        return;
     };
-    let message = match exchange(env, store, amount) {
+    let error = match exchange(env, store, amount) {
         Ok(()) => return,
         Err(error) => error,
     };
-    notice(env, message);
+    let strings = locale::preferred(env);
+    let message = match error {
+        ExchangeError::Unavailable => strings.unavailable,
+        ExchangeError::Insufficient => strings.insufficient,
+        ExchangeError::SaveFailed => strings.save_failed,
+    };
+    notice(env, strings.title, message);
 }
 
-fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), &'static str> {
-    const UNAVAILABLE: &str = "Der Tausch ist in diesem Spielstand gerade nicht verfügbar.";
+enum ExchangeError {
+    Unavailable,
+    Insufficient,
+    SaveFailed,
+}
+
+fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), ExchangeError> {
     let save: id = msg_class![env; UserSavedData sharedInstance];
     if save == nil || env.objc.hunter_exchange_save.is_some() {
-        return Err(UNAVAILABLE);
+        return Err(ExchangeError::Unavailable);
     }
     let ivar = |name: &str| {
-        env.objc.object_lookup_ivar(&env.mem, save, &name.to_owned()).ok_or(UNAVAILABLE)
+        env.objc
+            .object_lookup_ivar(&env.mem, save, &name.to_owned())
+            .ok_or(ExchangeError::Unavailable)
     };
     let silver = ivar("silver")?.cast::<i32>();
     let gold = ivar("goldFound")?.cast::<i32>();
@@ -210,8 +250,9 @@ fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), &'stati
     let old_silver = env.mem.read(silver);
     let old_gold = env.mem.read(gold);
     let old_dirty = env.mem.read(dirty);
-    let (next_silver, next_gold) = updated_balances(old_silver, old_gold, purchased, spent, mangle, amount)
-        .ok_or("Das Guthaben reicht für diesen Tausch nicht aus.")?;
+    let (next_silver, next_gold) =
+        updated_balances(old_silver, old_gold, purchased, spent, mangle, amount)
+            .ok_or(ExchangeError::Insufficient)?;
 
     // SpendSilver: saves immediately, and addFoundGold: applies the save's
     // encoding multiplier. Change the two stored balances together, then ask
@@ -219,15 +260,19 @@ fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), &'stati
     env.mem.write(silver, next_silver);
     env.mem.write(gold, next_gold);
     env.mem.write(dirty, 1);
-    let history_before = super::hunter_history::exchange_snapshot(env, (amount * RATE) as u64, amount as u64);
-    env.objc.hunter_exchange_save = Some(SaveReceipt { thread: env.current_thread, written: false });
+    let history_before =
+        super::hunter_history::exchange_snapshot(env, (amount * RATE) as u64, amount as u64);
+    env.objc.hunter_exchange_save = Some(SaveReceipt {
+        thread: env.current_thread,
+        written: false,
+    });
     () = msg![env; save safeSaveToFile];
     if !env.objc.hunter_exchange_save.take().unwrap().written {
         env.mem.write(silver, old_silver);
         env.mem.write(gold, old_gold);
         env.mem.write(dirty, old_dirty);
         super::hunter_history::exchange_rollback(env, history_before);
-        return Err("Speichern fehlgeschlagen. Der Tausch wurde rückgängig gemacht.");
+        return Err(ExchangeError::SaveFailed);
     }
     () = msg![env; store updateAll];
     log!("Hunter Island silver exchange: silver {old_silver} -> {next_silver}, gold +{amount}, saved");
@@ -235,7 +280,12 @@ fn exchange(env: &mut Environment, store: id, amount: i32) -> Result<(), &'stati
 }
 
 fn updated_balances(
-    silver: i32, found: i32, purchased: i32, spent: i32, mangle: i32, amount: i32,
+    silver: i32,
+    found: i32,
+    purchased: i32,
+    spent: i32,
+    mangle: i32,
+    amount: i32,
 ) -> Option<(i32, i32)> {
     if amount <= 0 || mangle <= 0 {
         return None;

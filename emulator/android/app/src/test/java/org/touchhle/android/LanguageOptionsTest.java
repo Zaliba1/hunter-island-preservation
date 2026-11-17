@@ -4,6 +4,7 @@ package org.touchhle.android;
 import static org.junit.Assert.*;
 import android.content.Context;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Spinner;
 import java.util.*;
 import org.junit.*;
@@ -21,6 +22,17 @@ public class LanguageOptionsTest {
         List<String> arguments = new ArrayList<>();
         LanguageOptions.appendArguments(context, arguments);
         assertEquals(Collections.singletonList("--preferred-languages=en"), arguments);
+        try (ActivityController<LauncherActivity> controller =
+                Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            Spinner language = controller.get().getWindow().getDecorView()
+                .findViewWithTag(LanguageOptions.CONTROL_TAG);
+            assertEquals("Game language", language.getContentDescription());
+            assertEquals("English", language.getSelectedItem());
+            ArrayList<View> matches = new ArrayList<>();
+            controller.get().getWindow().getDecorView()
+                .findViewsWithText(matches, "Import your IPA…", View.FIND_VIEWS_WITH_TEXT);
+            assertFalse(matches.isEmpty());
+        }
     }
 
     @Test public void dropdownPersistsEachChoiceAcrossRecreationAndFeedsGameArguments() {

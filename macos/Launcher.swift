@@ -42,7 +42,8 @@ final class LauncherBackground: NSView {
             playButton = button("Play", #selector(play)); playButton.keyEquivalent = "\r"; actions.addArrangedSubview(playButton); stack.addArrangedSubview(actions)
             stack.addArrangedSubview(label("Game language · saved for the next start"))
             language = NSPopUpButton(); language.addItems(withTitles: languageChoices.map { $0.1 })
-            language.selectItem(at: languageChoices.firstIndex { $0.0 == store.settings["language"] as? String } ?? 0)
+            let savedLanguage = gameLanguage(store.settings["language"] as? String)
+            language.selectItem(at: languageChoices.firstIndex { $0.0 == savedLanguage } ?? 0)
             language.target = self; language.action = #selector(saveOptions); buttons.append(language); stack.addArrangedSubview(language)
             stack.addArrangedSubview(label("Display mode"))
             device = NSPopUpButton(); device.addItems(withTitles: ["iPad · 1024 × 768", "iPhone · 480 × 320"])
@@ -140,7 +141,7 @@ final class LauncherBackground: NSView {
                 let log = logs.appendingPathComponent("game.log")
                 FileManager.default.createFile(atPath: log.path, contents: Data())
                 let handle = try FileHandle(forWritingTo: log)
-                let options = gameArguments(language: self.store.settings["language"] as? String ?? "en", device: self.store.settings["device"] as? String ?? "ipad", mods: self.store.settings["mods"] as? [String: Bool] ?? [:])
+                let options = gameArguments(language: self.store.settings["language"] as? String, device: self.store.settings["device"] as? String ?? "ipad", mods: self.store.settings["mods"] as? [String: Bool] ?? [:])
                 let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice
                 try process.run(); self.gameProcess = process

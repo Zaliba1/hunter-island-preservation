@@ -25,9 +25,9 @@ class ModOptionsTest(unittest.TestCase):
             root=tk.Tk();root.withdraw();failures=[]
             def click():
                 try:
-                    box=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Testspielstand'))
-                    level1=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and str(w.cget('text')).startswith('Neues Spiel:'))
-                    triple=next(w for w in controls(root) if isinstance(w,ttk.Checkbutton) and 'je 3-mal' in str(w.cget('text')))
+                    box=next(w for w in controls(root) if w.winfo_name()=='full')
+                    level1=next(w for w in controls(root) if w.winfo_name()=='level1')
+                    triple=next(w for w in controls(root) if w.winfo_name()=='triple')
                     box.invoke(); triple.invoke()
                     self.assertFalse(bool(root.getvar(str(box.cget('variable')))))
                     self.assertTrue(bool(root.getvar(str(triple.cget('variable')))))
@@ -37,7 +37,7 @@ class ModOptionsTest(unittest.TestCase):
                     self.assertTrue(bool(root.getvar(str(level1.cget('variable')))))
                     box.invoke()
                     self.assertFalse(bool(root.getvar(str(level1.cget('variable')))))
-                    next(w for w in controls(root) if isinstance(w,ttk.Button) and w.cget('text')=='Spiel starten').invoke()
+                    next(w for w in controls(root) if isinstance(w,ttk.Button) and w.winfo_name()=='play').invoke()
                 except BaseException as error:failures.append(error)
             def check():
                 try:
@@ -63,7 +63,7 @@ class ModOptionsTest(unittest.TestCase):
             atomic_json(store.config, {'mods': {'--hunter-test-save': True}})
             self.assertNotEqual(store.bundle, normal)
             self.assertEqual(store.bundle.name, 'pockettrend.hunterisland-test-v1')
-            with self.assertRaisesRegex(ValueError, 'normales Spiel'):
+            with self.assertRaisesRegex(ValueError, 'Start a normal game'):
                 store.require_testing_seed()
             seed = normal / 'Documents/saves0/sv_1'
             seed.parent.mkdir(parents=True)

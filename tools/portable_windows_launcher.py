@@ -140,8 +140,8 @@ def bundle_launcher(root, package, work, cache, source_zip):
     (package / 'START-HERE.txt').write_text(
         'Extract the entire ZIP and double-click Start Hunter Island.exe.\n'
         'Keep the _internal, launcher and runtime folders beside the starter.\n'
-        'Select Eigene IPA importieren to choose your own game file, then select\n'
-        'Spiel starten to play. See SETUP.md for details.\n', encoding='utf-8',
+        'Select Import your IPA to choose your game file, then select Play.\n'
+        'Use Language to change the launcher and game language. See SETUP.md.\n', encoding='utf-8',
     )
     with zipfile.ZipFile(source_zip, 'x', zipfile.ZIP_STORED) as archive:
         archive.write(lock_path, lock_path.name)

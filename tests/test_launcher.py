@@ -126,7 +126,7 @@ class ImportTests(unittest.TestCase):
             '../Save')}
         files={'../Save':files['../Save'],**files}
         atomic_json(release/'runtime-manifest.json',dict(files=files))
-        with self.assertRaisesRegex(ValueError,'Unsicherer Archivpfad'):store.stage_runtime(release)
+        with self.assertRaisesRegex(ValueError,'Unsafe archive path'):store.stage_runtime(release)
 
     def test_public_audit_finds_compressed_identity_and_forbidden_data(self):
         root=self.root/'public';root.mkdir()

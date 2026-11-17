@@ -169,6 +169,9 @@ func inspectIPA(_ url: URL) throws -> GameInfo {
 }
 
 let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français"), ("es", "Español"), ("it", "Italiano"), ("ja", "日本語"), ("system", "System language")]
+func gameLanguage(_ selection: String?) -> String {
+    languageChoices.first(where: { $0.0 == selection })?.0 ?? "en"
+}
 let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank")]
 let collectionProfiles = [("--hunter-test-save", "pockettrend.hunterisland-test-v1"), ("--hunter-level1-save", "pockettrend.hunterisland-level1-v1"), ("--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1")]
 func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
@@ -176,9 +179,9 @@ func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     try require(selected.count <= 1, "Choose only one testing collection.")
     return selected.first?.1 ?? "pockettrend.hunterisland"
 }
-func gameArguments(language: String, device: String, mods: [String: Bool]) -> [String] {
+func gameArguments(language: String?, device: String, mods: [String: Bool]) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
-    let code = languageChoices.contains(where: { $0.0 == language }) ? language : "en"
+    let code = gameLanguage(language)
     if code != "system" { args.append("--preferred-languages=" + code) }
     for (flag, _) in modChoices where mods[flag] == true { args.append(flag) }
     return args

@@ -24,7 +24,7 @@ public class MainActivity extends SDLActivity {
         // This activity is not exported. Only the inspected private import is used.
         String game = getIntent().getStringExtra("game");
         if (game == null || !new java.io.File(game).isFile())
-            throw new IllegalStateException("Bitte das Spiel über den Importlauncher öffnen");
+            throw new IllegalStateException("Open the game from the launcher");
         String profile=getSharedPreferences("display",MODE_PRIVATE).getString("family","iphone-retina");
         String family="ipad".equals(profile)?"ipad":"iphone";
         java.util.ArrayList<String> arguments=new java.util.ArrayList<>(java.util.Arrays.asList(game,"--no-error-popup","--experimental-gles2",

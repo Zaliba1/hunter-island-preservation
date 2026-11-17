@@ -8,7 +8,7 @@
 use super::ns_string::to_rust_string;
 use super::{NSRange, NSUInteger};
 use crate::frameworks::foundation::ns_keyed_unarchiver::decode_current_data;
-use crate::fs::GuestPath;
+use crate::fs::{FsError, GuestPath};
 use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr,
@@ -22,6 +22,32 @@ pub(super) struct NSDataHostObject {
 }
 impl HostObject for NSDataHostObject {}
 
+fn read_data_file(env: &mut Environment, data: id, path: id) -> Result<id, i32> {
+    use super::ns_error::NSFileReadNoSuchFileError;
+    if path == nil {
+        return Err(NSFileReadNoSuchFileError);
+    }
+    let path = to_rust_string(env, path);
+    log_dbg!("[(NSData*){:?} initWithContentsOfFile:{:?}]", data, path);
+    let path = GuestPath::new(&path);
+    let bytes = env.fs.read(path).map_err(|()| {
+        if env.fs.exists(path) {
+            256 // NSFileReadUnknownError
+        } else {
+            NSFileReadNoSuchFileError
+        }
+    })?;
+    let length = bytes.len().try_into().unwrap();
+    let alloc = env.mem.alloc(length);
+    env.mem
+        .bytes_at_mut(alloc.cast(), length)
+        .copy_from_slice(&bytes);
+    let host_object = env.objc.borrow_mut::<NSDataHostObject>(data);
+    host_object.bytes = alloc;
+    host_object.length = length;
+    Ok(data)
+}
+
 fn write_data_file(
     env: &mut Environment,
     data: id,
@@ -29,7 +55,6 @@ fn write_data_file(
     options: NSUInteger,
     error: MutPtr<id>,
 ) -> bool {
-    use crate::fs::FsError;
     let result = if path == nil || options & !1 != 0 {
         Err(FsError::AccessDenied)
     } else {
@@ -160,6 +185,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
++ (id)dataWithContentsOfURL:(id)url options:(NSUInteger)options error:(MutPtr<id>)error {
+    let new: id = msg![env; this alloc];
+    let new: id = msg![env; new initWithContentsOfURL:url options:options error:error];
+    autorelease(env, new)
+}
+
 + (id)dataWithData:(id)data {
     let new: id = msg![env; this alloc];
     let new: id = msg![env; new initWithData:data];
@@ -218,25 +249,49 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
-- (id)initWithContentsOfFile:(id)path {
-    if path == nil {
-        return nil;
-    }
-    let path = to_rust_string(env, path);
-    log_dbg!("[(NSData*){:?} initWithContentsOfFile:{:?}]", this, path);
-    let Ok(bytes) = env.fs.read(GuestPath::new(&path)) else {
-        release(env, this);
-        return nil;
+- (id)initWithContentsOfURL:(id)url options:(NSUInteger)_options error:(MutPtr<id>)error {
+    use super::ns_error::{NSCocoaErrorDomain, NSURLErrorDomain};
+    let (domain, code) = if msg![env; url isFileURL] {
+        let path: id = msg![env; url path];
+        // The guest filesystem provides a byte buffer for both ordinary and
+        // uncached reads. It has no mapping for archive entries.
+        let code = match read_data_file(env, this, path) {
+            Ok(data) => return data,
+            Err(code) => code,
+        };
+        (NSCocoaErrorDomain, code)
+    } else {
+        let absolute: id = msg![env; url absoluteString];
+        let code = if absolute == nil {
+            -1002 // NSURLErrorUnsupportedURL
+        } else {
+            let absolute = to_rust_string(env, absolute);
+            let scheme = absolute.split(':').next().unwrap_or("");
+            if scheme.eq_ignore_ascii_case("http") || scheme.eq_ignore_ascii_case("https") {
+                -1009 // NSURLErrorNotConnectedToInternet
+            } else {
+                -1002 // NSURLErrorUnsupportedURL
+            }
+        };
+        (NSURLErrorDomain, code)
     };
-    let size = bytes.len().try_into().unwrap();
-    let alloc = env.mem.alloc(size);
-    let slice = env.mem.bytes_at_mut(alloc.cast(), size);
-    slice.copy_from_slice(&bytes);
+    if !error.is_null() {
+        let domain = super::ns_string::get_static_str(env, domain);
+        let failure: id = msg_class![env; NSError errorWithDomain:domain code:code userInfo:nil];
+        env.mem.write(error, failure);
+    }
+    release(env, this);
+    nil
+}
 
-    let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
-    host_object.bytes = alloc;
-    host_object.length = size;
-    this
+- (id)initWithContentsOfFile:(id)path {
+    match read_data_file(env, this, path) {
+        Ok(data) => data,
+        Err(_) => {
+            release(env, this);
+            nil
+        }
+    }
 }
 
 - (id)initWithContentsOfMappedFile:(id)path {

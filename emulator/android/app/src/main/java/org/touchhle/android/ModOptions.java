@@ -11,12 +11,12 @@ import java.util.List;
 /** Optional rules for the locally imported Hunter Island game. */
 final class ModOptions {
     private static final String[][] OPTIONS = {
-        {"--hunter-rare-dragons", "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)"},
-        {"--hunter-silver-exchange", "Silber gegen Gold tauschen (50:1)"},
-        {"--hunter-no-arena-cooldown", "Kolosseum ohne 12-Stunden-Wartezeit"},
-        {"--hunter-test-save", "Testspielstand erstellen / verwenden (separate Kopie)"},
-        {"--hunter-level1-save", "Neues Spiel: alle Monster auf Level 1, ohne Zusatzboni"},
-        {"--hunter-triple99-save", "Neues Spiel: alle Monster je 3-mal, Level 99, Rang S"},
+        {"--hunter-rare-dragons", "Find rare starter dragons more often (5% per wild battle)"},
+        {"--hunter-silver-exchange", "Exchange silver for gold (50:1)"},
+        {"--hunter-no-arena-cooldown", "Skip the 12-hour arena wait"},
+        {"--hunter-test-save", "Full collection and resources (separate save copy)"},
+        {"--hunter-level1-save", "New game with all monsters at level 1"},
+        {"--hunter-triple99-save", "New game with 3 of each monster, level 99, rank S"},
     };
 
     private static final String[][] PROFILES = {
@@ -31,7 +31,7 @@ final class ModOptions {
         SharedPreferences p=preferences(context);
         String selected=IpaInspector.BUNDLE;
         for (String[] profile : PROFILES) if(p.getBoolean(profile[0],false)) {
-            if(!selected.equals(IpaInspector.BUNDLE))throw new IllegalStateException("Bitte nur eine Testsammlung wählen");
+            if(!selected.equals(IpaInspector.BUNDLE))throw new IllegalStateException("Choose only one testing collection");
             selected=profile[1];
         }
         return selected;
@@ -41,7 +41,7 @@ final class ModOptions {
         String selected=selectedProfile(context);
         if (!selected.equals("pockettrend.hunterisland-test-v1")) return;
         java.io.File external=context.getExternalFilesDir(null);
-        if(external==null) throw new java.io.IOException("Spielstand-Speicher nicht verfügbar");
+        if(external==null) throw new java.io.IOException("Save storage is unavailable");
         java.io.File parent=new java.io.File(external,"touchHLE_sandbox");
         if(new java.io.File(parent,selected+"/test-profile.json").isFile()) return;
         java.io.File[] slots=new java.io.File(parent,IpaInspector.BUNDLE+"/Documents").listFiles();
@@ -50,12 +50,12 @@ final class ModOptions {
             java.io.File[] saves=slot.listFiles();
             if(saves!=null) for(java.io.File save:saves) if(save.isFile() && save.getName().matches("sv_[0-9]+")) return;
         }
-        throw new java.io.IOException("Bitte zuerst ohne Testspielstand-Haken ein normales Spiel starten und speichern. Danach kann die separate Testkopie erstellt werden.");
+        throw new java.io.IOException("Save a normal game once before creating a full collection copy.");
     }
 
     static void addControls(Context context, LinearLayout root) {
         TextView heading = new TextView(context);
-        heading.setText("Optionale Mods (ab dem nächsten Spielstart)");
+        heading.setText("Optional mods (apply on next launch)");
         root.addView(heading);
         SharedPreferences preferences = preferences(context);
         java.util.Map<String,CheckBox> boxes=new java.util.HashMap<>();
@@ -77,7 +77,7 @@ final class ModOptions {
             root.addView(checkbox);
         }
         TextView explanation = new TextView(context);
-        explanation.setText("Vollsammlung: Kopie des Normalstands. Level 1 / 3-mal Level 99: neues Spiel ohne Zusatzboni. Jede Sammlung hat eigene Saves. Alle Sammlungshaken aus = normaler Spielstand.");
+        explanation.setText("Each collection has its own saves. Leave all three unchecked to use your normal saves. Level 1 and level 99 starts have no bonus resources.");
         root.addView(explanation);
     }
 

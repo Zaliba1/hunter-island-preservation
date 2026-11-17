@@ -6,8 +6,7 @@ The verified game version is Hunter Island **2.02**, 32-bit ARM, supplied as
 an already decrypted IPA. The importer checks the archive, bundle and executable
 and reports incompatible files.
 
-Project documentation is in English. The current launchers use German button
-labels; the labels below are quoted so you can find the corresponding actions.
+The following steps use the English launcher labels.
 
 ## Windows
 
@@ -18,9 +17,8 @@ labels; the labels below are quoted so you can find the corresponding actions.
    For a ZIP with only **Start.cmd**, install 64-bit Python 3.11 or later with
    Tcl/Tk using the [official installer](https://www.python.org/downloads/windows/),
    then open **Start.cmd**.
-3. Select **Eigene IPA importieren** (import your IPA).
-4. Choose the display mode, game language and optional mods, then select
-   **Spiel starten** (start the game).
+3. Select **Import your IPA…** and choose your game file.
+4. Choose the display mode, language and optional mods, then select **Play**.
 5. Close the game window to return to the launcher.
 
 Playing requires working graphics drivers and the Windows system components.
@@ -39,9 +37,9 @@ open its launcher. It uses the same local data directory.
 1. Download or transfer the ARM64 APK to your phone.
 2. Open the APK. If prompted, allow installation from your file/download app.
 3. Open **Hunter Island · touchHLE**.
-4. Select **Eigene IPA importieren** (import your IPA) and choose your file.
+4. Select **Import your IPA…** and choose your file.
 5. Choose the display mode, game language and mod switches, then select
-   **Spiel starten** (start the game).
+   **Play**.
 
 Updates signed with the same project key can be installed over the existing
 app. A personal build uses your own key. Export your save before switching
@@ -50,20 +48,21 @@ same existing app.
 
 Android keeps the import and settings in private app storage. Saves are stored
 in the app-specific external files directory. Uninstalling the app may remove
-this data. **Spielstand exportieren** (export save) writes a ZIP to a location
+this data. **Export save…** writes a ZIP to a location
 you select.
 
 ## Game language
 
-Both launchers offer **Spiel-Sprache / Game language**. English is the default,
-including for existing profiles that have never selected a game language.
-Choose English, Deutsch, Français, Español, Italiano, 日本語, or
-**Systemsprache / System language** to follow the device's preferred languages.
-The selection is saved immediately and takes effect the next time you start
-the game. No command-line arguments are needed.
+The Windows **Language** menu defaults to English and also offers Deutsch,
+Français, Español, Italiano and 日本語, covering all six languages in the IPA.
+The launcher updates immediately. The game uses the same selection on its next
+start. **System language** uses the first supported Windows display language,
+with English as a fallback. Previously saved choices are kept.
+The in-game silver exchange uses the selected game language.
 
-This setting controls the original game's translations. The launcher interface
-and the added mod dialogs currently retain their German labels.
+The Android and Mac launchers open in English. Their **Game language** menus
+offer the same six languages for the game, with English as the initial choice.
+The selected game language also applies to the in-game silver exchange.
 
 ## Display modes
 
