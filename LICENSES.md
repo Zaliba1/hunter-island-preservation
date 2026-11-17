@@ -35,15 +35,15 @@ The standard Windows ZIP uses separately installed Python/Tk. Windows 10/11
 supplies OS libraries and .NET Framework, including the C# compiler used to
 build the isolation probe. Earlier MSVC emulator builds are outside this scope.
 
-The local test `-standalone.zip` variant adds an app-local CPython 3.11.9/Tcl/Tk
-runtime and the unmodified PyInstaller bootloader. The Python, Tcl/Tk, OpenSSL
-and other upstream notices and the PyInstaller exception are in
-`licenses/runtime/`. The matching runtime sources are in `runtime/` in the
-SourceDependencies ZIP. `windows-launcher-provenance.json` identifies the
-PyInstaller source tag for the bootloader. The Microsoft runtime from the
-official CPython installation retains the separate terms in
-`licenses/runtime/Microsoft-Python-Runtime-Conditions.txt`. The package uses
-Windows' UCRT and API sets.
+The `-standalone.zip` variant adds CPython 3.14 and Tcl/Tk 8.6 from MSYS2's
+UCRT64 repository, built with GCC/MinGW-w64. The launcher starter uses the
+Windows .NET Framework. The app uses Windows' UCRT and API sets. The inventory
+maps each packaged binary to its originating package. The archive includes no
+Microsoft VC redistributable DLLs. The original MSYS2 package notices and the
+Tcl/Tk license terms are in `licenses/windows-portable/`. The Python, Tcl/Tk,
+GNU runtime and other full corresponding sources, including the MSYS2 recipes
+and patches, accompany the download in the WindowsRuntimeSources ZIP. See
+`windows-portable-runtime.json` for the exact upstream inputs and checksums.
 
 ## Source and executable licenses
 

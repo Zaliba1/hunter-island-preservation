@@ -10,8 +10,8 @@ def verify(root,inventory):
         for name in record.get('imports',[]):
             lower=name.lower()
             if lower in OS or lower.startswith(('api-ms-win-','ext-ms-win-')):continue
-            context=root/'runtime' if rel.parts[0]=='runtime' else root/'_internal'
-            if not any(p.is_file() and p.name.lower()==lower for p in context.iterdir()):
+            context=root/'runtime' if rel.parts[0]=='runtime' else root/'_internal/bin'
+            if not context.is_dir() or not any(p.is_file() and p.name.lower()==lower for p in context.iterdir()):
                 missing.append(dict(file=record['path'],missing=name))
             else:resolved+=1
     if missing:raise ValueError('Missing non-OS DLL dependencies: '+json.dumps(missing))

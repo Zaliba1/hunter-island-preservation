@@ -13,8 +13,8 @@ labels; the labels below are quoted so you can find the corresponding actions.
 
 1. Download the Windows x64 ZIP from Releases and extract it completely.
    A short path such as C:/Games/HunterIsland is suitable.
-2. If your ZIP contains **HunterIsland-Launcher.exe**, open it from the extracted
-   folder. Keep `_internal` and `runtime` beside it. Python and Tk are included.
+2. If your ZIP contains **Start Hunter Island.exe**, open it from the extracted
+   folder. Keep `_internal`, `launcher` and `runtime` beside it. Python and Tk are included.
    For a ZIP with only **Start.cmd**, install 64-bit Python 3.11 or later with
    Tcl/Tk using the [official installer](https://www.python.org/downloads/windows/),
    then open **Start.cmd**.

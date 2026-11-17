@@ -60,13 +60,21 @@ The package contains the portable launcher, runtime, license mapping and
 manifest. The build runs engine tests. Packaging checks sources, license
 entries and imported system libraries.
 
-For a local test ZIP with Python and Tk included, use official 64-bit
-CPython 3.11.9, matching the runtime sources in the dependency archive. Install
-`requirements-windows-launcher.txt` in the build environment as well, and add
-`--bundle-launcher` to the packaging command. The `-standalone.zip` variant opens
-through `HunterIsland-Launcher.exe` and includes its runtime inventory and
-third-party notices. Public distribution of this variant requires confirming
-redistribution terms for the app-local runtime described in LICENSES.md.
+For the Windows ZIP with Python and Tk included, first fetch the pinned MSYS2
+UCRT64 packages and their sources. Then add the cache option to the same
+packaging command:
+
+~~~powershell
+./.venv/Scripts/python.exe tools/portable_windows_launcher.py .build/windows-runtime
+./.venv/Scripts/python.exe tools/package_release.py --emulator-exe C:/hi-build/windows/x86_64-pc-windows-gnu/release/touchHLE.exe --dependency-sources .dependencies --out dist/windows-portable --portable-runtime-cache .build/windows-runtime
+~~~
+
+The `-standalone.zip` variant opens through `Start Hunter Island.exe`. Include
+its `HunterIsland-WindowsRuntimeSources-*.zip` beside the matching project and
+dependency source archives when distributing it. The runtime source archive
+includes the full upstream sources, MSYS2 package recipes and patches for the
+bundled components. Package URLs and SHA-256 hashes are pinned in
+`windows-portable-runtime.json`.
 
 ## Build and check Android
 

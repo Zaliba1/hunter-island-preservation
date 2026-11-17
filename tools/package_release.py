@@ -14,7 +14,7 @@ from license_inventory import inventory
 from verify_source_delivery import verify as verify_source_delivery
 from verify_windows_imports import verify as verify_windows_imports
 from audit_dependency_sources import audit as audit_dependency_sources
-from freeze_windows_launcher import freeze_launcher
+from portable_windows_launcher import bundle_launcher
 
 root=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(root/'launcher'))
@@ -31,7 +31,8 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--emulator-exe',type=Path,required=True)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--dependency-sources',type=Path,required=True)
-    parser.add_argument('--bundle-launcher',action='store_true',help='Build the standalone Windows launcher variant, including Python and Tk.')
+    parser.add_argument('--portable-runtime-cache',type=Path,
+                        help='Build the standalone variant from the verified MSYS2 package and source cache.')
     args=parser.parse_args()
     if args.out.exists():raise ValueError('Output must be a new directory')
     if b'OpenAL Soft LGPL relink verification' in args.emulator_exe.read_bytes():
@@ -62,17 +63,17 @@ def main():
     if (root/'TEST_PROFILE.md').exists():shutil.copyfile(root/'TEST_PROFILE.md',package/'TEST_PROFILE.md')
     licenses=package/'licenses';licenses.mkdir()
     shutil.copytree(root/'licenses',licenses,dirs_exist_ok=True)
-    bundled_vc_runtime = False
-    if args.bundle_launcher:
-        bundled_vc_runtime = freeze_launcher(root, package, args.out / '.build/frozen-launcher')
+    if args.portable_runtime_cache:
+        runtime_sources = args.out / f'HunterIsland-WindowsRuntimeSources-{VERSION}.zip'
+        bundle_launcher(root, package, args.out / '.build/portable-launcher', args.portable_runtime_cache, runtime_sources)
     component_inventory=inventory(package)
     imports_check=verify_windows_imports(package,component_inventory)
     (package/'license-inventory.json').write_text(json.dumps(component_inventory,indent=2)+'\n')
     report=audit(package,True)
     source_report=audit(root)
     (args.out/'audit.json').write_text(json.dumps(dict(release=report,source=source_report,source_delivery=source_delivery,windows_imports=imports_check,
-        source_dependency_privacy=source_privacy,bundled_python=args.bundle_launcher,bundled_microsoft_vc_runtime=bundled_vc_runtime),indent=2))
-    variant = '-standalone' if args.bundle_launcher else ''
+        source_dependency_privacy=source_privacy,bundled_python=args.portable_runtime_cache is not None,bundled_microsoft_vc_runtime=False),indent=2))
+    variant = '-standalone' if args.portable_runtime_cache else ''
     archive_tree(package,args.out/f'HunterIsland-Windows-x64-{VERSION}{variant}.zip')
     # Dependencies can be fetched at pinned revisions; no local vendor checkout,
     # build cache, private analysis, or existing .git history enters this archive.

@@ -7,6 +7,9 @@ Published builds provide them in
 - HunterIsland-Source-0.2.0-preview.9.zip
 - HunterIsland-SourceDependencies-0.2.0-preview.9.zip
 
+The standalone Windows variant also has a `HunterIsland-WindowsRuntimeSources-*.zip`
+with the sources for its bundled MSYS2 Python/Tcl/Tk runtime and libraries.
+
 Mac test artifacts use `HunterIsland-Source-test-<commit>.zip` and
 `HunterIsland-SourceDependencies-test-<commit>.zip` beside the matching app ZIP.
 
