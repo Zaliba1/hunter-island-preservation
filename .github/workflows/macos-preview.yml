@@ -1,18 +1,30 @@
 name: Apple Silicon Mac preview
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: Apple Silicon runner image (alternate pool if capacity is unavailable)
+        type: choice
+        default: macos-15
+        options: [macos-15, macos-26]
+      source_ref:
+        description: Optional exact source commit/tag to build; empty uses this workflow commit
+        type: string
+        default: ''
   push:
     branches: [main]
 permissions:
   contents: read
 jobs:
   macos:
-    runs-on: macos-15
+    runs-on: ${{ inputs.runner || 'macos-15' }}
     timeout-minutes: 75
     env:
       CARGO_TERM_COLOR: never
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11'
@@ -34,8 +46,8 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .build/macos/target
-          key: macos-arm64-rust190-v1-${{ hashFiles('emulator/Cargo.lock', 'emulator/Cargo.toml', 'emulator/src/**') }}
-          restore-keys: macos-arm64-rust190-v1-
+          key: macos-arm64-rust190-${{ inputs.runner || 'macos-15' }}-v1-${{ hashFiles('emulator/Cargo.lock', 'emulator/Cargo.toml', 'emulator/src/**') }}
+          restore-keys: macos-arm64-rust190-${{ inputs.runner || 'macos-15' }}-v1-
       - name: Build and test the native app
         shell: bash
         run: bash tools/build-macos.sh
