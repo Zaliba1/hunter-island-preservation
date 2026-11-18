@@ -160,7 +160,7 @@ final class LauncherBackground: NSView {
             do {
                 self.lockFD = try self.store.lock()
                 let game = try self.store.game(), app = Bundle.main.bundleURL
-                _ = try runTool("/usr/bin/codesign", ["--verify", "--strict", app.path])
+                try verifyInstalledBundle(app)
                 try self.store.backup(); try verifyIsolation(app: app, store: self.store)
                 let logs = self.store.root.appendingPathComponent("logs", isDirectory: true)
                 try FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)

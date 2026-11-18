@@ -39,6 +39,7 @@ codesign --force --sign - --options runtime --entitlements macos/engine-entitlem
 codesign --force --sign - "$app/Contents/MacOS/isolation-probe"
 codesign --force --sign - "$app"
 codesign --verify --deep --strict "$app"
+.build/macos/core-tests --signature "$app"
 HI_MAC_TEST_DATA="$root/.build/macos/ui-profile" HI_MAC_UI_SNAPSHOT="$root/.build/macos/launcher.png" "$app/Contents/MacOS/HunterIslandLauncher" --ui-smoke
 # Repeat isolation against the packaged probe and actual SB profile.
 .build/macos/core-tests --isolation "$app"

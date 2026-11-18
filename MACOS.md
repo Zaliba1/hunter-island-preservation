@@ -40,6 +40,18 @@ Backups are made before and after a game run; the latest 20 are retained.
 Automatic discovery/import of Windows or Android saves is not performed.
 There is not yet a Mac save-import button or a Mac diagnostic-export button.
 
+### FinderInfo error in earlier builds
+
+Finder can add metadata to an app after extraction. The current launcher
+handles FinderInfo on the outer app folder while verifying the signed contents.
+For an earlier build with the reported error and FinderInfo on the outer app
+folder in Applications, remove that attribute in Terminal and reopen the app.
+[Apple's FinderInfo explanation](https://developer.apple.com/library/archive/qa/qa1940/_index.html).
+
+```sh
+xattr -d com.apple.FinderInfo "/Applications/Hunter Island.app"
+```
+
 ## Isolation
 
 The preview uses the system `sandbox-exec` with the supplied Seatbelt profile.

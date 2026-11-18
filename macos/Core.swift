@@ -49,6 +49,49 @@ func runTool(_ executable: String, _ arguments: [String], limit: Int = 2 << 20) 
     }
     return data
 }
+
+private func attributeLength(_ name: String, at url: URL) throws -> Int? {
+    try url.withUnsafeFileSystemRepresentation { path in
+        guard let path = path else { throw PreviewError.invalid("Invalid app bundle path.") }
+        let size = name.withCString { getxattr(path, $0, nil, 0, 0, XATTR_NOFOLLOW) }
+        if size >= 0 { return size }
+        let code = errno
+        if code == ENOATTR { return nil }
+        throw POSIXError(POSIXErrorCode(rawValue: code) ?? .EIO)
+    }
+}
+
+func verifyInstalledBundle(_ app: URL) throws {
+    let codesign = "/usr/bin/codesign"
+    do {
+        _ = try runTool(codesign, ["--verify", "--deep", "--strict", app.path])
+    } catch PreviewError.invalid(let message) {
+        let strictFailure = PreviewError.invalid(message)
+        let finderInfo = "com.apple.FinderInfo", resourceFork = "com.apple.ResourceFork"
+        guard message.contains("resource fork, Finder information, or similar detritus not allowed"),
+              try attributeLength(finderInfo, at: app) == 32,
+              try attributeLength(resourceFork, at: app) == nil else {
+            throw strictFailure
+        }
+
+        // Finder can add a 32-byte record to the outer directory. Recheck the
+        // bundle without codesign's sideband rule only when this is the sole
+        // such attribute. Keep signature, sealed-resource and symlink checks.
+        var complete = true
+        guard let entries = FileManager.default.enumerator(
+            at: app, includingPropertiesForKeys: nil,
+            options: [], errorHandler: { _, _ in complete = false; return false }
+        ) else { throw strictFailure }
+        for case let item as URL in entries {
+            if try attributeLength(finderInfo, at: item) != nil || attributeLength(resourceFork, at: item) != nil {
+                throw strictFailure
+            }
+        }
+        guard complete else { throw strictFailure }
+        _ = try runTool(codesign, ["--verify", "--deep", "--strict=symlinks", app.path])
+    }
+}
+
 func digest(_ url: URL) throws -> String {
     let handle = try FileHandle(forReadingFrom: url); defer { try? handle.close() }
     var hash = SHA256()

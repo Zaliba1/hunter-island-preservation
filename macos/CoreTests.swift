@@ -3,8 +3,49 @@ import Foundation
 import Darwin
 
 @main struct CoreTests {
+    static func checkInstalledBundle(_ app: URL) throws {
+        let attributes = "/usr/bin/xattr"
+        let name = "com.apple.FinderInfo"
+        let value = "0000000000000000001000000000000000000000000000000000000000000000"
+        let temporary = FileManager.default.temporaryDirectory.appendingPathComponent("hunter-signature-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: temporary, withIntermediateDirectories: false,
+                                                attributes: [.posixPermissions: 0o700])
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        let fixture = temporary.appendingPathComponent("Copied Hunter Island.app")
+        try FileManager.default.copyItem(at: app, to: fixture)
+        try verifyInstalledBundle(fixture)
+
+        func rejects(_ operation: () throws -> Void) -> Bool {
+            do { try operation(); return false } catch { return true }
+        }
+
+        _ = try runTool(attributes, ["-wx", name, value, fixture.path])
+        let storedAttribute = try runTool(attributes, ["-px", name, fixture.path])
+        try require(rejects {
+            _ = try runTool("/usr/bin/codesign", ["--verify", "--deep", "--strict", fixture.path])
+        }, "The FinderInfo reproduction did not trigger the strict check.")
+        try verifyInstalledBundle(fixture)
+        let after = try runTool(attributes, ["-px", name, fixture.path])
+        try require(after == storedAttribute, "Verification changed the installed bundle metadata.")
+
+        let resource = fixture.appendingPathComponent("Contents/Resources/game.sb")
+        _ = try runTool(attributes, ["-wx", name, value, resource.path])
+        try require(rejects { try verifyInstalledBundle(fixture) }, "FinderInfo inside the signed bundle was accepted.")
+        _ = try runTool(attributes, ["-d", name, resource.path])
+        let handle = try FileHandle(forWritingTo: resource)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data("\n; modified resource for signature test\n".utf8))
+        try handle.close()
+        try require(rejects { try verifyInstalledBundle(fixture) }, "A modified signed resource was accepted.")
+        print("Installed Mac bundle signature checks passed with FinderInfo and tampered-resource fixtures.")
+    }
+
     static func main() throws {
         let args = CommandLine.arguments
+        if args.count == 3 && args[1] == "--signature" {
+            try checkInstalledBundle(URL(fileURLWithPath: args[2]))
+            return
+        }
         if args.count == 3 && args[1] == "--graphics" {
             guard let directory = ProcessInfo.processInfo.environment["HI_MAC_GRAPHICS_DATA"] else { throw PreviewError.invalid("Missing private graphics fixture directory.") }
             let store = try MacStore(root: URL(fileURLWithPath: directory))
