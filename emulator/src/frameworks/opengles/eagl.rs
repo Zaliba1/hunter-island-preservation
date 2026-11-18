@@ -14,7 +14,7 @@ use crate::frameworks::foundation::ns_string::get_static_str;
 use crate::frameworks::foundation::NSUInteger;
 use crate::gles::gles11_raw as gles11; // constants only
 use crate::gles::gles11_raw::types::*;
-use crate::gles::present::{present_frame, FpsCounter};
+use crate::gles::present::{present_frame, set_presentation_filter, FpsCounter};
 use crate::gles::{create_gles1_ctx, gles1_on_gl2, GLESContext, GLES};
 use crate::mem::MutPtr;
 use crate::objc::{id, msg, nil, objc_classes, release, retain, ClassExports, HostObject};
@@ -695,9 +695,10 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
     let shader_context =
         env.objc.borrow::<EAGLContextHostObject>(current).api == kEAGLRenderingAPIOpenGLES2;
     // Save these for when we need to draw the frame
-    let viewport = env.window.as_mut().unwrap().viewport();
-    let rotation_matrix = env.window.as_mut().unwrap().rotation_matrix();
-    let virtual_cursor_visible_at = env.window.as_mut().unwrap().virtual_cursor_visible_at();
+    let window = env.window();
+    let (viewport, nearest) = window.viewport_and_filter();
+    let rotation_matrix = window.rotation_matrix();
+    let virtual_cursor_visible_at = window.virtual_cursor_visible_at();
 
     let gles_ctx = super::get_thread_context(
         &mut env.framework_state.opengles,
@@ -710,7 +711,7 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
 
     #[cfg(target_os = "android")]
     if shader_context {
-        assert!(gles.present_shader_renderbuffer(viewport,rotation_matrix));
+        assert!(gles.present_shader_renderbuffer(viewport, rotation_matrix, nearest));
         std::mem::drop(gles_boxed);
         env.window.as_ref().unwrap().swap_window();
         return;
@@ -759,11 +760,7 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
     );
     // The texture will not have any mip levels so we must ensure the filter
     // does not use them, else rendering will fail.
-    gles.TexParameteri(
-        gles11::TEXTURE_2D,
-        gles11::TEXTURE_MIN_FILTER,
-        gles11::LINEAR as _,
-    );
+    set_presentation_filter(gles, nearest);
 
     // Clean up the framebuffer object since we no longer need it.
     // This also sets the framebuffer bindings back to zero, so rendering

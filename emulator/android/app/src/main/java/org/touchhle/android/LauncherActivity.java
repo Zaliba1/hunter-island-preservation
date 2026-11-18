@@ -22,16 +22,7 @@ public final class LauncherActivity extends Activity {
         int pad=(int)(24*getResources().getDisplayMetrics().density);root.setPadding(pad,pad,pad,pad);
         TextView title=new TextView(this);title.setText("Hunter Island");title.setTextSize(28);root.addView(title);
         TextView subtitle=new TextView(this);subtitle.setText("Android preview · touchHLE");root.addView(subtitle);
-        TextView displayLabel=new TextView(this);displayLabel.setText("Display mode (applies on next launch)");root.addView(displayLabel);
-        Spinner display=new Spinner(this);
-        display.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"iPhone Retina · 960 × 640 · experimental","iPhone · 480 × 320","iPad · 1024 × 768"}));
-        android.content.SharedPreferences preferences=getSharedPreferences("display",MODE_PRIVATE);
-        String family=preferences.getString("family","iphone-retina");
-        display.setSelection("ipad".equals(family)?2:"iphone".equals(family)?1:0);
-        display.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-            public void onItemSelected(AdapterView<?> p,android.view.View v,int position,long id){preferences.edit().putString("family",position==2?"ipad":position==1?"iphone":"iphone-retina").apply();}
-            public void onNothingSelected(AdapterView<?> p){}
-        });root.addView(display);
+        DisplayOptions.addControls(this, root);
         LanguageOptions.addControls(this, root);
         ModOptions.addControls(this, root);
         status=new TextView(this);status.setPadding(0,pad,0,pad);root.addView(status);

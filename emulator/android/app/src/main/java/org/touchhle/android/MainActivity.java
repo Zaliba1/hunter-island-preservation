@@ -25,12 +25,10 @@ public class MainActivity extends SDLActivity {
         String game = getIntent().getStringExtra("game");
         if (game == null || !new java.io.File(game).isFile())
             throw new IllegalStateException("Open the game from the launcher");
-        String profile=getSharedPreferences("display",MODE_PRIVATE).getString("family","iphone-retina");
-        String family="ipad".equals(profile)?"ipad":"iphone";
         java.util.ArrayList<String> arguments=new java.util.ArrayList<>(java.util.Arrays.asList(game,"--no-error-popup","--experimental-gles2",
             "--legacy-string-unsigned-int","--legacy-deferred-texture-deletes",
-            "--landscape-left","--device-family="+family));
-        if("iphone-retina".equals(profile))arguments.add("--experimental-retina");
+            "--landscape-left"));
+        DisplayOptions.appendArguments(this, arguments);
         LanguageOptions.appendArguments(this, arguments);
         ModOptions.appendArguments(this, arguments);
         return arguments.toArray(new String[0]);

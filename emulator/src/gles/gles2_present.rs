@@ -23,7 +23,7 @@ impl Presenter {
         let mut vao=0;let mut vbo=0;let mut texture=0;gl::GenVertexArrays(1,&mut vao);gl::GenBuffers(1,&mut vbo);gl::GenTextures(1,&mut texture);
         Self{program,vao,vbo,texture,size:(0,0),rotation:gl::GetUniformLocation(program,c"rotation".as_ptr())}
     }
-    pub unsafe fn draw(&mut self,context:&mut dyn GLES,viewport:(u32,u32,u32,u32),rotation:Matrix<2>) {
+    pub unsafe fn draw(&mut self,context:&mut dyn GLES,viewport:(u32,u32,u32,u32),rotation:Matrix<2>,nearest:bool) {
         let state=super::gles2_shaders::pause_program(context);
         fn int(name:u32)->i32{let mut n=0;unsafe{gl::GetIntegerv(name,&mut n)};n}
         let old_fbo=int(gl::FRAMEBUFFER_BINDING) as u32;
@@ -47,8 +47,7 @@ impl Presenter {
         if self.size!=(width,height) {
             gl::CopyTexImage2D(gl::TEXTURE_2D,0,gl::RGBA,0,0,width,height,0);self.size=(width,height);
         } else {gl::CopyTexSubImage2D(gl::TEXTURE_2D,0,0,0,0,0,width,height);}
-        gl::TexParameteri(gl::TEXTURE_2D,gl::TEXTURE_MIN_FILTER,gl::LINEAR as i32);
-        gl::TexParameteri(gl::TEXTURE_2D,gl::TEXTURE_MAG_FILTER,gl::LINEAR as i32);
+        super::present::set_presentation_filter(context, nearest);
         gl::TexParameteri(gl::TEXTURE_2D,gl::TEXTURE_WRAP_S,gl::CLAMP_TO_EDGE as i32);
         gl::TexParameteri(gl::TEXTURE_2D,gl::TEXTURE_WRAP_T,gl::CLAMP_TO_EDGE as i32);
         gl::BindFramebuffer(gl::FRAMEBUFFER,0);gl::DeleteFramebuffers(1,&fbo);

@@ -22,6 +22,11 @@ or a Windows `.cmd` file. Developers need the tools described below.
    enabled, uses the selected game language.
 5. Select **Play**. Close the game window to return to the launcher.
 
+The launcher remembers **Start in fullscreen** and **Integer scaling**.
+During play, **F11** switches between a window and full screen. **F10** changes
+the fullscreen scaling mode. Integer scaling keeps pixels sharp and can leave
+larger borders, depending on the display and game resolution.
+
 The test build is an experimental preview, **ad-hoc signed, not notarized**.
 The starter does not disable Gatekeeper or remove quarantine flags.
 Follow macOS's own review/approval flow for software you have chosen to trust.

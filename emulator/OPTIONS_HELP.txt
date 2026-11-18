@@ -1,12 +1,19 @@
 View options:
     --fullscreen
         Display the app in full screen. The default is to display in a window
-        instead, except on Android which always uses full screen.
+        instead, except on Android which always uses full screen. On desktop,
+        press F11 in the emulator window to toggle full screen while playing.
 
         The app's output will be scaled to fit your screen. This is independent
         of the internal resolution, so if the scale hack (see below) is not also
         in use, the result may be a bit blurry. An internal resolution larger
         than your screen's is possible, in which case the output is downscaled.
+
+    --integer-scaling
+        Use the largest whole-number scale that fits the fullscreen display,
+        with nearest-neighbor sampling. If no whole-number scale fits, the
+        emulator uses filtered fit-to-screen scaling. Press F10 in the game
+        window to switch between the two modes without restarting.
 
     --portrait
     --upside-down

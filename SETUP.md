@@ -68,8 +68,28 @@ The selected game language also applies to the in-game silver exchange.
 
 Windows offers landscape iPad at 1024 × 768 and iPhone at 480 × 320.
 Android also offers experimental iPhone Retina at 960 × 640.
-The game uses a fixed aspect ratio, so wider phones have unused space at
-the sides.
+On Android, select **Integer scaling** in the launcher to use it on the next
+game launch. The Mac launcher offers **Start in fullscreen** and
+**Integer scaling**. The launcher remembers these choices.
+
+While playing on Windows or Mac, press **F11** to switch between a window and
+full screen. Press **F10** to switch between fit-to-screen and integer scaling
+in full screen. Integer scaling uses whole pixels and may leave wider borders.
+The emulator fits the image to the screen if a whole-number scale cannot fit.
+The game keeps its original aspect ratio in either mode.
+
+Desktop players can set startup defaults with a `touchHLE_options.txt` file
+in the local `profiles/default/run` directory. Use one line for the game:
+
+```text
+pockettrend.hunterisland: --fullscreen --integer-scaling
+```
+
+For experimental supersampling, try `--fullscreen --scale-hack=2` on that
+line. It renders twice the width and height and uses four times as many pixels
+before display scaling. A smaller output can smooth edges when the frame is
+downsampled. The tested iPad title screen rendered at 2048 × 1536 with this
+option. Full gameplay at this setting has yet to be tested.
 
 ## Saves
 

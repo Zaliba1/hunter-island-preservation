@@ -14,6 +14,7 @@ final class LauncherBackground: NSView {
 @main final class Launcher: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!, store: MacStore!, status: NSTextField!, playButton: NSButton!
     var language: NSPopUpButton!, device: NSPopUpButton!, mods = [NSButton](), buttons = [NSControl]()
+    var fullscreen: NSButton!, integerScaling: NSButton!
     var gameProcess: Process?, lockFD: Int32 = -1
     var busy = false
     static func main() {
@@ -48,7 +49,14 @@ final class LauncherBackground: NSView {
             stack.addArrangedSubview(label("Display mode"))
             device = NSPopUpButton(); device.addItems(withTitles: ["iPad · 1024 × 768", "iPhone · 480 × 320"])
             device.selectItem(at: store.settings["device"] as? String == "iphone" ? 1 : 0)
-            device.target = self; device.action = #selector(saveOptions); buttons.append(device); stack.addArrangedSubview(device)
+            device.target = self; device.action = #selector(saveOptions); buttons.append(device)
+            fullscreen = displayToggle("Start in fullscreen", key: "fullscreen")
+            integerScaling = displayToggle("Integer scaling", key: "integerScaling")
+            let displayOptions = NSStackView(views: [device, fullscreen, integerScaling])
+            displayOptions.orientation = .horizontal
+            displayOptions.alignment = .centerY
+            displayOptions.spacing = 14
+            stack.addArrangedSubview(displayOptions)
             stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
@@ -70,6 +78,16 @@ final class LauncherBackground: NSView {
                         let frame = view.convert(view.bounds, to: self.window.contentView!)
                         if !available.contains(frame) { self.show(PreviewError.invalid("A launcher control is clipped: \(frame)")); return }
                     }
+                    do {
+                        for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling")] {
+                            let initialState = button.state
+                            button.performClick(nil)
+                            let reopened = try MacStore(root: self.store.root)
+                            try require(button.state != initialState, "The display checkbox did not toggle.")
+                            try require(reopened.settings[key] as? Bool == (button.state == .on), "The display choice did not persist.")
+                            button.performClick(nil)
+                        }
+                    } catch { self.show(error); return }
                     if let destination = ProcessInfo.processInfo.environment["HI_MAC_UI_SNAPSHOT"] {
                         let content = self.window.contentView!
                         guard let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds) else {
@@ -89,6 +107,12 @@ final class LauncherBackground: NSView {
     func label(_ text: String) -> NSTextField { NSTextField(wrappingLabelWithString: text) }
     func button(_ title: String, _ action: Selector) -> NSButton {
         let result = NSButton(title: title, target: self, action: action); result.bezelStyle = .rounded; buttons.append(result); return result
+    }
+    func displayToggle(_ title: String, key: String) -> NSButton {
+        let result = NSButton(checkboxWithTitle: title, target: self, action: #selector(saveOptions))
+        result.state = store.settings[key] as? Bool == true ? .on : .off
+        buttons.append(result)
+        return result
     }
     func show(_ error: Error) {
         if CommandLine.arguments.contains("--ui-smoke") {
@@ -111,6 +135,8 @@ final class LauncherBackground: NSView {
     @objc func saveOptions() {
         store.settings["language"] = languageChoices[language.indexOfSelectedItem].0
         store.settings["device"] = device.indexOfSelectedItem == 0 ? "ipad" : "iphone"
+        store.settings["fullscreen"] = fullscreen.state == .on
+        store.settings["integerScaling"] = integerScaling.state == .on
         store.settings["mods"] = Dictionary(uniqueKeysWithValues: zip(modChoices, mods).map { ($0.0.0, $0.1.state == .on) })
         do { let fd = try store.lock(); defer { flock(fd, LOCK_UN); close(fd) }; try store.save() } catch { show(error) }
     }
@@ -141,7 +167,13 @@ final class LauncherBackground: NSView {
                 let log = logs.appendingPathComponent("game.log")
                 FileManager.default.createFile(atPath: log.path, contents: Data())
                 let handle = try FileHandle(forWritingTo: log)
-                let options = gameArguments(language: self.store.settings["language"] as? String, device: self.store.settings["device"] as? String ?? "ipad", mods: self.store.settings["mods"] as? [String: Bool] ?? [:])
+                let options = gameArguments(
+                    language: self.store.settings["language"] as? String,
+                    device: self.store.settings["device"] as? String ?? "ipad",
+                    mods: self.store.settings["mods"] as? [String: Bool] ?? [:],
+                    fullscreen: self.store.settings["fullscreen"] as? Bool ?? false,
+                    integerScaling: self.store.settings["integerScaling"] as? Bool ?? false
+                )
                 let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice
                 try process.run(); self.gameProcess = process

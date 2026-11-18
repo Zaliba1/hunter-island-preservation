@@ -17,7 +17,7 @@ use crate::frameworks::core_graphics::cg_color::CGColorHostObject;
 use crate::frameworks::core_graphics::{cg_bitmap_context, cg_image, CGFloat, CGRect};
 use crate::gles::gles11_raw as gles11; // constants only
 use crate::gles::gles11_raw::types::*;
-use crate::gles::present::{present_frame, FpsCounter};
+use crate::gles::present::{present_frame, set_presentation_filter, FpsCounter};
 use crate::gles::GLES; // constants only
 use crate::image::Image;
 use crate::matrix::Matrix;
@@ -139,11 +139,10 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
     let scale_hack: u32 = env.options.scale_hack.get() * screen_scale;
     let fb_width = screen_bounds.size.width as u32 * scale_hack;
     let fb_height = screen_bounds.size.height as u32 * scale_hack;
-    let present_frame_args = (
-        env.window().viewport(),
-        env.window().rotation_matrix(),
-        env.window().virtual_cursor_visible_at(),
-    );
+    let window = env.window();
+    let (viewport, nearest) = window.viewport_and_filter();
+    let rotation = window.rotation_matrix();
+    let cursor = window.virtual_cursor_visible_at();
 
     // TODO: draw status bar if it's not hidden
 
@@ -375,13 +374,9 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
     // default framebuffer (0) so we need to unbind our internal framebuffer.
     unsafe {
         gles.BindTexture(gles11::TEXTURE_2D, texture);
+        set_presentation_filter(gles.as_mut(), nearest);
         gles.BindFramebufferOES(gles11::FRAMEBUFFER_OES, 0);
-        present_frame(
-            gles.as_mut(),
-            present_frame_args.0,
-            present_frame_args.1,
-            present_frame_args.2,
-        );
+        present_frame(gles.as_mut(), viewport, rotation, cursor);
     }
     std::mem::drop(gles);
     window.swap_window();

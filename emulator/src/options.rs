@@ -35,6 +35,7 @@ pub enum Button {
 #[derive(Clone)]
 pub struct Options {
     pub fullscreen: bool,
+    pub integer_scaling: bool,
     pub device_family: Option<DeviceFamily>,
     pub initial_orientation: DeviceOrientation,
     /// An explicit CLI orientation takes precedence over bundle auto-detection.
@@ -90,6 +91,7 @@ impl Default for Options {
     fn default() -> Self {
         Options {
             fullscreen: false,
+            integer_scaling: false,
             device_family: None,
             initial_orientation: DeviceOrientation::Portrait,
             explicit_initial_orientation: false,
@@ -160,6 +162,8 @@ impl Options {
 
         if arg == "--fullscreen" {
             self.fullscreen = true;
+        } else if arg == "--integer-scaling" {
+            self.integer_scaling = true;
         } else if arg == "--portrait" {
             self.initial_orientation = DeviceOrientation::Portrait;
             self.explicit_initial_orientation = true;

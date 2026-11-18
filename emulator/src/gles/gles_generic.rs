@@ -72,7 +72,14 @@ pub trait GLESContext {
 #[allow(clippy::too_many_arguments)] // not our fault :(
 pub trait GLES {
     /// Android shader-only presentation; other backends retain their existing presenter.
-    fn present_shader_renderbuffer(&mut self, _viewport:(u32,u32,u32,u32), _rotation:crate::matrix::Matrix<2>) -> bool { false }
+    fn present_shader_renderbuffer(
+        &mut self,
+        _viewport: (u32, u32, u32, u32),
+        _rotation: crate::matrix::Matrix<2>,
+        _nearest: bool,
+    ) -> bool {
+        false
+    }
     /// Experimental desktop shader API; the native GLES1 backend remains unsupported.
     fn supports_gles2_shaders(&self) -> bool {
         false

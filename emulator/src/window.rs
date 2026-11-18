@@ -12,7 +12,7 @@
 //! window system interaction in general, because it is assumed only one window
 //! will be needed for the runtime of the app.
 
-use crate::gles::present::present_frame;
+use crate::gles::present::{present_frame, set_presentation_filter};
 use crate::gles::{create_gles1_ctx_no_parent_stack, GLESContext, GLES};
 use crate::image::Image;
 use crate::matrix::Matrix;
@@ -90,6 +90,84 @@ fn size_for_orientation(
         DeviceOrientation::LandscapeRight => (height * scale_hack, width * scale_hack),
     }
 }
+/// Fit the oriented backing pixels into the drawable with centered borders.
+/// A display smaller than the backing still gets a complete, filtered image.
+fn fullscreen_viewport(
+    (width, height): (u32, u32),
+    (screen_width, screen_height): (u32, u32),
+    integer_scaling: bool,
+) -> ((u32, u32, u32, u32), bool) {
+    let factor = (screen_width / width).min(screen_height / height);
+    let nearest = integer_scaling && factor > 0;
+    let (scaled_width, scaled_height) = if nearest {
+        (width * factor, height * factor)
+    } else if u64::from(width) * u64::from(screen_height)
+        < u64::from(screen_width) * u64::from(height)
+    {
+        (
+            (f64::from(screen_height) * f64::from(width) / f64::from(height)).round() as u32,
+            screen_height,
+        )
+    } else {
+        (
+            screen_width,
+            (f64::from(screen_width) * f64::from(height) / f64::from(width)).round() as u32,
+        )
+    };
+    (
+        (
+            (screen_width - scaled_width) / 2,
+            (screen_height - scaled_height) / 2,
+            scaled_width,
+            scaled_height,
+        ),
+        nearest,
+    )
+}
+
+#[cfg(test)]
+mod viewport_tests {
+    use super::fullscreen_viewport;
+
+    #[test]
+    fn ipad_output_fits_1440p_without_distorting() {
+        let screen = (2560, 1440);
+        let backing = (1024, 768);
+        assert_eq!(
+            fullscreen_viewport(backing, screen, false),
+            ((320, 0, 1920, 1440), false)
+        );
+        assert_eq!(
+            fullscreen_viewport(backing, screen, true),
+            ((768, 336, 1024, 768), true)
+        );
+    }
+
+    #[test]
+    fn integer_scale_counts_backing_pixels_and_uses_the_largest_factor_that_fits() {
+        assert_eq!(
+            fullscreen_viewport((480, 320), (2560, 1440), true),
+            ((320, 80, 1920, 1280), true)
+        );
+        assert_eq!(
+            fullscreen_viewport((960, 640), (2400, 1080), true),
+            ((720, 220, 960, 640), true)
+        );
+        assert_eq!(
+            fullscreen_viewport((1024, 768), (3840, 2160), true),
+            ((896, 312, 2048, 1536), true)
+        );
+    }
+
+    #[test]
+    fn integer_scale_falls_back_to_fit_when_the_backing_is_too_large() {
+        assert_eq!(
+            fullscreen_viewport((1024, 768), (1280, 720), true),
+            ((160, 0, 960, 720), false)
+        );
+    }
+}
+
 fn rotate_fullscreen_size(orientation: DeviceOrientation, screen_size: (u32, u32)) -> (u32, u32) {
     let (short_side, long_side) = if screen_size.0 < screen_size.1 {
         (screen_size.0, screen_size.1)
@@ -228,9 +306,10 @@ pub struct Window {
     max_height: u32,
     #[cfg(target_os = "macos")]
     viewport_y_offset: u32,
-    /// Copy of `fullscreen` on [Options]. Note that this is meaningless when
-    /// [Self::rotatable_fullscreen] returns [true].
+    /// Current desktop window mode. Mobile always uses full screen.
     fullscreen: bool,
+    integer_scaling: bool,
+    backing_scale: u32,
     scale_hack: NonZeroU32,
     internal_gl_ins: Option<Box<dyn GLESContext>>,
     splash_image: Option<Image>,
@@ -265,6 +344,10 @@ impl Window {
         launch_image: Option<Image>,
         options: &Options,
     ) -> Window {
+        // Use physical pixels. Otherwise Windows can magnify a correctly
+        // integer-scaled OpenGL frame again at 125% or 150% display scaling.
+        #[cfg(target_os = "windows")]
+        sdl2::hint::set("SDL_WINDOWS_DPI_AWARENESS", "permonitorv2");
         let sdl_ctx = sdl2::init().unwrap();
         let video_ctx = sdl_ctx.video().unwrap();
 
@@ -313,25 +396,17 @@ impl Window {
                 .build()
                 .unwrap();
             window
-        } else if fullscreen {
-            let (width, height) = video_ctx.display_bounds(0).unwrap().size();
-            let window = video_ctx
-                .window(title, width, height)
-                .fullscreen_desktop()
-                .opengl()
-                .build()
-                .unwrap();
-            window
         } else {
             let (width, height) =
                 size_for_orientation(device_family, device_orientation, scale_hack);
-            let window = video_ctx
-                .window(title, width, height)
-                .position_centered()
-                .opengl()
-                .build()
-                .unwrap();
-            window
+            let mut builder = video_ctx.window(title, width, height);
+            builder.position_centered().opengl();
+            #[cfg(target_os = "macos")]
+            builder.allow_highdpi();
+            if fullscreen {
+                builder.fullscreen_desktop();
+            }
+            builder.build().unwrap()
         };
 
         if env::consts::OS == "android" {
@@ -380,6 +455,8 @@ impl Window {
             #[cfg(target_os = "macos")]
             viewport_y_offset: 0,
             fullscreen,
+            integer_scaling: options.integer_scaling,
+            backing_scale: if options.experimental_retina { 2 } else { 1 },
             scale_hack,
             internal_gl_ins: None,
             splash_image: launch_image,
@@ -465,10 +542,10 @@ impl Window {
             // Round to match touch precision of official devices.
             (out_x.round(), out_y.round())
         }
-        fn transform_virt_accel_coords(window: &Window, (in_x, in_y): (i32, i32)) -> (f32, f32) {
+        fn transform_virt_accel_coords(window: &Window, (in_x, in_y): Coords) -> Coords {
             let (_, _, vw, vh) = window.viewport();
-            let out_x = ((in_x as f32 / vw as f32) * 2.0 - 1.0).clamp(-1.0, 1.0);
-            let out_y = ((in_y as f32 / vh as f32) * 2.0 - 1.0).clamp(-1.0, 1.0);
+            let out_x = ((in_x / vw as f32) * 2.0 - 1.0).clamp(-1.0, 1.0);
+            let out_y = ((in_y / vh as f32) * 2.0 - 1.0).clamp(-1.0, 1.0);
             (out_x, out_y)
         }
         fn translate_button(button: sdl2::controller::Button) -> Option<crate::options::Button> {
@@ -491,6 +568,16 @@ impl Window {
         fn finger_absolute_coords(window: &Window, (x, y): (f32, f32)) -> (f32, f32) {
             let (screen_width, screen_height) = window.window.drawable_size();
             (screen_width as f32 * x, screen_height as f32 * y)
+        }
+        fn mouse_absolute_coords(window: &Window, x: i32, y: i32) -> Coords {
+            // SDL reports mouse coordinates in window units. Presentation
+            // uses framebuffer pixels, which can differ on HiDPI.
+            let (width, height) = window.window.size();
+            let (drawable_width, drawable_height) = window.window.drawable_size();
+            (
+                x as f32 * drawable_width as f32 / width.max(1) as f32,
+                y as f32 * drawable_height as f32 / height.max(1) as f32,
+            )
         }
 
         let mut controller_updated = false;
@@ -524,13 +611,15 @@ impl Window {
                     mouse_btn: MouseButton::Right,
                     ..
                 } => {
-                    let (x, y) = transform_virt_accel_coords(self, (x, y));
+                    let (x, y) =
+                        transform_virt_accel_coords(self, mouse_absolute_coords(self, x, y));
                     self.virtual_accelerometer_last = Some((x, y, true));
                 }
                 E::MouseMotion {
                     x, y, mousestate, ..
                 } if mousestate.right() => {
-                    let (x, y) = transform_virt_accel_coords(self, (x, y));
+                    let (x, y) =
+                        transform_virt_accel_coords(self, mouse_absolute_coords(self, x, y));
                     self.virtual_accelerometer_last = Some((x, y, true));
                 }
                 E::MouseButtonUp {
@@ -539,7 +628,8 @@ impl Window {
                     mouse_btn: MouseButton::Right,
                     ..
                 } => {
-                    let (x, y) = transform_virt_accel_coords(self, (x, y));
+                    let (x, y) =
+                        transform_virt_accel_coords(self, mouse_absolute_coords(self, x, y));
                     self.virtual_accelerometer_last = Some((x, y, false));
                 }
                 _ => {}
@@ -553,14 +643,16 @@ impl Window {
                     mouse_btn: MouseButton::Left,
                     ..
                 } => {
-                    let coords = transform_input_coords(self, (x as f32, y as f32), false);
+                    let coords =
+                        transform_input_coords(self, mouse_absolute_coords(self, x, y), false);
                     log_dbg!("MouseButtonDown x {}, y {}, coords {:?}", x, y, coords);
                     Event::TouchesDown(HashMap::from([(FingerId::Mouse, coords)]))
                 }
                 E::MouseMotion {
                     x, y, mousestate, ..
                 } if mousestate.left() => {
-                    let coords = transform_input_coords(self, (x as f32, y as f32), false);
+                    let coords =
+                        transform_input_coords(self, mouse_absolute_coords(self, x, y), false);
                     log_dbg!("MouseMotion x {}, y {}, coords {:?}", x, y, coords);
                     Event::TouchesMove(HashMap::from([(FingerId::Mouse, coords)]))
                 }
@@ -570,7 +662,8 @@ impl Window {
                     mouse_btn: MouseButton::Left,
                     ..
                 } => {
-                    let coords = transform_input_coords(self, (x as f32, y as f32), false);
+                    let coords =
+                        transform_input_coords(self, mouse_absolute_coords(self, x, y), false);
                     log_dbg!("MouseButtonUp x {}, y {}, coords {:?}", x, y, coords);
                     Event::TouchesUp(HashMap::from([(FingerId::Mouse, coords)]))
                 }
@@ -817,6 +910,28 @@ impl Window {
                         E::FingerDown { .. } => Event::TouchesDown(map),
                         _ => unreachable!(),
                     }
+                }
+                E::KeyDown {
+                    keycode: Some(sdl2::keyboard::Keycode::F11),
+                    repeat: false,
+                    ..
+                } if !Self::rotatable_fullscreen() => {
+                    self.toggle_fullscreen();
+                    continue;
+                }
+                E::KeyDown {
+                    keycode: Some(sdl2::keyboard::Keycode::F10),
+                    repeat: false,
+                    ..
+                } => {
+                    self.integer_scaling = !self.integer_scaling;
+                    let mode = if self.integer_scaling {
+                        "integer"
+                    } else {
+                        "fit"
+                    };
+                    log!("Fullscreen scaling mode: {mode}");
+                    continue;
                 }
                 E::KeyDown {
                     keycode: Some(sdl2::keyboard::Keycode::F12),
@@ -1235,7 +1350,7 @@ impl Window {
         // OpenGL ES expects bottom-to-top row order for image data, but our
         // image data will be top-to-bottom. A reflection transform compensates.
         let matrix = self.rotation_matrix().multiply(&Matrix::y_flip());
-        let (vx, vy, vw, vh) = self.viewport();
+        let ((vx, vy, vw, vh), nearest) = self.viewport_and_filter();
         let viewport = (vx, vy + self.viewport_y_offset(), vw, vh);
 
         let image = self.splash_image.as_ref().unwrap();
@@ -1267,16 +1382,7 @@ impl Window {
                 gles11::UNSIGNED_BYTE,
                 image.pixels().as_ptr() as *const _,
             );
-            gl_ctx.TexParameteri(
-                gles11::TEXTURE_2D,
-                gles11::TEXTURE_MIN_FILTER,
-                gles11::LINEAR as _,
-            );
-            gl_ctx.TexParameteri(
-                gles11::TEXTURE_2D,
-                gles11::TEXTURE_MAG_FILTER,
-                gles11::LINEAR as _,
-            );
+            set_presentation_filter(gl_ctx.as_mut(), nearest);
 
             present_frame(
                 gl_ctx.as_mut(),
@@ -1298,6 +1404,39 @@ impl Window {
     /// presented.
     pub fn swap_window(&self) {
         self.window.gl_swap_window();
+    }
+
+    fn toggle_fullscreen(&mut self) {
+        use sdl2::video::FullscreenType;
+
+        let new_mode = if self.fullscreen {
+            FullscreenType::Off
+        } else {
+            FullscreenType::Desktop
+        };
+        if let Err(error) = self.window.set_fullscreen(new_mode) {
+            log!("Could not change fullscreen mode: {error}");
+            return;
+        }
+        self.fullscreen = new_mode == FullscreenType::Desktop;
+        if !self.fullscreen {
+            let expected =
+                size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
+            if self.window.size() != expected {
+                if let Err(error) = self.window.set_size(expected.0, expected.1) {
+                    log!("Could not restore window size: {error}");
+                }
+            }
+        }
+        #[cfg(target_os = "macos")]
+        {
+            self.max_height = self.window.size().1;
+            self.viewport_y_offset = 0;
+        }
+        log!("Desktop fullscreen: {}", self.fullscreen);
+        if self.splash_image.is_some() {
+            self.display_splash();
+        }
     }
 
     /// Consider the emulated device to be rotated to a particular orientation.
@@ -1391,36 +1530,35 @@ impl Window {
     /// The aspect ratio of this region always reflects the guest app's view of
     /// the world, but the scale and orientation might not.
     pub fn viewport(&self) -> (u32, u32, u32, u32) {
+        self.viewport_and_filter().0
+    }
+
+    /// Viewport and whether whole-pixel nearest-neighbor scaling is possible.
+    pub fn viewport_and_filter(&self) -> ((u32, u32, u32, u32), bool) {
+        let drawable = self.window.drawable_size();
+        if !self.fullscreen && !Self::rotatable_fullscreen() {
+            return ((0, 0, drawable.0, drawable.1), false);
+        }
         let (app_width, app_height) =
             size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
-        if !self.fullscreen && !Self::rotatable_fullscreen() {
-            return (0, 0, app_width, app_height);
-        }
-
-        let (screen_width, screen_height) = self.window.drawable_size();
-
-        let app_aspect = app_width as f32 / app_height as f32;
-        let screen_aspect = screen_width as f32 / screen_height as f32;
-        let (scaled_width, scaled_height) = if app_aspect < screen_aspect {
+        fullscreen_viewport(
             (
-                (screen_height as f32 * app_aspect).round() as u32,
-                screen_height,
-            )
-        } else {
-            (
-                screen_width,
-                (screen_width as f32 / app_aspect).round() as u32,
-            )
-        };
-        let x = (screen_width - scaled_width) / 2;
-        let y = (screen_height - scaled_height) / 2;
-        (x, y, scaled_width, scaled_height)
+                app_width * self.backing_scale,
+                app_height * self.backing_scale,
+            ),
+            drawable,
+            self.integer_scaling,
+        )
     }
 
     /// Special offset to add to y co-ordinates, only when drawing to screen.
     pub fn viewport_y_offset(&self) -> u32 {
         #[cfg(target_os = "macos")]
-        return self.viewport_y_offset;
+        {
+            let (_, height) = self.window.size();
+            let (_, drawable_height) = self.window.drawable_size();
+            return self.viewport_y_offset * drawable_height / height.max(1);
+        }
         #[cfg(not(target_os = "macos"))]
         return 0;
     }
@@ -1574,4 +1712,75 @@ pub fn get_preferred_country_codes(env: &mut Environment) -> Vec<String> {
             .filter_map(|loc| loc.country)
             .collect()
     })
+}
+
+#[cfg(all(test, target_os = "windows"))]
+#[test]
+#[ignore = "opens a native OpenGL window on the interactive desktop"]
+fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
+    use sdl2::event::Event as SdlEvent;
+    use sdl2::keyboard::{Keycode, Mod, Scancode};
+    use sdl2::video::FullscreenType;
+
+    let options = Options {
+        device_family: Some(DeviceFamily::iPad),
+        initial_orientation: DeviceOrientation::LandscapeLeft,
+        ..Options::default()
+    };
+    let mut window = Window::new("touchHLE fullscreen controls test", None, None, &options);
+    let events = window._sdl_ctx.event().unwrap();
+    let window_id = window.window.id();
+    let key = |window: &mut Window, keycode, scancode, repeat| {
+        events
+            .push_event(SdlEvent::KeyDown {
+                timestamp: 0,
+                window_id,
+                keycode: Some(keycode),
+                scancode: Some(scancode),
+                keymod: Mod::NOMOD,
+                repeat,
+            })
+            .unwrap();
+        window.last_polled = Instant::now() - Duration::from_secs(1);
+        window.poll_for_events(&options);
+    };
+
+    key(&mut window, Keycode::F11, Scancode::F11, false);
+    assert_eq!(window.window.fullscreen_state(), FullscreenType::Desktop);
+    key(&mut window, Keycode::F11, Scancode::F11, true);
+    assert_eq!(window.window.fullscreen_state(), FullscreenType::Desktop);
+
+    key(&mut window, Keycode::F10, Scancode::F10, false);
+    let (viewport, nearest) = window.viewport_and_filter();
+    assert_eq!(
+        (viewport, nearest),
+        fullscreen_viewport((1024, 768), window.window.drawable_size(), true)
+    );
+    let (vx, vy, vw, vh) = viewport;
+    let (width, height) = window.window.size();
+    let (drawable_width, drawable_height) = window.window.drawable_size();
+    events
+        .push_event(SdlEvent::MouseButtonDown {
+            timestamp: 0,
+            window_id,
+            which: 0,
+            mouse_btn: MouseButton::Left,
+            clicks: 1,
+            x: ((vx + vw / 2) * width / drawable_width) as i32,
+            y: ((vy + vh / 2) * height / drawable_height) as i32,
+        })
+        .unwrap();
+    window.last_polled = Instant::now() - Duration::from_secs(1);
+    window.poll_for_events(&options);
+    let coords = std::iter::from_fn(|| window.pop_event())
+        .find_map(|event| match event {
+            Event::TouchesDown(points) => points.get(&FingerId::Mouse).copied(),
+            _ => None,
+        })
+        .expect("mouse press did not reach the guest");
+    assert!((coords.0 - 384.0).abs() <= 1.0 && (coords.1 - 512.0).abs() <= 1.0);
+
+    key(&mut window, Keycode::F11, Scancode::F11, false);
+    assert_eq!(window.window.fullscreen_state(), FullscreenType::Off);
+    assert_eq!(window.window.size(), (1024, 768));
 }

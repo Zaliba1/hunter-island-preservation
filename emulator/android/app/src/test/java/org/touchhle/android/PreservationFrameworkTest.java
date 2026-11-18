@@ -154,6 +154,34 @@ public class PreservationFrameworkTest {
             p.edit().putBoolean(flag,false).commit();
         }
     }
+    @Test public void integerScalingIsOptionalPersistsAndKeepsTheExistingDisplayProfile() {
+        android.content.SharedPreferences display = context.getSharedPreferences("display", Context.MODE_PRIVATE);
+        display.edit().clear().putString("family", "ipad").commit();
+        try (ActivityController<LauncherActivity> controller =
+                Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            android.widget.CheckBox scaling = controller.get().getWindow().getDecorView()
+                .findViewWithTag(DisplayOptions.INTEGER_SCALING_TAG);
+            assertFalse(scaling.isChecked());
+            List<String> arguments = new ArrayList<>();
+            DisplayOptions.appendArguments(controller.get(), arguments);
+            assertEquals(Arrays.asList("--device-family=ipad"), arguments);
+
+            scaling.performClick();
+            controller.recreate();
+            scaling = controller.get().getWindow().getDecorView().findViewWithTag(DisplayOptions.INTEGER_SCALING_TAG);
+            assertTrue(scaling.isChecked());
+            arguments.clear();
+            DisplayOptions.appendArguments(controller.get(), arguments);
+            assertEquals(Arrays.asList("--device-family=ipad", "--integer-scaling"), arguments);
+
+            scaling.performClick();
+            display.edit().putString("family", "iphone-retina").commit();
+            arguments.clear();
+            DisplayOptions.appendArguments(controller.get(), arguments);
+            assertEquals(Arrays.asList("--device-family=iphone", "--experimental-retina"), arguments);
+        }
+    }
+
     @Test public void launcherRefreshesImportWhenReturning() throws Exception {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {
             LauncherActivity activity=controller.get();Button start=button(activity.getWindow().getDecorView(),"Play");

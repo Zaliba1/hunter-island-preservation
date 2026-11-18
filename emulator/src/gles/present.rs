@@ -11,6 +11,19 @@ use super::GLES;
 use crate::matrix::Matrix;
 use std::time::{Duration, Instant};
 
+/// Configure the host's presentation texture after binding it. Guest textures
+/// keep their own sampling state.
+pub unsafe fn set_presentation_filter(gles: &mut dyn GLES, nearest: bool) {
+    let filter = if nearest {
+        gles11::NEAREST
+    } else {
+        gles11::LINEAR
+    };
+    for parameter in [gles11::TEXTURE_MIN_FILTER, gles11::TEXTURE_MAG_FILTER] {
+        gles.TexParameteri(gles11::TEXTURE_2D, parameter, filter as _);
+    }
+}
+
 pub struct FpsCounter {
     time: std::time::Instant,
     frames: u32,
