@@ -1,7 +1,7 @@
 # Hunter Island Preservation
 
-An unofficial project for preserving Hunter Island 2.02 offline on Windows
-and Android, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
+An unofficial project for preserving Hunter Island 2.02 offline on Windows,
+Android, and Apple Silicon Mac, based on [touchHLE v0.3.0](https://github.com/touchHLE/touchHLE).
 Import your own compatible, already decrypted 32-bit IPA locally.
 
 The shared source tree also contains an experimental native **Apple Silicon Mac**
@@ -28,23 +28,28 @@ Download the package for your device from
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | HunterIsland-Windows-x64-0.2.0-preview.9.zip | Windows 10/11 x64, 64-bit Python 3.11+ with Tcl/Tk, OpenGL drivers |
-| Android | HunterIsland-Android-arm64-0.2.0-preview.9.apk | Android 8+, ARM64, OpenGL ES 3.0 |
-| Apple Silicon Mac | HunterIsland-macOS-arm64-test-<commit>.zip | macOS 13+, ARM64; experimental, ad-hoc signed |
+| Windows PC | Standalone Windows ZIP | Windows 10/11 x64 with OpenGL drivers. Python and Tk are bundled. |
+| Android | Android ARM64 APK | Android 8+, ARM64, OpenGL ES 3.0 |
+| Apple Silicon Mac | Apple Silicon Mac ZIP | macOS 13+, ARM64. Experimental, ad-hoc signed. |
 
-**Windows:** extract the entire ZIP, open Start.cmd, import your IPA and start
-the game. Install Python with Tcl/Tk from
-[python.org](https://www.python.org/downloads/windows/).
-For instructions to build a local Windows ZIP with Python and Tcl/Tk included,
-see [BUILD.md](BUILD.md#build-and-check-windows).
+### Windows
 
-**Android:** install the APK, open the app, import your IPA and start the game.
+Extract the entire standalone ZIP, open **Start Hunter Island.exe**, select
+**Import your IPA…**, then select **Play**.
+
+### Android
+
+Install the APK, open the app, import your IPA and start the game.
 Android may ask you to allow APK installation from your download or file app.
 
+### Mac
+
+Extract the ZIP, move **Hunter Island.app** to Applications, and open it.
+Select **Import your IPA…**, then select **Play**. See [MACOS.md](MACOS.md).
+
 The [setup guide](SETUP.md) covers installation, updates, display modes,
-save transfer and bug reports. It identifies the current launchers' German
-button labels. The [optional mods and testing collection](MODS.md) are disabled initially.
-Both launchers remember your choices.
+save transfer and bug reports. The launchers remember your choices.
+The [optional mods and testing collections](MODS.md) are disabled initially.
 
 ## Develop
 

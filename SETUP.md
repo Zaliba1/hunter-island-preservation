@@ -10,13 +10,10 @@ The following steps use the English launcher labels.
 
 ## Windows
 
-1. Download the Windows x64 ZIP from Releases and extract it completely.
+1. Download the standalone Windows x64 ZIP from Releases and extract it completely.
    A short path such as C:/Games/HunterIsland is suitable.
-2. If your ZIP contains **Start Hunter Island.exe**, open it from the extracted
+2. Open **Start Hunter Island.exe** from the extracted
    folder. Keep `_internal`, `launcher` and `runtime` beside it. Python and Tk are included.
-   For a ZIP with only **Start.cmd**, install 64-bit Python 3.11 or later with
-   Tcl/Tk using the [official installer](https://www.python.org/downloads/windows/),
-   then open **Start.cmd**.
 3. Select **Import your IPA…** and choose your game file.
 4. Choose the display mode, language and optional mods, then select **Play**.
 5. Close the game window to return to the launcher.
@@ -97,10 +94,9 @@ The game writes normal checkpoints at its intended save points. Reloading may
 therefore resume in a town. Emulator savestates for an ongoing battle are
 not implemented.
 
-Android accepts compatible backup ZIPs through **Spielstand importieren**
-(import save). Before importing, the app backs up the existing save locally.
-Use **Sicherung vor Import exportieren** (export pre-import backup) to copy
-that backup out of the app.
+Android accepts compatible backup ZIPs through **Import save…**. Before
+importing, the app backs up the existing save locally. Use
+**Export pre-import backup…** to copy that backup out of the app.
 
 The Windows diagnostic export can include saves when you explicitly select
 that option; it produces an Android-compatible ZIP. The portable Windows
