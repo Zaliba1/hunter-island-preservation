@@ -23,19 +23,21 @@ inventories. See VALIDATION.md for the checks performed and remaining limits.
 
 ## Play
 
-Download the package for your device from
-[Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
+Use the current downloads below. The [release notes and sources](https://github.com/Zaliba1/hunter-island-preservation/releases/tag/v0.2.0-preview.9-packaging.1)
+include checksums and the test results.
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | Standalone Windows ZIP | Windows 10/11 x64 with OpenGL drivers. Python and Tk are bundled. |
-| Android | Android ARM64 APK | Android 8+, ARM64, OpenGL ES 3.0 |
-| Apple Silicon Mac | Apple Silicon Mac ZIP | macOS 13+, ARM64. Experimental, ad-hoc signed. |
+| Windows PC | [Standalone Windows ZIP](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-packaging.1/HunterIsland-Windows-x64-0.2.0-preview.9-localized.zip) | Windows 10/11 x64 with OpenGL drivers. Python and Tk are bundled. |
+| Android | [Android ARM64 release APK](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-packaging.1/HunterIsland-Android-arm64-0.2.0-preview.9-release.apk) | Android 8+, ARM64, OpenGL ES 3.0 |
+| Apple Silicon Mac | [Apple Silicon Mac ZIP](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-display.1/HunterIsland-macOS-arm64-test-a6495e5.zip) | macOS 13+, ARM64. Experimental, ad-hoc signed. |
 
 ### Windows
 
 Extract the entire standalone ZIP, open **Start Hunter Island.exe**, select
 **Import your IPA…**, then select **Play**.
+New profiles start in English. Changing **Language** updates the launcher
+immediately and applies to the game when you next start it.
 
 ### Android
 

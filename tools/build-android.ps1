@@ -8,7 +8,8 @@ param([Parameter(Mandatory=$true)][string]$SdkRoot,
       [string]$Python='python',
       [switch]$RebuildOpenAL,
       [switch]$Test,
-      [switch]$OfflineGradle)
+      [switch]$OfflineGradle,
+      [switch]$SkipReleaseLint)
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path $PSScriptRoot -Parent
 if($projectRoot -match '\s' -or $SdkRoot -match '\s'){throw 'Use short source and SDK paths without spaces.'}
@@ -66,10 +67,13 @@ try {
  try {
   $tasks = @('--no-daemon','--console=plain')
   if ($OfflineGradle) { $tasks += '--offline' }
-  if ($Test) { $tasks += ':app:testDebugUnitTest' }
-  $tasks += ':app:assembleDebug'
+  # A fresh package avoids unused ZIP space left by incremental APK updates.
+  # Clean only the Android app module, keeping the staged native libraries.
+  $tasks += @(':app:clean', ':app:assembleRelease')
+  if ($Test) { $tasks += ':app:testReleaseUnitTest' }
+  if ($SkipReleaseLint) { $tasks += @('-x', ':app:lintVitalRelease') }
   & (Join-Path $GradleRoot 'bin\gradle.bat') @tasks
   if($LASTEXITCODE){throw 'Android APK build failed'}
  } finally {Pop-Location}
 } finally {Remove-Item Env:HI_ANDROID_SIGNING_PASSWORD -ErrorAction SilentlyContinue}
-Write-Host (Join-Path $projectRoot 'emulator\android\app\build\outputs\apk\debug\app-debug.apk')
+Write-Host (Join-Path $projectRoot 'emulator\android\app\build\outputs\apk\release\app-release.apk')

@@ -40,7 +40,11 @@ android {
     }
     buildTypes {
         debug { isDebuggable = true; signingConfig = signingConfigs.getByName("localPreview") }
-        release { isMinifyEnabled = false }
+        release {
+            isDebuggable = false
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("localPreview")
+        }
     }
     sourceSets {
         getByName("main") {

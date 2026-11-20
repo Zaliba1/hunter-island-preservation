@@ -86,11 +86,16 @@ python tools/create_android_signing.py --java-home C:/Java17 --directory C:/hi-s
 ./tools/build-android.ps1 -SdkRoot C:/Android/sdk -JavaHome C:/Java17 -GradleRoot C:/Gradle/gradle-8.11.1 -GnuRoot C:/Winlibs/mingw64 -SigningConfig C:/hi-signing/local-preview-signing.json -TargetDir C:/hi-build/android -Test
 ~~~
 
-The APK is written to emulator/android/app/build/outputs/apk/debug/app-debug.apk.
--OfflineGradle uses existing Gradle/Maven caches. On the first build, Gradle
+The script creates a fresh signed, non-debuggable APK at
+`emulator/android/app/build/outputs/apk/release/app-release.apk`.
+`-Test` runs the release variant's unit tests. `-OfflineGradle` uses existing
+Gradle/Maven caches. On the first build, Gradle
 downloads the pinned build and test dependencies from the official repositories
 configured in the project. Native Cargo builds use --frozen after source
 preparation.
+
+For a local test build when the Android Lint dependency is unavailable offline,
+pass `-SkipReleaseLint`. The release unit tests still run with `-Test`.
 
 Your own signing key is sufficient for personal builds. The project's private
 key is excluded from the repository. A build signed with your own key cannot
@@ -111,7 +116,7 @@ VALIDATION.md records the checks actually performed.
 Use the supplied tools to inspect the Android package.
 
 ~~~powershell
-python tools/verify_android_apk.py --apk PATH/TO/app-debug.apk --sdk-root C:/Android/sdk --java-home C:/Java17 --out .build/android-review
+python tools/verify_android_apk.py --apk PATH/TO/app-release.apk --sdk-root C:/Android/sdk --java-home C:/Java17 --out .build/android-review
 python tools/android_license_inventory.py .build/android-review/HunterIsland-Android-arm64-0.2.0-preview.5.apk --out .build/android-license-inventory.json
 python tools/audit_public.py .
 ~~~
