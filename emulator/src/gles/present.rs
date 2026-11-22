@@ -24,6 +24,34 @@ pub unsafe fn set_presentation_filter(gles: &mut dyn GLES, nearest: bool) {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum UpscaleMode {
+    #[default]
+    Bilinear,
+    Fsr,
+    FsrSharpened,
+}
+
+impl UpscaleMode {
+    #[cfg(not(target_os = "android"))]
+    pub fn next(self) -> Self {
+        match self {
+            Self::Bilinear => Self::Fsr,
+            Self::Fsr => Self::FsrSharpened,
+            Self::FsrSharpened => Self::Bilinear,
+        }
+    }
+
+    #[cfg(not(target_os = "android"))]
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Bilinear => "Bilinear",
+            Self::Fsr => "FSR 1.2",
+            Self::FsrSharpened => "FSR 1.2 + RCAS",
+        }
+    }
+}
+
 pub struct FpsCounter {
     time: std::time::Instant,
     frames: u32,
@@ -62,6 +90,8 @@ pub unsafe fn present_frame(
     viewport: (u32, u32, u32, u32),
     rotation_matrix: Matrix<2>,
     virtual_cursor_visible_at: Option<(f32, f32, bool)>,
+    upscale: Option<(UpscaleMode, (u32, u32))>,
+    show_upscale_notice: bool,
 ) {
     // While this is a generic utility, it is closely tied to
     // crate::frameworks::opengles::eagl::present_renderbuffer, which handles
@@ -92,7 +122,31 @@ pub unsafe fn present_frame(
     gles.MatrixMode(gles11::TEXTURE);
     gles.LoadMatrixf(matrix.columns().as_ptr() as *const _);
     gles.Enable(gles11::TEXTURE_2D);
-    gles.DrawArrays(gles11::TRIANGLES, 0, 6);
+    let upscaled = upscale.and_then(|(mode, (width, height))| {
+        let (_, _, output_width, output_height) = viewport;
+        let (oriented_width, oriented_height) = if rotation_matrix.columns()[0][0].abs() < 0.5 {
+            (height, width)
+        } else {
+            (width, height)
+        };
+        if mode != UpscaleMode::Bilinear
+            && width > 0
+            && height > 0
+            && output_width >= oriented_width
+            && output_height >= oriented_height
+            && (output_width > oriented_width || output_height > oriented_height)
+        {
+            gles.draw_upscaled_quad(mode, (width, height), viewport, rotation_matrix)
+        } else {
+            None
+        }
+    });
+    if upscaled.is_none() {
+        gles.DrawArrays(gles11::TRIANGLES, 0, 6);
+    }
+    if show_upscale_notice && upscale.is_some() {
+        gles.draw_upscale_notice(upscaled.unwrap_or(UpscaleMode::Bilinear), viewport);
+    }
     // clean this up so we don't need to worry about it in e.g. Core Animation
     gles.LoadIdentity();
 

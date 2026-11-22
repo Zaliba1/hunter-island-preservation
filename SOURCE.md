@@ -4,8 +4,11 @@ Matching sources accompany locally supplied Windows and Android binaries.
 Published builds provide them in
 [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
 
-- HunterIsland-Source-0.2.0-preview.9.zip
-- HunterIsland-SourceDependencies-0.2.0-preview.9.zip
+For the Windows FSR release:
+
+- HunterIsland-Source-0.2.0-preview.9-fsr.1.zip
+- HunterIsland-SourceDependencies-0.2.0-preview.9-fsr.1.zip
+- HunterIsland-WindowsRuntimeSources-0.2.0-preview.9-fsr.1.zip
 
 The standalone Windows variant also has a `HunterIsland-WindowsRuntimeSources-*.zip`
 with the sources for its bundled MSYS2 Python/Tcl/Tk runtime and libraries.

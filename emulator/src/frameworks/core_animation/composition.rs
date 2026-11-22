@@ -141,6 +141,8 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
     let fb_height = screen_bounds.size.height as u32 * scale_hack;
     let window = env.window();
     let (viewport, nearest) = window.viewport_and_filter();
+    let upscale = (!nearest).then_some((window.upscale, (fb_width, fb_height)));
+    let show_upscale_notice = window.show_upscale_notice();
     let rotation = window.rotation_matrix();
     let cursor = window.virtual_cursor_visible_at();
 
@@ -376,7 +378,7 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
         gles.BindTexture(gles11::TEXTURE_2D, texture);
         set_presentation_filter(gles.as_mut(), nearest);
         gles.BindFramebufferOES(gles11::FRAMEBUFFER_OES, 0);
-        present_frame(gles.as_mut(), viewport, rotation, cursor);
+        present_frame(gles.as_mut(), viewport, rotation, cursor, upscale, show_upscale_notice);
     }
     std::mem::drop(gles);
     window.swap_window();

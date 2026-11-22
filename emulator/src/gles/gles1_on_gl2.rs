@@ -388,6 +388,8 @@ const UNSUPPORTED_TEX_PARAMS: ParamTable =
     ParamTable(&[(gl21::TEXTURE_MAX_LEVEL, ParamType::Float, 1)]);
 
 pub struct GLES1OnGL2State {
+    #[cfg(not(target_os = "android"))]
+    fsr: super::fsr::FsrPresenter,
     vertex_array_support: std::cell::OnceCell<bool>,
     max_vertex_attributes: std::cell::OnceCell<GLint>,
     pointer_is_fixed_point: [bool; ARRAYS.len()],
@@ -427,6 +429,8 @@ impl GLESContext for GLES1OnGL2Context {
         Ok(Self {
             gl_ctx: window.create_gl_context(GLVersion::GL21Compat)?,
             state: GLES1OnGL2State {
+                #[cfg(not(target_os = "android"))]
+                fsr: super::fsr::FsrPresenter::default(),
                 vertex_array_support: std::cell::OnceCell::new(),
                 max_vertex_attributes: std::cell::OnceCell::new(),
                 pointer_is_fixed_point: [false; ARRAYS.len()],
@@ -752,6 +756,26 @@ impl GLES1OnGL2<'_> {
 }
 
 impl GLES for GLES1OnGL2<'_> {
+    #[cfg(not(target_os = "android"))]
+    unsafe fn draw_upscaled_quad(
+        &mut self,
+        mode: super::present::UpscaleMode,
+        source_size: (u32, u32),
+        viewport: (u32, u32, u32, u32),
+        rotation: crate::matrix::Matrix<2>,
+    ) -> Option<super::present::UpscaleMode> {
+        self.state.fsr.draw(mode, source_size, viewport, rotation)
+    }
+
+    #[cfg(not(target_os = "android"))]
+    unsafe fn draw_upscale_notice(
+        &mut self,
+        mode: super::present::UpscaleMode,
+        viewport: (u32, u32, u32, u32),
+    ) {
+        self.state.fsr.draw_notice(mode, viewport);
+    }
+
     fn supports_gles2_shaders(&self) -> bool {
         gl21::CreateShader::is_loaded() && gl21::ShaderSource::is_loaded()
     }

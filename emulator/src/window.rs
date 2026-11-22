@@ -12,7 +12,7 @@
 //! window system interaction in general, because it is assumed only one window
 //! will be needed for the runtime of the app.
 
-use crate::gles::present::{present_frame, set_presentation_filter};
+use crate::gles::present::{present_frame, set_presentation_filter, UpscaleMode};
 use crate::gles::{create_gles1_ctx_no_parent_stack, GLESContext, GLES};
 use crate::image::Image;
 use crate::matrix::Matrix;
@@ -309,6 +309,8 @@ pub struct Window {
     /// Current desktop window mode. Mobile always uses full screen.
     fullscreen: bool,
     integer_scaling: bool,
+    pub(crate) upscale: UpscaleMode,
+    upscale_notice_until: Option<Instant>,
     backing_scale: u32,
     scale_hack: NonZeroU32,
     internal_gl_ins: Option<Box<dyn GLESContext>>,
@@ -456,6 +458,8 @@ impl Window {
             viewport_y_offset: 0,
             fullscreen,
             integer_scaling: options.integer_scaling,
+            upscale: options.upscale,
+            upscale_notice_until: None,
             backing_scale: if options.experimental_retina { 2 } else { 1 },
             scale_hack,
             internal_gl_ins: None,
@@ -917,6 +921,27 @@ impl Window {
                     ..
                 } if !Self::rotatable_fullscreen() => {
                     self.toggle_fullscreen();
+                    continue;
+                }
+                #[cfg(not(target_os = "android"))]
+                E::KeyDown {
+                    keycode: Some(sdl2::keyboard::Keycode::F9),
+                    repeat: false,
+                    ..
+                } if !Self::rotatable_fullscreen() => {
+                    // The fit filter is invisible at 1:1 and is bypassed by
+                    // integer scaling. Enter a mode where F9 can be compared.
+                    if !self.fullscreen || self.integer_scaling {
+                        self.integer_scaling = false;
+                        self.upscale = UpscaleMode::Fsr;
+                        if !self.fullscreen {
+                            self.toggle_fullscreen();
+                        }
+                    } else {
+                        self.upscale = self.upscale.next();
+                    }
+                    self.upscale_notice_until = Some(Instant::now() + Duration::from_secs(2));
+                    log!("Upscaling filter: {}", self.upscale.label());
                     continue;
                 }
                 E::KeyDown {
@@ -1389,6 +1414,8 @@ impl Window {
                 viewport,
                 matrix,
                 /* virtual_cursor_visible_at: */ None,
+                /* upscale: */ None,
+                /* show_upscale_notice: */ false,
             );
 
             gl_ctx.DeleteTextures(1, &texture);
@@ -1531,6 +1558,10 @@ impl Window {
     /// the world, but the scale and orientation might not.
     pub fn viewport(&self) -> (u32, u32, u32, u32) {
         self.viewport_and_filter().0
+    }
+
+    pub(crate) fn show_upscale_notice(&self) -> bool {
+        self.upscale_notice_until.is_some_and(|until| Instant::now() < until)
     }
 
     /// Viewport and whether whole-pixel nearest-neighbor scaling is possible.
@@ -1783,4 +1814,23 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
     key(&mut window, Keycode::F11, Scancode::F11, false);
     assert_eq!(window.window.fullscreen_state(), FullscreenType::Off);
     assert_eq!(window.window.size(), (1024, 768));
+
+    // F9 from the window (with integer scaling remembered) should immediately
+    // switch to fit-to-screen FSR, and further presses cycle effective filters.
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.window.fullscreen_state(), FullscreenType::Desktop);
+    assert!(!window.integer_scaling);
+    assert_eq!(window.upscale, UpscaleMode::Fsr);
+    assert!(window.show_upscale_notice());
+    key(&mut window, Keycode::F9, Scancode::F9, true);
+    assert_eq!(window.upscale, UpscaleMode::Fsr);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::FsrSharpened);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::Bilinear);
+    key(&mut window, Keycode::F10, Scancode::F10, false);
+    assert!(window.integer_scaling);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert!(!window.integer_scaling);
+    assert_eq!(window.upscale, UpscaleMode::Fsr);
 }

@@ -1,3 +1,16 @@
+# 0.2.0-preview.9-fsr.1 — Windows FSR
+
+- Optional AMD FidelityFX Super Resolution 1.2 with edge-adaptive upscaling
+  and optional light RCAS sharpening.
+- F9 enters fit-to-screen fullscreen with FSR from windowed or integer mode.
+  Further presses compare FSR, FSR with RCAS, and bilinear filtering. The
+  active filter appears briefly on screen.
+- F10 switches between fit-to-screen and integer scaling in fullscreen. F11
+  switches between windowed and fullscreen display.
+
+Windows x64 is the tested package for this update. See the release validation
+and correspondence checks for its build and testing details.
+
 # 0.2.0-preview.9
 
 Add an optional fresh campaign with exactly three independent copies of each

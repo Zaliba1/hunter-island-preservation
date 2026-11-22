@@ -71,6 +71,25 @@ pub trait GLESContext {
 #[allow(clippy::upper_case_acronyms)]
 #[allow(clippy::too_many_arguments)] // not our fault :(
 pub trait GLES {
+    /// Draw the configured desktop upscaler using the current presentation quad.
+    unsafe fn draw_upscaled_quad(
+        &mut self,
+        _mode: super::present::UpscaleMode,
+        _source_size: (u32, u32),
+        _viewport: (u32, u32, u32, u32),
+        _rotation: crate::matrix::Matrix<2>,
+    ) -> Option<super::present::UpscaleMode> {
+        None
+    }
+
+    /// Show the effective host filter briefly over the presented frame.
+    unsafe fn draw_upscale_notice(
+        &mut self,
+        _mode: super::present::UpscaleMode,
+        _viewport: (u32, u32, u32, u32),
+    ) {
+    }
+
     /// Android shader-only presentation; other backends retain their existing presenter.
     fn present_shader_renderbuffer(
         &mut self,

@@ -36,6 +36,7 @@ pub enum Button {
 pub struct Options {
     pub fullscreen: bool,
     pub integer_scaling: bool,
+    pub upscale: crate::gles::present::UpscaleMode,
     pub device_family: Option<DeviceFamily>,
     pub initial_orientation: DeviceOrientation,
     /// An explicit CLI orientation takes precedence over bundle auto-detection.
@@ -92,6 +93,7 @@ impl Default for Options {
         Options {
             fullscreen: false,
             integer_scaling: false,
+            upscale: crate::gles::present::UpscaleMode::default(),
             device_family: None,
             initial_orientation: DeviceOrientation::Portrait,
             explicit_initial_orientation: false,
@@ -164,6 +166,14 @@ impl Options {
             self.fullscreen = true;
         } else if arg == "--integer-scaling" {
             self.integer_scaling = true;
+        } else if let Some(value) = arg.strip_prefix("--upscale=") {
+            use crate::gles::present::UpscaleMode;
+            self.upscale = match value {
+                "bilinear" => UpscaleMode::Bilinear,
+                "fsr" => UpscaleMode::Fsr,
+                "fsr-sharpened" => UpscaleMode::FsrSharpened,
+                _ => return Err("Expected --upscale=bilinear, fsr or fsr-sharpened".to_string()),
+            };
         } else if arg == "--portrait" {
             self.initial_orientation = DeviceOrientation::Portrait;
             self.explicit_initial_orientation = true;

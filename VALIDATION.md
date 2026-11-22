@@ -1,4 +1,12 @@
-# Validation for 0.2.0-preview.9
+# Validation for 0.2.0-preview.9-fsr.1
+
+Windows development checks covered the F9/F10/F11 transitions through SDL
+and all three F9 selections in the packaged game. A Radeon RX 7800 XT rendered
+FSR 1.2 and FSR 1.2 with RCAS at 1920 × 1440. Fresh isolated playthroughs
+reached the Fang tutorial with both bilinear and FSR + RCAS and created a
+checkpoint. See release-checks.json for the final package validation.
+
+## Previous validation: 0.2.0-preview.9
 
 Verified using private, isolated copies. No game data or player saves are
 included in the source or runtime packages.

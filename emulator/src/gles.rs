@@ -72,6 +72,8 @@ mod shader_source;
 pub mod gles2_native;
 #[cfg(target_os = "android")]
 mod gles2_present;
+#[cfg(not(target_os = "android"))]
+mod fsr;
 mod gles_generic;
 pub mod present;
 mod util;

@@ -10,6 +10,7 @@ The combined emulator executable is distributed under **GPL-3.0-or-later**, as s
 | SDL2 / rust-sdl2 | zlib / MIT as marked | Native source and Cargo-vendored Git source, original notices |
 | Boost 1.81.0 | BSL-1.0 | Full original Boost archive; licenses/Boost.txt |
 | stb / PVRTDecompress | Upstream MIT/public-domain or marked terms | Complete native or emulator vendor source; original license files |
+| AMD FidelityFX Super Resolution 1.2 shader adaptation | MIT | licenses/AMD-FSR-MIT.txt; shader source in emulator/src/gles/fsr.glsl |
 | Rust crates | Per-package terms | Complete Cargo-vendored sources/checksums; licenses/rust_dependencies.txt; original notices |
 | libgcc_s.1.dylib | GPL v2 or later with historical runtime exception | Complete Apple gcc-5664 source; original GPL and exception headers |
 | libstdc++.6.0.9.dylib | GPL v2 or later with historical linking exception | Complete Apple libstdcxx-39 source; original GPL and exception headers |

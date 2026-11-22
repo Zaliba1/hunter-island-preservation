@@ -73,7 +73,10 @@ While playing on Windows or Mac, press **F11** to switch between a window and
 full screen. Press **F10** to switch between fit-to-screen and integer scaling
 in full screen. Integer scaling uses whole pixels and may leave wider borders.
 The emulator fits the image to the screen if a whole-number scale cannot fit.
-The game keeps its original aspect ratio in either mode.
+The game keeps its original aspect ratio in either mode. In the Windows FSR
+release, F9 enters fit-to-screen fullscreen with FSR 1.2 from the window
+or integer mode. Further presses cycle to FSR 1.2 with light RCAS sharpening,
+bilinear, and back to FSR 1.2. The active filter is displayed briefly.
 
 Desktop players can set startup defaults with a `touchHLE_options.txt` file
 in the local `profiles/default/run` directory. Use one line for the game:

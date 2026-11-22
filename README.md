@@ -10,6 +10,11 @@ installation, data locations and the remaining gameplay checks.
 
 ## Current release
 
+**0.2.0-preview.9-fsr.1** adds optional FSR 1.2 upscaling to the Windows build. In-game,
+**F9** enters fit-to-screen fullscreen and selects FSR. Press it again to
+compare FSR with light RCAS sharpening and bilinear filtering. The active
+filter appears briefly in the game.
+
 **0.2.0-preview.9** adds an optional fresh campaign with three copies of each
 regular monster form, all at level 99 and S rarity. It uses its own save folder
 and grants no extra resources. Newly created full and level-one collections
@@ -23,12 +28,12 @@ inventories. See VALIDATION.md for the checks performed and remaining limits.
 
 ## Play
 
-Use the current downloads below. The [release notes and sources](https://github.com/Zaliba1/hunter-island-preservation/releases/tag/v0.2.0-preview.9-packaging.1)
-include checksums and the test results.
+Use the current downloads below. The [Windows FSR release](https://github.com/Zaliba1/hunter-island-preservation/releases/tag/v0.2.0-preview.9-fsr.1)
+includes its source archives, checksums and test results.
 
 | Platform | Download | Requirements |
 | --- | --- | --- |
-| Windows PC | [Standalone Windows ZIP](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-packaging.1/HunterIsland-Windows-x64-0.2.0-preview.9-localized.zip) | Windows 10/11 x64 with OpenGL drivers. Python and Tk are bundled. |
+| Windows PC | [Standalone Windows ZIP](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-fsr.1/HunterIsland-Windows-x64-0.2.0-preview.9-fsr.1-standalone.zip) | Windows 10/11 x64 with OpenGL drivers. Python and Tk are bundled. |
 | Android | [Android ARM64 release APK](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-packaging.1/HunterIsland-Android-arm64-0.2.0-preview.9-release.apk) | Android 8+, ARM64, OpenGL ES 3.0 |
 | Apple Silicon Mac | [Apple Silicon Mac ZIP](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.9-display.1/HunterIsland-macOS-arm64-test-a6495e5.zip) | macOS 13+, ARM64. Experimental, ad-hoc signed. |
 

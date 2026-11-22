@@ -697,6 +697,8 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
     // Save these for when we need to draw the frame
     let window = env.window();
     let (viewport, nearest) = window.viewport_and_filter();
+    let upscale = window.upscale;
+    let show_upscale_notice = window.show_upscale_notice();
     let rotation_matrix = window.rotation_matrix();
     let virtual_cursor_visible_at = window.virtual_cursor_visible_at();
 
@@ -832,7 +834,14 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
     );
 
     // Draw the quad
-    present_frame(gles, viewport, rotation_matrix, virtual_cursor_visible_at);
+    present_frame(
+        gles,
+        viewport,
+        rotation_matrix,
+        virtual_cursor_visible_at,
+        (!nearest).then_some((upscale, (width as u32, height as u32))),
+        show_upscale_notice,
+    );
 
     // Clean up the texture
     gles.DeleteTextures(1, &texture);
