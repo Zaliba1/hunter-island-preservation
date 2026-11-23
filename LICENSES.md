@@ -61,3 +61,7 @@ Apache-2.0 with LLVM exception, with the original Android NDK notices.
 Robolectric/JUnit are host-only tests. ANDROID-LICENSES.md contains the
 Android-specific inventory scope. Both platforms share the matching
 Source and SourceDependencies assets described in SOURCE.md.
+
+## Local monster texture generation
+
+The embedded Real-ESRGAN animevideov3 x4 weights are from Xintao Wang's Real-ESRGAN v0.2.5.0 portable NCNN release (BSD 3-Clause). See licenses/Real-ESRGAN-BSD.txt. The original model member is models/realesr-animevideov3-x4.bin, SHA-256 548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d. Source distribution: https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0. The local Rust inference implementation reads these unchanged model weights.

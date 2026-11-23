@@ -1181,6 +1181,35 @@ fn glTexImage2D(
     type_: GLenum,
     pixels: ConstVoidPtr,
 ) {
+    if target == gles11::TEXTURE_2D && level == 0 && border == 0 && !pixels.is_null()
+        && matches!((format, type_),
+            (gles11::RGBA | gles11::BGRA_EXT, gles11::UNSIGNED_BYTE)
+            | (gles11::RGBA, gles11::UNSIGNED_SHORT_4_4_4_4))
+        && env.framework_state.opengles.hd_textures.as_ref().is_some_and(|c| c.has_size(width,height))
+    {
+        let mut cache = env.framework_state.opengles.hd_textures.take().unwrap();
+        let used = with_ctx_and_mem(env, |gles,mem| unsafe {
+            let (mut maximum,mut alignment) = (0,0);
+            gles.GetIntegerv(gles11::MAX_TEXTURE_SIZE,&mut maximum);
+            gles.GetIntegerv(gles11::UNPACK_ALIGNMENT,&mut alignment);
+            if width*4 > maximum || height*4 > maximum || !matches!(alignment,1|2|4|8) {return false}
+            let (w,h) = (width as usize,height as usize);
+            let row = w * if type_ == gles11::UNSIGNED_BYTE {4} else {2};
+            let stride = row.next_multiple_of(alignment as usize);
+            let len = (h-1)*stride+row;
+            let ptr = mem.ptr_at(pixels.cast::<u8>(),len as u32);
+            let raw = std::slice::from_raw_parts(ptr,len);
+            if let Some(data) = cache.replacement((w,h),raw,stride,format,type_) {
+                gles.TexImage2D(target,level,gles11::RGBA as i32,width*4,height*4,0,
+                    gles11::RGBA,gles11::UNSIGNED_BYTE,data.as_ptr().cast());
+                log!("Local HD texture applied: {width}x{height}");
+                return true
+            }
+            false
+        });
+        env.framework_state.opengles.hd_textures = Some(cache);
+        if used {return}
+    }
     with_ctx_and_mem(env, |gles, mem| unsafe {
         let pixels = if pixels.is_null() {
             std::ptr::null()

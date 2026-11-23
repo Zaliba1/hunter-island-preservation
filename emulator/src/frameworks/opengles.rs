@@ -32,6 +32,7 @@ pub const DYLIB: crate::dyld::HostDylib = crate::dyld::HostDylib {
 
 #[derive(Default)]
 pub struct State {
+    pub(crate) hd_textures: Option<crate::hd_textures::Cache>,
     texture_cleanup: texture_cleanup::Cleanup,
     #[cfg(feature = "diagnostic-live-cycles")]
     generated_textures: u64,
@@ -42,6 +43,10 @@ pub struct State {
     /// Current EAGLContext for each thread
     current_ctxs: std::collections::HashMap<crate::ThreadId, Option<crate::objc::id>>,
     strings_cache: std::collections::HashMap<(u32, GLenum), ConstPtr<u8>>,
+}
+
+pub(crate) fn enable_hd_textures(env: &mut crate::Environment, cache: crate::hd_textures::Cache) {
+    env.framework_state.opengles.hd_textures = Some(cache);
 }
 
 fn current_texture_group(env: &crate::Environment) -> Option<usize> {

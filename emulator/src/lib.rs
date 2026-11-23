@@ -43,6 +43,7 @@ mod fs;
 mod gdb;
 mod gles;
 mod image;
+mod hd_textures;
 mod libc;
 mod licenses;
 mod mach_o;
@@ -408,6 +409,13 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             std::panic::resume_unwind(e)
         }
     };
+    if options.hunter_hd_textures && env.bundle.bundle_identifier() == "pockettrend.hunterisland" {
+        let dir = paths::user_data_base_path().join("hd-monsters-animev3-x4-v1");
+        match hd_textures::Cache::open(&bundle_path, dir) {
+            Ok(cache) => frameworks::opengles::enable_hd_textures(&mut env, cache),
+            Err(e) => { log!("Local HD textures unavailable: {e}"); }
+        }
+    }
     if test_mode.is_some_and(test_profile::Mode::fresh) {
         let catalog = test_profile::fresh_catalog(&bundle_path)?;
         objc::hunter_history::configure_fresh_collection(&mut env, catalog)?;

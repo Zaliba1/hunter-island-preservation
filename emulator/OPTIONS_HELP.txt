@@ -1,4 +1,7 @@
 View options:
+    --hunter-hd-textures
+        Generate local Real-ESRGAN 4x monster textures on first encounter.
+        Completed textures are used at the next texture load. Default: off.
     --fullscreen
         Display the app in full screen. The default is to display in a window
         instead, except on Android which always uses full screen. On desktop,

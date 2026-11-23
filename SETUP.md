@@ -91,6 +91,12 @@ before display scaling. A smaller output can smooth edges when the frame is
 downsampled. The tested iPad title screen rendered at 2048 × 1536 with this
 option. Full gameplay at this setting has yet to be tested.
 
+### Local HD monster textures on Mac and Android
+
+In Display mode, enable **Generate and save HD monster textures locally (Real-ESRGAN 4×)** and start the game. When the emulator encounters a supported monster image, it processes the image from your imported IPA in a background CPU worker. The HD version appears on a subsequent texture load, for example when re-entering a battle. The cache survives a restart. Leave the option off to play with the original sprites. The initial release of this option targets standalone monster sprites, including Fang. Atlases, text and backgrounds use the game's normal graphics.
+
+Generated textures stay in `hd-monsters-animev3-x4-v1` under the emulator data directory, separate from saves. Each cache entry belongs to the source PNG's SHA-256. To reclaim the space, close the game and remove this cache folder. Generation uses the bundled compact Real-ESRGAN animevideov3 ×4 model and requires no download or account.
+
 ## Saves
 
 The game writes normal checkpoints at its intended save points. Reloading may

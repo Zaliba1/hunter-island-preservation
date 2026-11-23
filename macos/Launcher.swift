@@ -14,7 +14,7 @@ final class LauncherBackground: NSView {
 @main final class Launcher: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!, store: MacStore!, status: NSTextField!, playButton: NSButton!
     var language: NSPopUpButton!, device: NSPopUpButton!, mods = [NSButton](), buttons = [NSControl]()
-    var fullscreen: NSButton!, integerScaling: NSButton!
+    var fullscreen: NSButton!, integerScaling: NSButton!, hdTextures: NSButton!
     var gameProcess: Process?, lockFD: Int32 = -1
     var busy = false
     static func main() {
@@ -57,6 +57,9 @@ final class LauncherBackground: NSView {
             displayOptions.alignment = .centerY
             displayOptions.spacing = 14
             stack.addArrangedSubview(displayOptions)
+            hdTextures = displayToggle("Generate and save HD monster textures locally (Real-ESRGAN 4×)", key: "hdTextures")
+            hdTextures.toolTip = "Encountered monsters are processed in the background. Their HD texture appears the next time it is loaded."
+            stack.addArrangedSubview(hdTextures)
             stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
@@ -79,7 +82,7 @@ final class LauncherBackground: NSView {
                         if !available.contains(frame) { self.show(PreviewError.invalid("A launcher control is clipped: \(frame)")); return }
                     }
                     do {
-                        for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling")] {
+                        for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling"), (self.hdTextures!, "hdTextures")] {
                             let initialState = button.state
                             button.performClick(nil)
                             let reopened = try MacStore(root: self.store.root)
@@ -137,6 +140,7 @@ final class LauncherBackground: NSView {
         store.settings["device"] = device.indexOfSelectedItem == 0 ? "ipad" : "iphone"
         store.settings["fullscreen"] = fullscreen.state == .on
         store.settings["integerScaling"] = integerScaling.state == .on
+        store.settings["hdTextures"] = hdTextures.state == .on
         store.settings["mods"] = Dictionary(uniqueKeysWithValues: zip(modChoices, mods).map { ($0.0.0, $0.1.state == .on) })
         do { let fd = try store.lock(); defer { flock(fd, LOCK_UN); close(fd) }; try store.save() } catch { show(error) }
     }
@@ -172,7 +176,8 @@ final class LauncherBackground: NSView {
                     device: self.store.settings["device"] as? String ?? "ipad",
                     mods: self.store.settings["mods"] as? [String: Bool] ?? [:],
                     fullscreen: self.store.settings["fullscreen"] as? Bool ?? false,
-                    integerScaling: self.store.settings["integerScaling"] as? Bool ?? false
+                    integerScaling: self.store.settings["integerScaling"] as? Bool ?? false,
+                    hdTextures: self.store.settings["hdTextures"] as? Bool ?? false
                 )
                 let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice

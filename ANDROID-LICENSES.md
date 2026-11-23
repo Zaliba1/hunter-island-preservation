@@ -23,3 +23,7 @@ Full original GPL text and component notices are in the source licenses/ directo
 IPA import and diagnostic export use Android's file chooser. The app requests no INTERNET or broad storage permission and opts out of Android cloud backup. Diagnostic JSON excludes the IPA, saves, raw logs, original import URI and local paths. The preview signing key is private build material and is never distributed with sources.
 
 Android platform libraries are dynamically referenced and are not copied into the APK. Only the three native libraries in android-runtime-provenance.json are packaged. Other-platform notices retained in this source set are supplementary material and do not mean those platform binaries are bundled. All local license texts are readable offline through the app license browser. See SOURCE.md for source access and your own rebuild/relink/signing procedure.
+
+## Local monster texture generation
+
+The embedded Real-ESRGAN animevideov3 x4 weights are from Xintao Wang's Real-ESRGAN v0.2.5.0 portable NCNN release (BSD 3-Clause). See licenses/Real-ESRGAN-BSD.txt. The original model member is models/realesr-animevideov3-x4.bin, SHA-256 548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d. Source distribution: https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0. The local Rust inference implementation reads these unchanged model weights.

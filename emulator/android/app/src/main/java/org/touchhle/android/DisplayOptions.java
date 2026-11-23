@@ -48,6 +48,13 @@ final class DisplayOptions {
         integerScaling.setOnCheckedChangeListener((button, checked) ->
             preferences.edit().putBoolean("integerScaling", checked).apply());
         root.addView(integerScaling);
+
+        CheckBox hd = new CheckBox(context);
+        hd.setText("Generate and save HD monster textures locally (Real-ESRGAN 4×)");
+        hd.setChecked(preferences.getBoolean("hdTextures", false));
+        hd.setOnCheckedChangeListener((button, checked) ->
+            preferences.edit().putBoolean("hdTextures", checked).apply());
+        root.addView(hd);
     }
 
     static void appendArguments(Context context, List<String> arguments) {
@@ -56,6 +63,7 @@ final class DisplayOptions {
         arguments.add("ipad".equals(profile) ? "--device-family=ipad" : "--device-family=iphone");
         if ("iphone-retina".equals(profile)) arguments.add("--experimental-retina");
         if (preferences.getBoolean("integerScaling", false)) arguments.add("--integer-scaling");
+        if (preferences.getBoolean("hdTextures", false)) arguments.add("--hunter-hd-textures");
     }
 
     private static SharedPreferences preferences(Context context) {

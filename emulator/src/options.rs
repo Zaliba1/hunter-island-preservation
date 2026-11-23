@@ -71,6 +71,7 @@ pub struct Options {
     pub legacy_string_unsigned_int: bool,
     /// Legacy compatibility: defer uniquely owned texture deletes to their GL sharegroup.
     pub legacy_deferred_texture_deletes: bool,
+    pub hunter_hd_textures: bool,
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_no_arena_cooldown: bool,
@@ -121,6 +122,7 @@ impl Default for Options {
             live_test_taps: false,
             legacy_string_unsigned_int: false,
             legacy_deferred_texture_deletes: false,
+            hunter_hd_textures: false,
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
             hunter_no_arena_cooldown: false,
@@ -293,6 +295,8 @@ impl Options {
             self.headless = true;
             // Can't show the dialog box when headless!
             self.popup_errors = false;
+        } else if arg == "--hunter-hd-textures" {
+            self.hunter_hd_textures = true;
         } else if arg == "--live-test-taps" {
             self.live_test_taps = true;
         } else if arg == "--hunter-no-arena-cooldown" {

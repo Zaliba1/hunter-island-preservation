@@ -222,10 +222,11 @@ func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     try require(selected.count <= 1, "Choose only one testing collection.")
     return selected.first?.1 ?? "pockettrend.hunterisland"
 }
-func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false) -> [String] {
+func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false, hdTextures: Bool = false) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
     if fullscreen { args.append("--fullscreen") }
     if integerScaling { args.append("--integer-scaling") }
+    if hdTextures { args.append("--hunter-hd-textures") }
     let code = gameLanguage(language)
     if code != "system" { args.append("--preferred-languages=" + code) }
     for (flag, _) in modChoices where mods[flag] == true { args.append(flag) }
