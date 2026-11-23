@@ -36,6 +36,7 @@ android {
         getByName("main") {
             java.srcDir("${rootDir.parentFile}/vendor/SDL/android-project/app/src/main/java")
             assets.setSrcDirs(listOf(layout.buildDirectory.dir("generated/preservationAssets")))
+            res.setSrcDirs(listOf(layout.buildDirectory.dir("generated/preservationRes")))
             jniLibs.srcDir("jniLibs")
         }
     }
@@ -69,4 +70,9 @@ val preparePreservationAssets by tasks.registering(Sync::class) {
     from("../../../ANDROID-LICENSES.md") { into("preservation-notices"); rename { "LICENSES.md" } }
     from("../../../ANDROID-SOURCE.md") { into("preservation-notices"); rename { "SOURCE.md" } }
 }
-tasks.named("preBuild") { dependsOn(preparePreservationAssets) }
+val preparePreservationRes by tasks.registering(Sync::class) {
+    into(layout.buildDirectory.dir("generated/preservationRes"))
+    from("src/main/res") { exclude("drawable-nodpi/icon*.png") }
+    from("../../res") { include("icon.png", "icon_preview.png", "icon_unofficial.png"); into("drawable-nodpi") }
+}
+tasks.named("preBuild") { dependsOn(preparePreservationAssets, preparePreservationRes) }

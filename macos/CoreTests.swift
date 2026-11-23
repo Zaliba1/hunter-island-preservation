@@ -94,6 +94,8 @@ import Darwin
         try require(gameArguments(language: "invalid", device: "iphone", mods: ["--unapproved": true]).contains("--preferred-languages=en"), "English fallback failed.")
         try require(gameArguments(language: nil, device: "ipad", mods: [:]).contains("--preferred-languages=en"), "English default failed.")
         for fullscreen in [false, true] {
+            let hdArgs = gameArguments(language: nil, device: "ipad", mods: [:], hdTextures: true)
+            try require(hdArgs.contains("--hunter-hd-textures"), "Missing HD texture flag.")
             for integerScaling in [false, true] {
                 let arguments = gameArguments(language: nil, device: "ipad", mods: [:], fullscreen: fullscreen, integerScaling: integerScaling)
                 try require(arguments.contains("--fullscreen") == fullscreen, "Incorrect fullscreen startup flag.")

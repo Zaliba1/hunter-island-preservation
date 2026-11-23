@@ -182,6 +182,25 @@ public class PreservationFrameworkTest {
         }
     }
 
+    @Test public void localTextureGenerationIsOptInAndSurvivesRecreation() {
+        try (ActivityController<LauncherActivity> controller =
+                Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            android.widget.CheckBox hd = controller.get().getWindow().getDecorView().findViewWithTag("hunter-hd-textures");
+            assertFalse(hd.isChecked());
+            hd.performClick();
+            controller.recreate();
+            hd = controller.get().getWindow().getDecorView().findViewWithTag("hunter-hd-textures");
+            assertTrue(hd.isChecked());
+            List<String> args = new ArrayList<>();
+            DisplayOptions.appendArguments(controller.get(), args);
+            assertTrue(args.contains("--hunter-hd-textures"));
+            hd.performClick();
+            args.clear();
+            DisplayOptions.appendArguments(controller.get(), args);
+            assertFalse(args.contains("--hunter-hd-textures"));
+        }
+    }
+
     @Test public void launcherRefreshesImportWhenReturning() throws Exception {
         try(ActivityController<LauncherActivity> controller=Robolectric.buildActivity(LauncherActivity.class).setup()) {
             LauncherActivity activity=controller.get();Button start=button(activity.getWindow().getDecorView(),"Play");
