@@ -27,9 +27,9 @@ impl GLESContext for GLES2NativeContext {
 pub struct GLES2Native<'a>{_lifetime:PhantomData<&'a ()>,presenter:&'a mut Option<super::gles2_present::Presenter>}
 #[allow(unused_variables)]
 impl GLES for GLES2Native<'_> {
-    fn present_shader_renderbuffer(&mut self,viewport:(u32,u32,u32,u32),rotation:crate::matrix::Matrix<2>,nearest:bool)->bool {
+    fn present_shader_renderbuffer(&mut self,viewport:(u32,u32,u32,u32),rotation:crate::matrix::Matrix<2>,nearest:bool,upscale:super::present::UpscaleMode)->bool {
         let mut presenter=self.presenter.take().unwrap_or_else(||unsafe{super::gles2_present::Presenter::new()});
-        unsafe{presenter.draw(self,viewport,rotation,nearest)};
+        unsafe{presenter.draw(self,viewport,rotation,nearest,upscale)};
         *self.presenter=Some(presenter);true
     }
     fn supports_gles2_shaders(&self)->bool{true}

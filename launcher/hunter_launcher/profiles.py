@@ -13,4 +13,6 @@ def selected_test_directory(settings):
     choices = [folder for flag, folder in TEST_PROFILES.items() if mods.get(flag, False)]
     if len(choices) > 1:
         raise ValueError('Choose only one collection mode')
+    if mods.get("--zalibas-expansion"):
+        return (choices[0] if choices else "pockettrend.hunterisland") + "-expansion"
     return choices[0] if choices else None

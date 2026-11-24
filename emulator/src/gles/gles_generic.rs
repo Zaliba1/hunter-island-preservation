@@ -96,6 +96,7 @@ pub trait GLES {
         _viewport: (u32, u32, u32, u32),
         _rotation: crate::matrix::Matrix<2>,
         _nearest: bool,
+        _upscale: super::present::UpscaleMode,
     ) -> bool {
         false
     }

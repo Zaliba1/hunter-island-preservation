@@ -30,9 +30,7 @@ pub enum UpscaleMode {
     Bilinear,
     Fsr,
     FsrSharpened,
-    #[cfg(not(target_os = "android"))]
     Anime4K,
-    #[cfg(not(target_os = "android"))]
     Fsrcnnx,
 }
 
@@ -48,7 +46,6 @@ impl UpscaleMode {
         }
     }
 
-    #[cfg(not(target_os = "android"))]
     pub fn label(self) -> &'static str {
         match self {
             Self::Bilinear => "Bilinear",

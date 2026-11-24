@@ -77,6 +77,23 @@ class ModOptionsTest(unittest.TestCase):
     def test_older_profiles_keep_original_rules(self):
         self.assertEqual(mod_arguments({"device": "ipad"}), [])
 
+    def test_expansion_normal_and_full_use_their_own_seed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(directory)
+            base = store.bundle
+            atomic_json(store.config, {"mods": {"--zalibas-expansion": True}})
+            expansion = store.bundle
+            self.assertNotEqual(expansion, base)
+            store.require_testing_seed()
+            atomic_json(store.config, {"mods": {"--zalibas-expansion": True, "--hunter-test-save": True}})
+            self.assertEqual(store.bundle.name, "pockettrend.hunterisland-test-v1-expansion")
+            with self.assertRaises(ValueError):
+                store.require_testing_seed()
+            seed = expansion / "Documents/saves0/sv_1"
+            seed.parent.mkdir(parents=True)
+            seed.write_bytes(b"expansion checkpoint")
+            store.require_testing_seed()
+
     def test_all_choices_are_independent_and_unknown_flags_cannot_be_injected(self):
         for states in product((False, True), repeat=len(MOD_OPTIONS)):
             config = dict(zip((flag for flag, _ in MOD_OPTIONS), states))

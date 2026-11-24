@@ -13,6 +13,8 @@ import android.widget.TextView;
 import java.util.List;
 
 final class DisplayOptions {
+    private static final String[] FILTERS = {"bilinear", "fsr", "fsr-sharpened", "anime4k", "fsrcnnx"};
+    private static final String[] FILTER_LABELS = {"Bilinear", "FSR 1.2", "FSR 1.2 + RCAS", "Anime4K CNN x2 S", "FSRCNNX x2"};
     private static final String[] PROFILES = {"iphone-retina", "iphone", "ipad"};
     private static final String[] LABELS = {
         "iPhone Retina · 960 × 640 · experimental", "iPhone · 480 × 320", "iPad · 1024 × 768",
@@ -40,6 +42,20 @@ final class DisplayOptions {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
         root.addView(display);
+        TextView filterLabel = new TextView(context);
+        filterLabel.setText("Output filter");
+        root.addView(filterLabel);
+        Spinner filter = new Spinner(context);
+        filter.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, FILTER_LABELS));
+        int index = java.util.Arrays.asList(FILTERS).indexOf(preferences.getString("upscale", "bilinear"));
+        filter.setSelection(Math.max(0,index));
+        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                preferences.edit().putString("upscale", FILTERS[position]).apply();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        root.addView(filter);
 
         CheckBox integerScaling = new CheckBox(context);
         integerScaling.setText("Integer scaling (sharper pixels, larger borders)");
@@ -68,6 +84,8 @@ final class DisplayOptions {
 
     static void appendArguments(Context context, List<String> arguments) {
         SharedPreferences preferences = preferences(context);
+        String filter = preferences.getString("upscale", "bilinear");
+        if (!"bilinear".equals(filter) && java.util.Arrays.asList(FILTERS).contains(filter)) arguments.add("--upscale="+filter);
         String profile = preferences.getString("family", PROFILES[0]);
         arguments.add("ipad".equals(profile) ? "--device-family=ipad" : "--device-family=iphone");
         if ("iphone-retina".equals(profile)) arguments.add("--experimental-retina");

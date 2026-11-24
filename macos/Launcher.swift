@@ -32,7 +32,7 @@ final class LauncherBackground: NSView {
             window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 850), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
             window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: 850))
             window.title = "Hunter Island · Mac Preview"; window.delegate = self; window.center()
-            let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 13
+            let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 10
             stack.translatesAutoresizingMaskIntoConstraints = false; window.contentView!.addSubview(stack)
             NSLayoutConstraint.activate([stack.leadingAnchor.constraint(equalTo: window.contentView!.leadingAnchor, constant: 28), stack.trailingAnchor.constraint(equalTo: window.contentView!.trailingAnchor, constant: -28), stack.topAnchor.constraint(equalTo: window.contentView!.topAnchor, constant: 25)])
             let title = label("Hunter Island"); title.font = .boldSystemFont(ofSize: 26); stack.addArrangedSubview(title)

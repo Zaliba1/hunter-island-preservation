@@ -72,6 +72,7 @@ pub struct Options {
     /// Legacy compatibility: defer uniquely owned texture deletes to their GL sharegroup.
     pub legacy_deferred_texture_deletes: bool,
     pub hunter_hd_textures: bool,
+    pub zalibas_expansion: bool,
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_no_arena_cooldown: bool,
@@ -123,6 +124,7 @@ impl Default for Options {
             legacy_string_unsigned_int: false,
             legacy_deferred_texture_deletes: false,
             hunter_hd_textures: false,
+            zalibas_expansion: false,
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
             hunter_no_arena_cooldown: false,
@@ -174,9 +176,7 @@ impl Options {
                 "bilinear" => UpscaleMode::Bilinear,
                 "fsr" => UpscaleMode::Fsr,
                 "fsr-sharpened" => UpscaleMode::FsrSharpened,
-                #[cfg(not(target_os = "android"))]
                 "anime4k" => UpscaleMode::Anime4K,
-                #[cfg(not(target_os = "android"))]
                 "fsrcnnx" => UpscaleMode::Fsrcnnx,
                 _ => return Err(format!("Unsupported output filter: {value}")),
             };
@@ -313,6 +313,8 @@ impl Options {
             self.hunter_triple99_save = true;
         } else if arg == "--hunter-silver-exchange" {
             self.hunter_silver_exchange = true;
+        } else if arg == "--zalibas-expansion" {
+            self.zalibas_expansion = true;
         } else if arg == "--hunter-rare-dragons" {
             self.hunter_rare_dragons = true;
         } else if arg == "--legacy-string-unsigned-int" {

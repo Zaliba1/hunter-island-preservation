@@ -1,3 +1,24 @@
+# 0.2.0-preview.10 — Zalibas Expansion and graphics filters
+
+Select **Zalibas Expansion** in the launcher to play the optional campaign
+using your original Hunter Island 2.02 IPA. Turn it off to return to your
+base campaign. The mod has separate saves, including separate testing
+collections. Quest dialogue and directions follow the selected game language
+in English, German, French, Spanish, Italian and Japanese.
+
+The expansion adds 39 quest chains, 51 habitats and 34 fusion recipes.
+The seven Orbling milestones lead to Kamiwyrm at the end of the collection.
+Existing Windows Expedition 14 saves can be copied manually with the game
+closed into the new expansion profile. Keep a backup of the old folder.
+
+Windows x64 and Apple Silicon Mac use F9 to cycle Bilinear, FSR, FSR with
+RCAS, Anime4K CNN x2 S and FSRCNNX x2. On Android arm64 the launcher saves
+the chosen output filter. Neural filters engage when the displayed image is
+large enough and the GPU supports the intermediate textures. Local HD artwork
+and 2× internal resolution have independent switches on all three platforms.
+The distribution includes the emulator and mod instructions. Players supply
+their own game locally.
+
 # 0.2.0-preview.9-fsr.1 — Windows FSR
 
 - Optional AMD FidelityFX Super Resolution 1.2 with edge-adaptive upscaling

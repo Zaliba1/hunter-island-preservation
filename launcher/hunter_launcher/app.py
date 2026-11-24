@@ -13,6 +13,9 @@ from .language import (LANGUAGES, LANGUAGE_CODES, active_language, issue_message
 from .profiles import TEST_PROFILES, selected_test_directory
 
 MOD_OPTIONS = (
+    ('--zalibas-expansion', 'expansion'),
+    ('--hunter-hd-textures', 'hd_textures'),
+    ('--scale-hack=2', 'render_2x'),
     ('--hunter-rare-dragons', 'rare'),
     ('--hunter-silver-exchange', 'exchange'),
     ('--hunter-no-arena-cooldown', 'arena'),
@@ -94,7 +97,7 @@ def gui(store, release):
     style.configure('TLabel',background='#f3f5f7',foreground='#182c3d',font=('Segoe UI',10))
     style.configure('Title.TLabel',font=('Segoe UI',22,'bold'))
     style.configure('TButton',font=('Segoe UI',10),padding=(14,9))
-    frame = ttk.Frame(root,padding=28)
+    frame = ttk.Frame(root,padding=18)
     frame.pack(fill='both',expand=True)
     ttk.Label(frame,text='Hunter Island',style='Title.TLabel').pack(anchor='w')
     translate(ttk.Label(frame), 'version', version=VERSION).pack(anchor='w',pady=(2,18))
@@ -146,7 +149,7 @@ def gui(store, release):
     for flag, key in MOD_OPTIONS:
         value = tk.BooleanVar(value=settings.get('mods', {}).get(flag, False))
         control = translate(ttk.Checkbutton(frame, variable=value, name=key), key)
-        control.pack(anchor='w', pady=2)
+        control.pack(anchor='w', pady=0)
         mod_values[flag] = value
         mod_controls.append(control)
     def choose_test(flag):

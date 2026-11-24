@@ -1,0 +1,98 @@
+{
+  "HiBattleConvoy": {
+    "de": "Kahn {0}/4 · Gegnerzüge {1}/6 · Deckung {2}",
+    "en": "Barge {0}/4 · Enemy turns {1}/6 · Cover {2}",
+    "fr": "Chaland {0}/4 · Tours ennemis {1}/6 · Couverture {2}",
+    "es": "Barcaza {0}/4 · Turnos enemigos {1}/6 · Cobertura {2}",
+    "it": "Chiatta {0}/4 · Turni nemici {1}/6 · Copertura {2}",
+    "ja": "はしけの耐久 {0}/4・敵の行動 {1}/6・防御残り {2}回"
+  },
+  "HiBattleForeman": {
+    "de": "Werkmeister {0}/4 · Deckung {1}",
+    "en": "Foreman {0}/4 · Cover {1}",
+    "fr": "Contremaître {0}/4 · Couverture {1}",
+    "es": "Capataz {0}/4 · Cobertura {1}",
+    "it": "Capofficina {0}/4 · Copertura {1}",
+    "ja": "工房長の耐久 {0}/4・防御残り {1}回"
+  },
+  "HiBattleSpores": {
+    "de": "Giftsporen steigen aus den Wurzeln. Deckung schützt vor den Sporen.",
+    "en": "Poison spores rise from the roots. Take cover to avoid them.",
+    "fr": "Des spores toxiques s’élèvent des racines. Mets-toi à couvert pour t’en protéger.",
+    "es": "De las raíces brotan esporas venenosas. Ponte a cubierto para protegerte.",
+    "it": "Dalle radici salgono spore velenose. Mettiti al riparo per proteggerti.",
+    "ja": "根から毒の胞子が舞い上がった。防御すれば胞子を防げる。"
+  },
+  "HiBattleLandslide": {
+    "de": "Der Hang gibt nach. Jeder dritte Gegnerzug kann ein getroffenes Archedion verdrängen.",
+    "en": "The slope is giving way. Every third enemy turn can knock a hit Arkadion into reserve.",
+    "fr": "Le terrain s’effondre. Tous les trois tours ennemis, un Arkadion touché peut être repoussé en réserve.",
+    "es": "La ladera se derrumba. Cada tres turnos enemigos, un Arkadion golpeado puede caer a la reserva.",
+    "it": "Il pendio sta cedendo. Ogni tre turni nemici, un Arkadion colpito può finire in riserva.",
+    "ja": "斜面が崩れかけている。敵の行動3回ごとに、攻撃を受けた仲間が控えに押し出されることがある。"
+  },
+  "HiBattleSporeDamage": {
+    "de": "Giftsporen · {0} verliert zusätzlich {1} KP.",
+    "en": "Poison spores · {0} loses another {1} HP.",
+    "fr": "Spores toxiques · {0} perd encore {1} PV.",
+    "es": "Esporas venenosas · {0} pierde {1} PS más.",
+    "it": "Spore velenose · {0} perde altri {1} PS.",
+    "ja": "毒の胞子で{0}のHPがさらに{1}減った。"
+  },
+  "HiBattleRockDelay": {
+    "de": "Geröll verzögert {0} um 120 TU.",
+    "en": "Falling rocks delay {0} by 120 TU.",
+    "fr": "Les éboulis retardent {0} de 120 TU.",
+    "es": "El desprendimiento retrasa a {0} en 120 TU.",
+    "it": "La frana ritarda {0} di 120 TU.",
+    "ja": "落石で{0}の行動が120 TU遅れた。"
+  },
+  "HiBattleDisplaced": {
+    "de": "Der Hang rutscht! {0} rückt in die Reserve.",
+    "en": "The slope gives way! {0} is pushed into reserve.",
+    "fr": "Le terrain s’effondre ! {0} est repoussé en réserve.",
+    "es": "¡La ladera se derrumba! {0} pasa a la reserva.",
+    "it": "Il pendio cede! {0} finisce in riserva.",
+    "ja": "斜面が崩れ、{0}が控えに押し出された。"
+  },
+  "HiBattleSlopeCover": {
+    "de": "Deckung am Hang für drei Gegnerzüge.",
+    "en": "Taking cover on the slope for three enemy turns.",
+    "fr": "À couvert sur la pente pendant trois tours ennemis.",
+    "es": "A cubierto en la ladera durante tres turnos enemigos.",
+    "it": "Al riparo sul pendio per tre turni nemici.",
+    "ja": "敵が3回行動するまで斜面で身を守る。"
+  },
+  "HiBattleWardSlot": {
+    "de": "Eisschild auf Wächterplatz {0}",
+    "en": "Ice shield on guardian {0}",
+    "fr": "Bouclier de glace sur le gardien {0}",
+    "es": "Escudo de hielo en el guardián {0}",
+    "it": "Scudo di ghiaccio sul guardiano {0}",
+    "ja": "{0}番目の番人に氷の盾"
+  },
+  "HiBattleWardName": {
+    "de": "Eisschild auf Platz {0} · {1}",
+    "en": "Ice shield on slot {0} · {1}",
+    "fr": "Bouclier de glace en position {0} · {1}",
+    "es": "Escudo de hielo en la posición {0} · {1}",
+    "it": "Scudo di ghiaccio in posizione {0} · {1}",
+    "ja": "氷の盾：{0}番目の{1}"
+  },
+  "HiBattleFrostCover": {
+    "de": "Deckung für die nächsten drei Gegnerzüge.",
+    "en": "Taking cover for the next three enemy turns.",
+    "fr": "À couvert pendant les trois prochains tours ennemis.",
+    "es": "A cubierto durante los próximos tres turnos enemigos.",
+    "it": "Al riparo per i prossimi tre turni nemici.",
+    "ja": "敵があと3回行動するまで防御する。"
+  },
+  "HiBattleCharged": {
+    "de": "Das Eis knackt! Cryowyrm lädt seinen nächsten Angriff.",
+    "en": "The ice cracks! Cryowyrm is charging its next attack.",
+    "fr": "La glace craque ! Cryowyrm charge sa prochaine attaque.",
+    "es": "¡El hielo cruje! Cryowyrm carga su próximo ataque.",
+    "it": "Il ghiaccio scricchiola! Cryowyrm carica il prossimo attacco.",
+    "ja": "氷がきしむ！ 敵は次の攻撃に向けて力をためている。"
+  }
+}

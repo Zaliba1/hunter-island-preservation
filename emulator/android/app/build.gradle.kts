@@ -7,8 +7,8 @@ android {
         applicationId = "org.hunterislandpreservation.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 19
-        versionName = "0.2.0-preview.9"
+        versionCode = 21
+        versionName = "0.2.0-preview.10"
         ndk { abiFilters += "arm64-v8a" }
     }
     buildFeatures { buildConfig = true }
@@ -68,6 +68,7 @@ val preparePreservationAssets by tasks.registering(Sync::class) {
         exclude("runtime/**", "gnu-runtime/**", "tcl8.6.txt", "tk8.6.txt")
     }
     from("../../../ANDROID-LICENSES.md") { into("preservation-notices"); rename { "LICENSES.md" } }
+    from("../../../THIRD_PARTY.md") { into("preservation-notices") }
     from("../../../ANDROID-SOURCE.md") { into("preservation-notices"); rename { "SOURCE.md" } }
 }
 val preparePreservationRes by tasks.registering(Sync::class) {

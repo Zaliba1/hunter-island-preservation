@@ -65,11 +65,12 @@ class Store:
 
     def require_testing_seed(self):
         selected = selected_test_directory(self.settings())
-        if selected in (None, 'pockettrend.hunterisland-level1-v1', 'pockettrend.hunterisland-triple99-v1'):
+        if not selected or selected.removesuffix("-expansion") != "pockettrend.hunterisland-test-v1":
             return
         if (self.bundle / 'test-profile.json').is_file():
             return
-        normal = self.run / 'touchHLE_sandbox' / ipa.BUNDLE / 'Documents'
+        suffix = '-expansion' if selected.endswith('-expansion') else ''
+        normal = self.run / 'touchHLE_sandbox' / (ipa.BUNDLE + suffix) / 'Documents'
         if not any(p.is_file() and p.name[3:].isdigit() for p in normal.glob('saves*/sv_*')):
             raise LauncherInputError('seed_required')
 
@@ -162,9 +163,12 @@ class Store:
             return None
         if len(files) > 10000 or sum(p.stat().st_size for p in files) > 512 * 1024**2:
             raise LauncherInputError('export_size')
-        self.backups.mkdir(exist_ok=True)
+        backups = self.backups
+        if self.bundle.name.endswith('-expansion'):
+            backups = backups / self.bundle.name
+        backups.mkdir(parents=True, exist_ok=True)
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S')
-        path = self.backups / (stamp + '-' + uuid.uuid4().hex[:8] + '.zip')
+        path = backups / (stamp + '-' + uuid.uuid4().hex[:8] + '.zip')
         temp = path.with_suffix('.partial')
         try:
             with zipfile.ZipFile(temp, 'x', zipfile.ZIP_DEFLATED) as archive:
@@ -174,6 +178,6 @@ class Store:
         finally:
             temp.unlink(missing_ok=True)
         # Bounded local backup retention. These are private, never release inputs.
-        for old in sorted(self.backups.glob('*.zip'))[:-20]:
+        for old in sorted(backups.glob('*.zip'))[:-20]:
             old.unlink()
         return path

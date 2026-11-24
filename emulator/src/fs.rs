@@ -46,6 +46,7 @@ enum FileLocation {
     Path(PathBuf),
     /// Reference to a file inside a `.ipa` file (ZIP archive). Read only.
     IpaFileRef(IpaFileRef),
+    Expansion(std::rc::Rc<[u8]>),
     /// Name of a resource file bundled with touchHLE. Read only.
     ResourceFilePath(String),
 }
@@ -844,6 +845,7 @@ impl Fs {
                 // This shouldn't be a big problem as we're always assuming
                 // GMT in the codebase right now.
                 // TODO: double check that when we support different timezones
+                FileLocation::Expansion(_) => Ok(0),
                 FileLocation::IpaFileRef(ipa_file_ref) => {
                     Ok(ipa_file_ref.get_last_modified().into())
                 }
@@ -871,6 +873,7 @@ impl Fs {
         let node = self.lookup_node(path).ok_or(())?;
         match node {
             FsNode::File { location, .. } => match location {
+                FileLocation::Expansion(bytes) => Ok(bytes.len() as u64),
                 FileLocation::IpaFileRef(ipa_file_ref) => Ok(ipa_file_ref.get_size()),
                 FileLocation::Path(path) => {
                     fs::metadata(path).map(|meta| meta.len()).map_err(|_| ())
@@ -1041,6 +1044,7 @@ impl Fs {
                     let host_file = handle_open_err(File::open(host_path), host_path);
                     Ok(GuestFile::from_host_file(host_file))
                 }
+                FileLocation::Expansion(bytes) => Ok(GuestFile::IpaBundleFile(IpaFile::from_bytes(bytes.clone()))),
                 FileLocation::IpaFileRef(file) => Ok(GuestFile::from_ipa_file(file)),
                 FileLocation::ResourceFilePath(name) => {
                     let resource_file = handle_open_err(paths::ResourceFile::open(name), name);
@@ -1160,6 +1164,10 @@ impl Fs {
                             );
                             return Ok(GuestFile::File(file));
                         }
+                        FileLocation::Expansion(bytes) => {
+                            assert!(!(writeable || append || write));
+                            return Ok(GuestFile::IpaBundleFile(IpaFile::from_bytes(bytes.clone())));
+                        }
                         FileLocation::IpaFileRef(file) => {
                             assert!(!(writeable || append || write));
                             return Ok(GuestFile::from_ipa_file(file));
@@ -1269,7 +1277,7 @@ impl Fs {
 
                 let host_path = match location {
                     FileLocation::Path(host_path) => host_path,
-                    FileLocation::IpaFileRef(_) | FileLocation::ResourceFilePath(_) => panic!(),
+                    FileLocation::IpaFileRef(_) | FileLocation::Expansion(_) | FileLocation::ResourceFilePath(_) => panic!(),
                 };
 
                 std::fs::remove_file(host_path).map_err(FsError::IoError)?;

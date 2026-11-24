@@ -72,6 +72,7 @@ pub enum BundleData {
     HostDirectory(PathBuf),
     Zip {
         zip: ZipArchive<std::fs::File>,
+        overlay: std::collections::BTreeMap<String, Vec<u8>>,
         /// Path to the app bundle inside the zip file.
         /// It should be `"Payload/<app name>.app"` (no trailing slash!).
         bundle_path: String,
@@ -120,7 +121,10 @@ impl BundleData {
         let mut zip =
             ZipArchive::new(file).map_err(|e| format!("Could not open IPA archive: {e}"))?;
         let bundle_path = Self::find_bundle_path_in_archive(&mut zip)?;
-        Ok(BundleData::Zip { zip, bundle_path })
+        if zip.by_name(&format!("{bundle_path}/HiTakranDrain.plist")).is_ok() {
+            return Err("Import your original Hunter Island IPA and select Zalibas Expansion in the launcher.".into());
+        }
+        Ok(BundleData::Zip { zip, bundle_path, overlay: Default::default() })
     }
 
     pub fn open_any(path: &Path) -> Result<BundleData, String> {
@@ -141,10 +145,17 @@ impl BundleData {
         }
     }
 
+    pub(crate) fn set_overlay(&mut self, files: std::collections::BTreeMap<String, Vec<u8>>) -> Result<(), String> {
+        match self {
+            Self::Zip { overlay, .. } => { *overlay = files; Ok(()) }
+            Self::HostDirectory(_) => Err("Zalibas Expansion requires the original IPA".into()),
+        }
+    }
+
     pub(super) fn into_fs_node(self) -> FsNode {
         match self {
             BundleData::HostDirectory(path) => FsNode::from_host_dir(&path, false),
-            BundleData::Zip { zip, bundle_path } => {
+            BundleData::Zip { zip, bundle_path, overlay } => {
                 let archive = Rc::new(RefCell::new(zip));
                 let archive_cache = Rc::new(RefCell::new(HashMap::new()));
                 let metadata_map = Rc::new(RefCell::new(HashMap::new()));
@@ -172,6 +183,11 @@ impl BundleData {
                         }
                     }
                 }
+                for (path, bytes) in overlay {
+                    builder.add_file(GuestPath::new(&format!("/{path}")), FsNode::File {
+                        location: super::FileLocation::Expansion(Rc::from(bytes)), writeable: false,
+                    });
+                }
                 builder.build()
             }
         }
@@ -184,7 +200,7 @@ impl BundleData {
                     format!("Could not read Info.plist from the app bundle directory: {e}")
                 })
             }
-            BundleData::Zip { zip, bundle_path } => {
+            BundleData::Zip { zip, bundle_path, .. } => {
                 let mut file = zip
                     .by_name(&format!("{bundle_path}/Info.plist"))
                     .map_err(|e| format!("Could not open Info.plist from the IPA archive: {e}"))?;
@@ -302,6 +318,10 @@ impl IpaFileRef {
 /// Represents an opened file in an IPA bundle.
 pub struct IpaFile {
     file: Cursor<DecompressedFile>,
+}
+
+impl IpaFile {
+    pub(super) fn from_bytes(bytes: Rc<[u8]>) -> Self { Self { file: Cursor::new(bytes) } }
 }
 
 impl Debug for IpaFile {

@@ -194,6 +194,9 @@ Type mismatch when sending message {} to {:?}!
         }
         // Keep stack arguments in place, including on a cached guest IMP.
         IMP::Guest(guest_imp) => {
+            if env.options.zalibas_expansion && super::expedition_register::try_handle(env, receiver, guest_imp) {
+                return;
+            }
             if env.options.hunter_rare_dragons
                 && super::hunter_rare_dragons::try_draw(env, receiver, guest_imp)
             {

@@ -713,7 +713,7 @@ unsafe fn present_renderbuffer(env: &mut Environment) {
 
     #[cfg(target_os = "android")]
     if shader_context {
-        assert!(gles.present_shader_renderbuffer(viewport, rotation_matrix, nearest));
+        assert!(gles.present_shader_renderbuffer(viewport, rotation_matrix, nearest, upscale));
         std::mem::drop(gles_boxed);
         env.window.as_ref().unwrap().swap_window();
         return;

@@ -115,6 +115,8 @@ import Darwin
         }
         store.settings["language"] = "ja"; try store.save()
         try require(try selectedProfileDirectory([:]) == "pockettrend.hunterisland", "Wrong normal profile.")
+        try require(try selectedProfileDirectory(["--zalibas-expansion": true]) == "pockettrend.hunterisland-expansion", "Wrong expansion profile.")
+        try require(try selectedProfileDirectory(["--zalibas-expansion": true, "--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1-expansion", "Wrong expansion testing profile.")
         try require(try selectedProfileDirectory(["--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1", "Wrong level-one profile.")
         try require(try selectedProfileDirectory(["--hunter-triple99-save": true]) == "pockettrend.hunterisland-triple99-v1", "Wrong triple-99 profile.")
         for mask in 0..<(1 << collectionProfiles.count) {

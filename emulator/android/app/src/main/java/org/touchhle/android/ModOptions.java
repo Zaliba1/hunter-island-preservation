@@ -11,6 +11,7 @@ import java.util.List;
 /** Optional rules for the locally imported Hunter Island game. */
 final class ModOptions {
     private static final String[][] OPTIONS = {
+        {"--zalibas-expansion", "Zalibas Expansion"},
         {"--hunter-rare-dragons", "Find rare starter dragons more often (5% per wild battle)"},
         {"--hunter-silver-exchange", "Exchange silver for gold (50:1)"},
         {"--hunter-no-arena-cooldown", "Skip the 12-hour arena wait"},
@@ -34,17 +35,21 @@ final class ModOptions {
             if(!selected.equals(IpaInspector.BUNDLE))throw new IllegalStateException("Choose only one testing collection");
             selected=profile[1];
         }
-        return selected;
+        return selected + (p.getBoolean("--zalibas-expansion",false) ? "-expansion" : "");
+    }
+
+    static String campaignProfile(Context context) {
+        return IpaInspector.BUNDLE + (preferences(context).getBoolean("--zalibas-expansion", false) ? "-expansion" : "");
     }
 
     static void requireTestingSeed(Context context) throws java.io.IOException {
         String selected=selectedProfile(context);
-        if (!selected.equals("pockettrend.hunterisland-test-v1")) return;
+        if (!selected.equals("pockettrend.hunterisland-test-v1") && !selected.equals("pockettrend.hunterisland-test-v1-expansion")) return;
         java.io.File external=context.getExternalFilesDir(null);
         if(external==null) throw new java.io.IOException("Save storage is unavailable");
         java.io.File parent=new java.io.File(external,"touchHLE_sandbox");
         if(new java.io.File(parent,selected+"/test-profile.json").isFile()) return;
-        java.io.File[] slots=new java.io.File(parent,IpaInspector.BUNDLE+"/Documents").listFiles();
+        java.io.File[] slots=new java.io.File(parent,IpaInspector.BUNDLE+(selected.endsWith("-expansion") ? "-expansion" : "")+"/Documents").listFiles();
         if(slots!=null) for(java.io.File slot:slots) {
             if(!slot.isDirectory() || !slot.getName().matches("saves[0-9]+")) continue;
             java.io.File[] saves=slot.listFiles();

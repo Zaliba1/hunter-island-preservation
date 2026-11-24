@@ -372,14 +372,15 @@ fn number(name: &str, prefix: &str) -> Option<u64> {
     s.parse().ok()
 }
 
-pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode) -> Result<PathBuf, String> {
+pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode, expansion: bool) -> Result<PathBuf, String> {
     let key = preservation::save_key(ipa).map_err(|e|format!("Test-profile IPA inspection failed: {e}"))?;
     log!("Test profile: IPA metadata and data key checked.");
     let sandbox = base.join(crate::paths::SANDBOX_DIR);
     std::fs::create_dir_all(&sandbox).map_err(|e|e.to_string())?;
     plain_file(&sandbox)?;
-    let source = sandbox.join(BUNDLE);
-    let target = sandbox.join(mode.folder());
+    let suffix = if expansion { "-expansion" } else { "" };
+    let source = sandbox.join(format!("{BUNDLE}{suffix}"));
+    let target = sandbox.join(format!("{}{suffix}",mode.folder()));
     if target.exists() {
         plain_file(&target)?;
         let marker = target.join(MARKER);

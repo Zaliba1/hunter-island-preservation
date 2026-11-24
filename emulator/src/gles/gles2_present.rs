@@ -4,7 +4,7 @@ use super::{shader_raw as gl,GLES};
 use crate::matrix::Matrix;
 use std::ffi::CString;
 
-pub struct Presenter {program:u32,vao:u32,vbo:u32,texture:u32,size:(i32,i32),rotation:i32}
+pub struct Presenter {filters:super::fsr::FsrPresenter,program:u32,vao:u32,vbo:u32,texture:u32,size:(i32,i32),rotation:i32}
 unsafe fn shader(kind:u32,source:&str)->u32 {
     let shader=gl::CreateShader(kind);let text=CString::new(source).unwrap();
     gl::ShaderSource(shader,1,&text.as_ptr(),std::ptr::null());gl::CompileShader(shader);
@@ -21,9 +21,9 @@ impl Presenter {
         let mut ok=0;gl::GetProgramiv(program,gl::LINK_STATUS,&mut ok);assert_ne!(ok,0,"Android presenter program link failed");
         gl::DeleteShader(vertex);gl::DeleteShader(fragment);
         let mut vao=0;let mut vbo=0;let mut texture=0;gl::GenVertexArrays(1,&mut vao);gl::GenBuffers(1,&mut vbo);gl::GenTextures(1,&mut texture);
-        Self{program,vao,vbo,texture,size:(0,0),rotation:gl::GetUniformLocation(program,c"rotation".as_ptr())}
+        Self{filters:Default::default(),program,vao,vbo,texture,size:(0,0),rotation:gl::GetUniformLocation(program,c"rotation".as_ptr())}
     }
-    pub unsafe fn draw(&mut self,context:&mut dyn GLES,viewport:(u32,u32,u32,u32),rotation:Matrix<2>,nearest:bool) {
+    pub unsafe fn draw(&mut self,context:&mut dyn GLES,viewport:(u32,u32,u32,u32),rotation:Matrix<2>,nearest:bool,upscale:super::present::UpscaleMode) {
         let state=super::gles2_shaders::pause_program(context);
         fn int(name:u32)->i32{let mut n=0;unsafe{gl::GetIntegerv(name,&mut n)};n}
         let old_fbo=int(gl::FRAMEBUFFER_BINDING) as u32;
@@ -61,7 +61,14 @@ impl Presenter {
         gl::EnableVertexAttribArray(0);gl::EnableVertexAttribArray(1);
         gl::VertexAttribPointer(0,2,gl::FLOAT,gl::FALSE,16,std::ptr::null());
         gl::VertexAttribPointer(1,2,gl::FLOAT,gl::FALSE,16,8usize as *const _);
-        gl::DrawArrays(gl::TRIANGLE_STRIP,0,4);
+        let src = (width as u32, height as u32);
+        let oriented = if rotation.columns()[0][0].abs() < 0.5 { (src.1, src.0) } else { src };
+        let enlarge = viewport.2 >= oriented.0 && viewport.3 >= oriented.1
+            && (viewport.2, viewport.3) != oriented;
+        if upscale == super::present::UpscaleMode::Bilinear || !enlarge
+            || self.filters.draw(upscale, src, viewport, rotation).is_none() {
+            gl::DrawArrays(gl::TRIANGLE_STRIP,0,4);
+        }
         gl::BindTexture(gl::TEXTURE_2D,old_texture);gl::ActiveTexture(old_active);
         gl::BindFramebuffer(gl::FRAMEBUFFER,old_fbo);
         gl::Viewport(old_viewport[0],old_viewport[1],old_viewport[2],old_viewport[3]);

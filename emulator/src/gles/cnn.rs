@@ -137,6 +137,12 @@ impl Presenter {
                 return ready;
             }
         }
+        #[cfg(target_os = "android")]
+        {
+            // A failed reallocation must not leave the previous size attached.
+            gl::DeleteTextures(1, &self.textures[i]);
+            gl::GenTextures(1, &mut self.textures[i]);
+        }
         gl::BindTexture(gl::TEXTURE_2D, self.textures[i]);
         for param in [gl::TEXTURE_MIN_FILTER, gl::TEXTURE_MAG_FILTER] {
             gl::TexParameteri(gl::TEXTURE_2D, param, gl::LINEAR as i32);
@@ -164,12 +170,19 @@ impl Presenter {
             self.textures[i],
             0,
         );
+        #[cfg(not(target_os = "android"))]
+        let allocated = {
         let mut width = 0;
         let mut height = 0;
         gl::GetTexLevelParameteriv(gl::TEXTURE_2D, 0, gl::TEXTURE_WIDTH, &mut width);
         gl::GetTexLevelParameteriv(gl::TEXTURE_2D, 0, gl::TEXTURE_HEIGHT, &mut height);
-        let ready = (width as u32, height as u32) == size
-            && gl::CheckFramebufferStatusEXT(gl::FRAMEBUFFER_EXT) == gl::FRAMEBUFFER_COMPLETE_EXT;
+        (width as u32, height as u32) == size
+        };
+        // GLES 3.0 has no texture-level query. Each target size is checked by
+        // attaching a freshly allocated image and checking framebuffer status.
+        #[cfg(target_os = "android")]
+        let allocated = true;
+        let ready = allocated && gl::CheckFramebufferStatusEXT(gl::FRAMEBUFFER_EXT) == gl::FRAMEBUFFER_COMPLETE_EXT;
         self.sizes[i] = Some((size, ready));
         ready
     }
@@ -245,7 +258,7 @@ impl Presenter {
                 gl::UseProgram(copy.id);
                 gl::Uniform1i(copy.image, 0);
                 gl::UniformMatrix2fv(copy.rotation, 1, gl::FALSE, rotation);
-                gl::DrawArrays(gl::TRIANGLES, 0, 6);
+                super::draw_quad();
             };
             gl::FramebufferTexture2DEXT(
                 gl::FRAMEBUFFER_EXT,
@@ -279,7 +292,7 @@ impl Presenter {
                     gl::BindTexture(gl::TEXTURE_2D, self.textures[slot]);
                     gl::Uniform1i(location, unit as i32);
                 }
-                gl::DrawArrays(gl::TRIANGLES, 0, 6);
+                super::draw_quad();
             }
             gl::BindFramebufferEXT(gl::FRAMEBUFFER_EXT, old_fbo as _);
             gl::Viewport(vp.0 as _, vp.1 as _, vp.2 as _, vp.3 as _);

@@ -24,6 +24,7 @@ use crate::MutexId;
 use std::collections::HashMap;
 
 mod arc;
+mod expedition_register;
 mod hunter_rare_dragons;
 mod hunter_silver_exchange;
 pub(crate) mod hunter_history;

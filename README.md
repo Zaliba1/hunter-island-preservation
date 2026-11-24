@@ -10,6 +10,16 @@ installation, data locations and the remaining gameplay checks.
 
 ## Current release
 
+**0.2.0-preview.10** combines the optional **Zalibas Expansion** campaign and
+graphics filters on Windows x64, Android arm64 and Apple Silicon Mac. Import
+your own original Hunter Island 2.02 IPA. Enable the campaign in the launcher
+to enter its separate saves. The expansion uses the selected game language.
+On desktop, press F9 to cycle the output filters. On Android choose the output
+filter in the launcher. Local HD artwork and 2× internal resolution can be
+selected separately. See [release notes](RELEASE_NOTES.md).
+
+## Previous releases
+
 **0.2.0-preview.9-fsr.1** adds optional FSR 1.2 upscaling to the Windows build. In-game,
 **F9** enters fit-to-screen fullscreen and selects FSR. Press it again to
 compare FSR with light RCAS sharpening and bilinear filtering. The active

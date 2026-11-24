@@ -1142,6 +1142,7 @@ name = "touchHLE"
 version = "0.3.0"
 dependencies = [
  "aes",
+ "base64",
  "cargo-license",
  "cc",
  "chrono",

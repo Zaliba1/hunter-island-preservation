@@ -215,12 +215,12 @@ let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français")
 func gameLanguage(_ selection: String?) -> String {
     languageChoices.first(where: { $0.0 == selection })?.0 ?? "en"
 }
-let modChoices = [("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank")]
+let modChoices = [("--zalibas-expansion", "Zalibas Expansion"), ("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank")]
 let collectionProfiles = [("--hunter-test-save", "pockettrend.hunterisland-test-v1"), ("--hunter-level1-save", "pockettrend.hunterisland-level1-v1"), ("--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1")]
 func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     let selected = collectionProfiles.filter { mods[$0.0] == true }
     try require(selected.count <= 1, "Choose only one testing collection.")
-    return selected.first?.1 ?? "pockettrend.hunterisland"
+    return (selected.first?.1 ?? "pockettrend.hunterisland") + (mods["--zalibas-expansion"] == true ? "-expansion" : "")
 }
 func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false, hdTextures: Bool = false, internal2x: Bool = false) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
@@ -274,11 +274,11 @@ final class MacStore {
         let url = root.appendingPathComponent("games/" + hash + ".ipa")
         try require(try digest(url) == hash, "The imported IPA was modified. Please import it again.")
         let profile = try selectedProfileDirectory(settings["mods"] as? [String: Bool] ?? [:])
-        if profile == "pockettrend.hunterisland-test-v1" {
+        if profile == "pockettrend.hunterisland-test-v1" || profile == "pockettrend.hunterisland-test-v1-expansion" {
             let parent = run.appendingPathComponent("touchHLE_sandbox")
-            let marker = parent.appendingPathComponent("pockettrend.hunterisland-test-v1/test-profile.json")
+            let marker = parent.appendingPathComponent(profile + "/test-profile.json")
             if !FileManager.default.fileExists(atPath: marker.path) {
-                let documents = parent.appendingPathComponent("pockettrend.hunterisland/Documents")
+                let documents = parent.appendingPathComponent((profile.hasSuffix("-expansion") ? "pockettrend.hunterisland-expansion" : "pockettrend.hunterisland") + "/Documents")
                 let files = FileManager.default.enumerator(at: documents, includingPropertiesForKeys: nil)
                 var found = false
                 while let file = files?.nextObject() as? URL {
@@ -306,7 +306,8 @@ final class MacStore {
             count += 1; total += attributes.fileSize ?? 0
             try require(attributes.isSymbolicLink != true && count <= 10000 && total <= 512 << 20, "Unsafe or oversized save directory.")
         }
-        let backups = root.appendingPathComponent("backups", isDirectory: true)
+        let backupFolder = profile.hasSuffix("-expansion") ? "backups/" + profile : "backups"
+        let backups = root.appendingPathComponent(backupFolder, isDirectory: true)
         try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
         let target = backups.appendingPathComponent(UUID().uuidString + ".zip")
         _ = try runTool("/usr/bin/ditto", ["-c", "-k", "--keepParent", bundle.path, target.path])

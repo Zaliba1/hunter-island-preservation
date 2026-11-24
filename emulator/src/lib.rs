@@ -54,6 +54,7 @@ mod objc;
 mod options;
 mod paths;
 pub mod preservation;
+mod expansion;
 mod test_profile;
 mod stack;
 mod window;
@@ -249,11 +250,19 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     }
 
     let test_mode = test_profile::Mode::from_options(&options)?;
-    let test_sandbox = if !just_info {
-        test_mode.map(|mode|test_profile::prepare(&bundle_path,&paths::user_data_base_path(),mode)).transpose()?
-    } else {None};
-    let bundle_data = fs::BundleData::open_any(&bundle_path)
+    let expansion = options.zalibas_expansion;
+    let root = paths::user_data_base_path();
+    let test_sandbox = match (just_info, test_mode, expansion) {
+        (false, Some(mode), _) => Some(test_profile::prepare(&bundle_path, &root, mode, expansion)?),
+        (false, None, true) => Some(root.join(paths::SANDBOX_DIR).join("pockettrend.hunterisland-expansion")),
+        _ => None,
+    };
+    let mut bundle_data = fs::BundleData::open_any(&bundle_path)
         .map_err(|e| format!("Could not open app bundle: {e}"))?;
+    if expansion {
+        let overlay = expansion::build(&bundle_path).map_err(|e| format!("Zalibas Expansion: {e}"))?;
+        bundle_data.set_overlay(overlay)?;
+    }
     let (bundle, fs) = match bundle::Bundle::new_with_sandbox(
         bundle_data,
         /* read_only_mode: */ false,
@@ -378,6 +387,9 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     for option_arg in option_args {
         let parse_result = options.parse_argument(&option_arg);
         assert!(parse_result == Ok(true));
+    }
+    if options.zalibas_expansion != expansion {
+        return Err("Select Zalibas Expansion in the launcher or command line.".into());
     }
     if test_profile::Mode::from_options(&options)? != test_mode {
         return Err("Select the testing collection in the launcher or command line; options files cannot change its save directory.".into());

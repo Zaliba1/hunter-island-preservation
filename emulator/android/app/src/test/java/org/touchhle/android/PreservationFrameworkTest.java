@@ -87,6 +87,7 @@ public class PreservationFrameworkTest {
     }
     @Test public void launcherModsDefaultOffAndReachTheGameIndependently() {
         String[] labels = {
+            "Zalibas Expansion",
             "Find rare starter dragons more often (5% per wild battle)",
             "Exchange silver for gold (50:1)",
             "Skip the 12-hour arena wait",
@@ -95,6 +96,7 @@ public class PreservationFrameworkTest {
             "New game with 3 of each monster, level 99, rank S",
         };
         String[] flags = {
+            "--zalibas-expansion",
             "--hunter-rare-dragons", "--hunter-silver-exchange", "--hunter-no-arena-cooldown",
             "--hunter-test-save",
             "--hunter-level1-save",
@@ -116,7 +118,7 @@ public class PreservationFrameworkTest {
                     boxes[i].setChecked(enabled);
                 }
                 for (int i=0;i<flags.length;i++) if(boxes[i].isChecked()) expected.add(flags[i]);
-                assertTrue((boxes[3].isChecked()?1:0)+(boxes[4].isChecked()?1:0)+(boxes[5].isChecked()?1:0)<=1);
+                assertTrue((boxes[4].isChecked()?1:0)+(boxes[5].isChecked()?1:0)+(boxes[6].isChecked()?1:0)<=1);
                 List<String> arguments = new ArrayList<>();
                 ModOptions.appendArguments(activity, arguments);
                 assertEquals(expected, arguments);

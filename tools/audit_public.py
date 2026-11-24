@@ -26,6 +26,10 @@ def audit(root,release=False):
         data=data.replace(public_url, b"https://github.com/project-owner/project")
         data=data.replace(public_url.decode().encode("utf-16-le"),
                           "https://github.com/project-owner/project".encode("utf-16-le"))
+        # Public mod title and its two fixed program identifiers.
+        for title in ("Zalibas Expansion", "--zalibas-expansion", "zalibas_expansion"):
+            for encoding in ("utf-8", "utf-16-le"):
+                data=data.replace(title.lower().encode(encoding), b"<mod>")
         if any(marker in data or marker.decode(errors='ignore').encode('utf-16-le') in data for marker in markers):
             errors.append(label+': local identity/path marker')
         if re.search(rb'-----begin (?:[a-z0-9]+ )?private key-----',data) or re.search(rb'gh[pousr]_[a-z0-9]{30,}',data):

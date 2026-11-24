@@ -1,0 +1,6697 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "schleppkorb",
+      "title": "Der zerrissene Schleppkorb",
+      "npc": "Karen",
+      "offer": "over-39x83",
+      "requires": [
+        "Agramis.DeliverEnvelope"
+      ],
+      "dialogue": "Der rote Schwimmer gehört an die Außenseite. Schau mal, wo er jetzt hängt.",
+      "alternateDialogue": "Seit du die Leute vom Strand geholt hast, zählt hier jeder sein Werkzeug. Uns fehlt ein ganzer Korb.",
+      "ending": "Karen: „Da in der Reuse sitzt ein Krake. Für Megajaw frag am Ufer von Finam. Frigatefish zieht weiter bis Earun.“",
+      "reference": "E024",
+      "steps": [
+        {
+          "place": "over-38x74",
+          "action": "Roten Schwimmer lösen",
+          "veteran": 1.35,
+          "reserves": 2,
+          "level": 9,
+          "enemies": [
+            "Crab01",
+            "Rudefish01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Crab01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Rudefish01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Crab01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Rudefish01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Crab01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Rudefish01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Crab01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            },
+            {
+              "monsterId": "Rudefish01",
+              "level": 13,
+              "vitality": 1.35,
+              "force": 1.6605
+            }
+          ]
+        },
+        {
+          "place": "over-38x74",
+          "action": "Schleppkorb am Wellenbrecher befestigen",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "leuchtfeuer",
+      "title": "Der falsche Leuchtturm",
+      "npc": "Cardens",
+      "offer": "over-103x129",
+      "requires": [
+        "Quests.DefendLarkel"
+      ],
+      "dialogue": "Earlharts Leute haben die Lampe landeinwärts gedreht. Von See aus sieht unsere Klippe jetzt aus wie eine Hafeneinfahrt.",
+      "ending": "Cardens: „Jetzt sehen sie die Einfahrt wieder! Schau in den Tümpel unter der Leiter. Die Muschelschale da läuft.“",
+      "reference": "E091",
+      "steps": [
+        {
+          "place": "over-102x131",
+          "action": "Leiter freilegen",
+          "veteran": 1.2,
+          "reserves": 2,
+          "level": 23,
+          "enemies": [
+            "Crab02",
+            "Killerwhale01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Crab02",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Killerwhale01",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Crab02",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Killerwhale01",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Crab02",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Killerwhale01",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            },
+            {
+              "monsterId": "Crab02",
+              "level": 27,
+              "vitality": 1.2,
+              "force": 1.428
+            }
+          ]
+        },
+        {
+          "place": "over-102x131",
+          "action": "Lampe zur Fahrrinne drehen",
+          "clue": [
+            "Von hier malt die Lampe einen hellen Fleck auf die Klippe. Hinter den Bojen liegt die Fahrrinne.",
+            [
+              "Zur Klippe drehen",
+              "Zwischen die Bojen leuchten"
+            ],
+            1
+          ],
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "geleit",
+      "title": "Geleit durch die Untiefen",
+      "npc": "Mardu",
+      "offer": "over-106x46",
+      "requires": [
+        "Quests.DarandalPirates",
+        "leuchtfeuer",
+        "schleppkorb"
+      ],
+      "dialogue": "An Cardens’ Feuer kommen sie heil vorbei. Jetzt laufen sie mir auf der letzten halben Meile auf. Komm an Bord, ich zeig dir die Stelle.",
+      "ending": "Mardu: „Merk dir diese Boje, hier zieht Octor durchs Riff. Die beiden Zeichnungen gehören dir.“",
+      "reference": "E161",
+      "steps": [
+        {
+          "place": "over-117x47",
+          "action": "Das Schiff an der ersten Boje entlang lotsen",
+          "level": 44,
+          "enemies": [
+            "Wildwhale02",
+            "Drillfish01"
+          ],
+          "recipe": "Steelfish02",
+          "formation": [
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 48,
+              "vitality": 1.74,
+              "force": 1.35
+            }
+          ]
+        },
+        {
+          "place": "over-117x47",
+          "action": "Die verklemmte Riffkette lösen",
+          "level": 47,
+          "enemies": [
+            "Windpenguin03",
+            "Seadragon02",
+            "Pirateoctopus01"
+          ],
+          "recipe": "Pirateoctopus02",
+          "formation": [
+            {
+              "monsterId": "Windpenguin03",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Pirateoctopus01",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Pirateoctopus01",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Pirateoctopus01",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Pirateoctopus01",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 51,
+              "vitality": 1.07,
+              "force": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blockade",
+      "title": "Die Blockade von Darandal",
+      "npc": "Mardu",
+      "offer": "over-106x46",
+      "requires": [
+        "epilogue",
+        "geleit",
+        "Quests.FinalShowdown"
+      ],
+      "dialogue": "Earlhart hat aufgegeben. Aber sein letzter Anker liegt immer noch quer zur Fahrrinne. Heute nehmen wir ihn mit.",
+      "ending": "Mardu: „Der Anker ist oben! Außen am Riff zieht schon wieder ein Cruiserfish seine Runde.“",
+      "reference": "E221",
+      "steps": [
+        {
+          "place": "over-117x47",
+          "action": "Ersatzbojen einholen",
+          "level": 90,
+          "enemies": [
+            "Drillfish01",
+            "Icecat04",
+            "Seadragon02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Drillfish01",
+              "level": 94,
+              "vitality": 1.42,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Icecat04",
+              "level": 94,
+              "vitality": 1.42,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Seadragon02",
+              "level": 94,
+              "vitality": 1.42,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Drillfish01",
+              "level": 94,
+              "vitality": 1.42,
+              "force": 1.53
+            }
+          ]
+        },
+        {
+          "place": "over-117x47",
+          "action": "Den Schleppkahn für sechs Gegneraktionen decken",
+          "level": 94,
+          "enemies": [
+            "Windpenguin03",
+            "Windpenguin03",
+            "Killerwhale02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Windpenguin03",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            },
+            {
+              "monsterId": "Killerwhale02",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            },
+            {
+              "monsterId": "Windpenguin03",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            },
+            {
+              "monsterId": "Killerwhale02",
+              "level": 98,
+              "vitality": 1,
+              "force": 1.59
+            }
+          ]
+        },
+        {
+          "place": "over-117x47",
+          "action": "Earlharts Anker am Außenriff bergen",
+          "level": 97,
+          "enemies": [
+            "Wildwhale02",
+            "Wildwhale02",
+            "Steelfish02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Steelfish02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Steelfish02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Wildwhale02",
+              "level": 101,
+              "vitality": 1,
+              "force": 1.69
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kiesbank",
+      "title": "Warme Steine am Varda",
+      "npc": "Willard",
+      "offer": "over-71x109",
+      "requires": [
+        "Geat.TalkToBeo"
+      ],
+      "dialogue": "Fass mal an die Planke. Kalt. Jetzt an den Stein daneben. Genau dort liegt jeden Morgen eine frische Haut.",
+      "ending": "Willard: „Noch nass, der Abdruck. Komm bei der nächsten Ebbe zur warmen Kiesbank zurück.“",
+      "reference": "E048",
+      "steps": [
+        {
+          "place": "over-73x111",
+          "action": "Die drei Häute auf warmen Kies untersuchen",
+          "clue": [
+            "Zwei Häute fühlen sich kalt an. An der dritten klebt warmer Kies.",
+            [
+              "Die glatte Haut wenden",
+              "Die Haut mit Kies wenden",
+              "Am kalten Ufer graben"
+            ],
+            1
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-73x111",
+          "action": "Den Sonnenplatz freilegen",
+          "level": 14,
+          "enemies": [
+            "Windptero01",
+            "Windbug01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windbug01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windbug01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windbug01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windbug01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windbug01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 18,
+              "vitality": 1.58,
+              "force": 1.42
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "windwache",
+      "title": "Die Pfeifen der Windwache",
+      "npc": "Karzan",
+      "offer": "over-89x112",
+      "requires": [
+        "Earun.Commotion"
+      ],
+      "dialogue": "An der Brücke hören wir den Westposten bis hierher. Vom Ostposten kam heute kein Ton. Nimm die Ersatzpfeife mit.",
+      "ending": "Karzan: „Jetzt hörst du beide Pfeifen. Ninjagust folgt dem Wind am Uferkamm.“",
+      "reference": "E084",
+      "steps": [
+        {
+          "place": "over-86x112",
+          "action": "Die Westpfeife stimmen",
+          "clue": [
+            "Die Pfeife über dem Westufer ist zu hören, wenn die Öffnung dem Wind zugewandt ist.",
+            [
+              "Öffnung zum Fluss drehen",
+              "Öffnung abdecken"
+            ],
+            0
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-98x106",
+          "action": "Den Ostmast sichern und die zweite Pfeife drehen",
+          "veteran": 1.45,
+          "level": 19,
+          "enemies": [
+            "Thunderfox01",
+            "Firesquirrel01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Firesquirrel01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Firesquirrel01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Firesquirrel01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Firesquirrel01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Firesquirrel01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            },
+            {
+              "monsterId": "Thunderfox01",
+              "level": 23,
+              "vitality": 2.117,
+              "force": 2.3634999999999997
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "warte",
+      "title": "Die hohe Warte",
+      "npc": "Karzan",
+      "offer": "over-89x112",
+      "requires": [
+        "windwache",
+        "Takran.DefeatDahag"
+      ],
+      "dialogue": "Hörst du den kurzen Ruf? Den macht immer der Altvogel. Heute kommt er vom Boden.",
+      "ending": "Karzan: „Da fliegt der Altvogel wieder. Nimm die Seite über Garudahawk aus meinem Feldbuch.“",
+      "reference": "E124",
+      "steps": [
+        {
+          "place": "over-122x103",
+          "action": "Die Felskante für den Abstieg sichern",
+          "level": 32,
+          "enemies": [
+            "Armourbird01",
+            "Armourbird02",
+            "Windbird03",
+            "Fireptero02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Armourbird01",
+              "level": 32
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 32
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 32
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 32
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 32
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 32
+            }
+          ]
+        },
+        {
+          "place": "over-122x103",
+          "action": "Karzan beim Bergen des Altvogels decken",
+          "level": 34,
+          "enemies": [
+            "Armourbird02",
+            "Windbird02",
+            "Fireptero02",
+            "Windbird03"
+          ],
+          "recipe": "Garuda02",
+          "formation": [
+            {
+              "monsterId": "Armourbird02",
+              "level": 34
+            },
+            {
+              "monsterId": "Windbird02",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 34
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 34
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 34
+            },
+            {
+              "monsterId": "Windbird03",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Fireptero02",
+              "level": 34
+            },
+            {
+              "monsterId": "Armourbird02",
+              "level": 34
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mauer",
+      "title": "Unter der alten Mauer",
+      "npc": "Garjes",
+      "offer": "over-87x100",
+      "requires": [
+        "Heorot.CaptureTheKing"
+      ],
+      "dialogue": "Der Glockenzug führt bis in den Hof. Wenn du ihn von unten zum Klingen bringst, wissen wir, wo wir graben müssen.",
+      "ending": "Garjes: „Die Glocke hat bis in den Hof getragen. Von dort kommst du wieder ins Freie. Hier ist die Karte.“",
+      "reference": "E076",
+      "steps": [
+        {
+          "place": "over-87x100",
+          "room": "Gewölbe",
+          "action": "Eingestürzten Glockengang räumen",
+          "level": 20,
+          "enemies": [
+            "Darkbird01",
+            "Darkbird01",
+            "Windptero01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Windptero01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            },
+            {
+              "monsterId": "Darkbird01",
+              "level": 24,
+              "vitality": 1.37,
+              "force": 1.15
+            }
+          ]
+        },
+        {
+          "place": "over-87x100",
+          "room": "Wachhof",
+          "action": "Glocke läuten und die Routenkarte bergen",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "torbuch",
+      "title": "Das Buch des Torwächters",
+      "npc": "Garjes",
+      "offer": "over-87x100",
+      "requires": [
+        "mauer",
+        "Aurandal.SearchForTheScale"
+      ],
+      "dialogue": "Drei Siegel in einem Buch. Der Torwächter hat immer das gleiche genommen, wenn er vom selben Tier schrieb. Jetzt kennen wir seine Runde.",
+      "ending": "Garjes: „Drei Stationen in einer Wachrunde. Jetzt verstehe ich, warum jedes Siegel anders aussieht.“",
+      "reference": "E163",
+      "steps": [
+        {
+          "place": "over-126x106",
+          "action": "Abflusssiegel zuordnen",
+          "level": 42,
+          "enemies": [
+            "Bonefish01",
+            "Sharpshark02"
+          ],
+          "recipe": "Bonefish02",
+          "formation": [
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Bonefish01",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            },
+            {
+              "monsterId": "Sharpshark02",
+              "level": 46,
+              "vitality": 1.23,
+              "force": 1.05
+            }
+          ]
+        },
+        {
+          "place": "over-98x65",
+          "room": "Grabgewölbe",
+          "action": "Gewölbesiegel entziffern",
+          "level": 45,
+          "enemies": [
+            "Mummydragon01",
+            "Ghost02"
+          ],
+          "recipe": "Mummydragon02",
+          "formation": [
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Mummydragon01",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            },
+            {
+              "monsterId": "Ghost02",
+              "level": 49,
+              "vitality": 1.61,
+              "force": 1.64
+            }
+          ]
+        },
+        {
+          "place": "over-98x65",
+          "room": "Wachhof",
+          "action": "Wachhofsiegel abnehmen",
+          "level": 45,
+          "enemies": [
+            "Cerberus01",
+            "Cerberus01"
+          ],
+          "recipe": "Cerberus02",
+          "formation": [
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            },
+            {
+              "monsterId": "Cerberus01",
+              "level": 49,
+              "vitality": 1.08,
+              "force": 1.7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pflanzrinne",
+      "title": "Was unter den Stümpfen wächst",
+      "npc": "Reidia",
+      "offer": "over-123x110",
+      "requires": [
+        "Arborun.SaveArborus",
+        "Quests.StopSaws"
+      ],
+      "dialogue": "Siehst du den dünnen grünen Streifen? Genau da lief früher Wasser. Hilf mir mit dem Sägeblatt, dann kommt es wieder bis ans Beet.",
+      "ending": "Reidia: „Im hellen Beet raschelt Mandrapod. Mossling mag das nasse Holz weiter hinten. Zwischen den Kleeblüten am Rand der Rinne habe ich kleine Pfotenabdrücke gesehen. Ein Vegikit war vor uns hier.“",
+      "reference": "E105",
+      "steps": [
+        {
+          "place": "over-125x108",
+          "action": "Das Sägeblatt aus der Rinne heben",
+          "level": 28,
+          "enemies": [
+            "Bull02",
+            "Mummy01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 32,
+              "vitality": 1.18,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-125x108",
+          "action": "Wasser in das Saatbeet leiten",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "aussaat",
+      "title": "Die zweite Aussaat",
+      "npc": "Santi",
+      "offer": "over-123x110",
+      "requires": [
+        "pflanzrinne",
+        "Takran.DefeatDahag"
+      ],
+      "dialogue": "Als ich das erste Beet gegossen habe, hat es mir die Kanne weggezogen. Diesmal gießt du. Ich schau drunter.",
+      "ending": "Santi: „Vier Triebe unter zwei Beeten. Halt mir die Kanne, das will ich zeichnen.“",
+      "reference": "E126",
+      "steps": [
+        {
+          "place": "over-125x108",
+          "action": "Den Wasserlauf zur zweiten Lichtung öffnen",
+          "level": 31,
+          "enemies": [
+            "Mandragora01"
+          ],
+          "recipe": "Mandragora02",
+          "formation": [
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mandragora01",
+              "level": 35,
+              "vitality": 1.32,
+              "force": 1.66
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hang",
+      "title": "Wurzeln für den Hang",
+      "npc": "Albert",
+      "offer": "over-123x110",
+      "requires": [
+        "pflanzrinne",
+        "Aurandal.WinFinalRound"
+      ],
+      "dialogue": "Diesmal steht mein Versuchsaufbau fest im Boden. Das dachte ich gestern allerdings auch.",
+      "alternateDialogue": "Pack lieber da an, wo die Erde nachgibt.",
+      "ending": "Albert: „Vier Mossling halten diesen Hang. Hier kannst du sehen, wie ihre Wurzeln zu Mossgolem zusammenwachsen.“",
+      "reference": "E152",
+      "steps": [
+        {
+          "place": "over-125x108",
+          "action": "Den trockenen Hang verteidigen",
+          "veteran": 1.75,
+          "reserves": 2,
+          "level": 39,
+          "enemies": [
+            "Bull02",
+            "Bull02",
+            "Rhyno02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Bull02",
+              "level": 39,
+              "vitality": 1.75,
+              "force": 1.75
+            },
+            {
+              "monsterId": "Bull02",
+              "level": 39,
+              "vitality": 1.75,
+              "force": 1.75
+            },
+            {
+              "monsterId": "Rhyno02",
+              "level": 39,
+              "vitality": 1.75,
+              "force": 1.75
+            }
+          ]
+        },
+        {
+          "place": "over-125x108",
+          "action": "Die Verbindung der vier Mossling abzeichnen",
+          "recipe": "Bushgolem02",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "wurzel",
+      "title": "Die letzte Wurzel",
+      "npc": "Reidia",
+      "offer": "over-123x110",
+      "requires": [
+        "epilogue",
+        "hang"
+      ],
+      "dialogue": "Oben fault die Rinde. Unten liegen die jungen Wächter im Graben. Du kennst den Hang. Wen soll ich mitnehmen?",
+      "ending": "Reidia: „Der Graben hält. Siehst du den frischen Abdruck im Kessel? Der gehört dem Mossgolem.“",
+      "reference": "E221",
+      "steps": [
+        {
+          "place": "over-125x108",
+          "room": "Wurzelkessel",
+          "action": "Die kranken Wurzeln erreichen",
+          "level": 89,
+          "enemies": [
+            "Naturalegg01",
+            "Slime02",
+            "Mummy01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Naturalegg01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Slime02",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Naturalegg01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Slime02",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Naturalegg01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Slime02",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Naturalegg01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Slime02",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 93,
+              "vitality": 1,
+              "force": 1.79
+            }
+          ]
+        },
+        {
+          "place": "over-125x108",
+          "room": "Wurzelkessel",
+          "action": "Den Graben halten",
+          "level": 92,
+          "enemies": [
+            "Boxbunny02",
+            "Windptero02",
+            "Mammut02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Boxbunny02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Windptero02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Boxbunny02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Windptero02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            },
+            {
+              "monsterId": "Boxbunny02",
+              "level": 96,
+              "vitality": 1.11,
+              "force": 1.53
+            }
+          ]
+        },
+        {
+          "place": "over-125x108",
+          "room": "Wurzelkessel",
+          "action": "Mit Reidia den offenen Zugang verteidigen",
+          "level": 96,
+          "enemies": [
+            "Naturalegg01",
+            "Mummy01",
+            "Bushgolem02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Naturalegg01",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Bushgolem02",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Naturalegg01",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Mummy01",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Bushgolem02",
+              "level": 100,
+              "vitality": 1,
+              "force": 1.77
+            }
+          ],
+          "alternative": [
+            {
+              "monsterId": "Boxbunny02",
+              "level": 100,
+              "vitality": 1.09,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 100,
+              "vitality": 1.09,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Bushgolem02",
+              "level": 100,
+              "vitality": 1.09,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Boxbunny02",
+              "level": 100,
+              "vitality": 1.09,
+              "force": 1.66
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 100,
+              "vitality": 1.09,
+              "force": 1.66
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bohrer",
+      "title": "Was der Bohrer freigelegt hat",
+      "npc": "Jizelda",
+      "offer": "over-126x98",
+      "requires": [
+        "Takran.DefeatDahag"
+      ],
+      "dialogue": "Unten in Vasek schmeckt unser Wasser nach Eisen. Seit gestern steigt der Pegel, obwohl der Bohrer steht. Halt die Lampe mal über den Ablauf.",
+      "ending": "Jizelda: „Der Pegel fällt! Im Wartungsgang patrouilliert noch ein Droneguard. Oben am Bogen sitzen weitere Tiere.“",
+      "reference": "E130",
+      "steps": [
+        {
+          "place": "over-126x73",
+          "room": "Wartungsgang",
+          "action": "Den Ablauf am Geröll öffnen",
+          "level": 32,
+          "enemies": [
+            "Rhyno02",
+            "Securityrobot01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Rhyno02",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Rhyno02",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Rhyno02",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Rhyno02",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Rhyno02",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 36,
+              "vitality": 1.39,
+              "force": 1.58
+            }
+          ]
+        },
+        {
+          "place": "over-126x73",
+          "room": "Wartungsgang",
+          "action": "Die Verteilerweiche entriegeln",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "druck",
+      "title": "Der Druck im Stollen",
+      "npc": "Yarzan",
+      "offer": "over-128x79",
+      "requires": [
+        "bohrer",
+        "Aurandal.SearchForTheScale"
+      ],
+      "dialogue": "Ich kann dir sagen, was sechs volle Fässer wiegen. Wer mir erklärt, wie sechs Plasmoid durch dieses Rohr passen, bekommt mein altes Feldbuch.",
+      "ending": "Yarzan: „Sechs Plasmoid in einem Becken. Das glaubt mir oben keiner. Nimm das Feldbuch mit.“",
+      "reference": "E163",
+      "steps": [
+        {
+          "place": "over-126x73",
+          "room": "Absetzbecken",
+          "action": "Das Zulaufventil öffnen",
+          "clue": [
+            "Der Zulauf klopft trocken. Das mittlere Rohr steht noch leer.",
+            [
+              "Zulauf öffnen",
+              "Ausgleich öffnen",
+              "Ablauf öffnen"
+            ],
+            0
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-126x73",
+          "room": "Absetzbecken",
+          "action": "Den Druck ausgleichen",
+          "clue": [
+            "Jetzt schlägt das mittlere Rohr. Erst wenn beide Pegel gleich stehen, hält das untere Gewinde.",
+            [
+              "Ablauf öffnen",
+              "Zulauf schließen",
+              "Ausgleich öffnen"
+            ],
+            2
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-126x73",
+          "room": "Absetzbecken",
+          "action": "Das Ablaufventil sichern",
+          "level": 46,
+          "enemies": [
+            "Slimegolem01",
+            "Slimegolem01",
+            "Rockegg01"
+          ],
+          "recipe": "Slimegolem02",
+          "clue": [
+            "Die Pegel stehen gleich. Am tiefsten Ventil hörst du das Wasser ablaufen.",
+            [
+              "Zulauf schließen",
+              "Ablauf öffnen",
+              "Ausgleich schließen"
+            ],
+            1
+          ],
+          "formation": [
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Rockegg01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Rockegg01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Rockegg01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Rockegg01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Rockegg01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Slimegolem01",
+              "level": 50,
+              "vitality": 1.08,
+              "force": 1.77
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pfeiler",
+      "title": "Die gläsernen Pfeiler",
+      "npc": "Jizelda",
+      "offer": "over-128x79",
+      "requires": [
+        "bohrer",
+        "Kallaku.ConvinceFrostSerpent"
+      ],
+      "dialogue": "Klopf erst ans Gestein. Ein dumpfer Ton heißt, dass die Leute dahinter noch Luft haben.",
+      "ending": "Jizelda: „Hörst du die Stimmen? Beide Schichten sind draußen. Der blaue Splitter kommt aus der Ryudou-Höhle.“",
+      "reference": "E189",
+      "steps": [
+        {
+          "place": "over-126x73",
+          "room": "Geröllhalle",
+          "action": "Die erste Schicht aus dem Geröllbogen holen",
+          "level": 51,
+          "enemies": [
+            "Rockdragon01",
+            "Earthrex02",
+            "Rockdragon01"
+          ],
+          "recipe": "Rockdragon02",
+          "formation": [
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Earthrex02",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 55,
+              "vitality": 1,
+              "force": 1.21
+            }
+          ]
+        },
+        {
+          "place": "over-126x73",
+          "room": "Kristallnische",
+          "action": "Die Kristallstütze sichern",
+          "level": 54,
+          "enemies": [
+            "Crystalgolem01",
+            "Wallmonster01",
+            "Crystalgolem01"
+          ],
+          "recipe": "Crystalgolem02",
+          "formation": [
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            },
+            {
+              "monsterId": "Crystalgolem01",
+              "level": 58,
+              "vitality": 1,
+              "force": 2.13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "waechter",
+      "title": "Der stille Wächter",
+      "npc": "Jizelda",
+      "offer": "over-128x79",
+      "requires": [
+        "bohrer",
+        "Kallaku.ConvinceFrostSerpent"
+      ],
+      "dialogue": "Bei jedem dritten Schlag fährt der Riegel vor. Zieh den Hebel genau dann, wenn du mich klopfen hörst.",
+      "ending": "Jizelda: „Endlich steht der Riegel still. Auf der Steuerscheibe kannst du die Anordnung für Roidguard ablesen.“",
+      "reference": "E189",
+      "steps": [
+        {
+          "place": "over-126x73",
+          "room": "Wartungsgang",
+          "action": "Den Riegel beim dritten Klopfen lösen",
+          "level": 53,
+          "enemies": [
+            "Securityrobot01",
+            "Robolion01",
+            "Securityrobot01"
+          ],
+          "recipe": "Securityrobot02",
+          "clue": [
+            "Klopf. Klopf. Beim nächsten Schlag hebt sich der Riegel.",
+            [
+              "Nach dem ersten Schlag ziehen",
+              "Beim dritten Schlag ziehen"
+            ],
+            1
+          ],
+          "formation": [
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            },
+            {
+              "monsterId": "Securityrobot01",
+              "level": 57,
+              "vitality": 1,
+              "force": 1.77
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ton",
+      "title": "Die Stimmen im Ton",
+      "npc": "Urid",
+      "offer": "over-104x77",
+      "requires": [
+        "Handal.HanClanSponsor"
+      ],
+      "dialogue": "Im Sand verlierst du auch einen guten Weg. Darum klingen die Figuren am Pass alle verschieden. Schlag sacht mit dem Ring dagegen.",
+      "ending": "Urid: „Hörst du die Antwort vom Tor? So klang der Pass, bevor der Sand die Wegfiguren verschluckt hat.“",
+      "reference": "E143",
+      "steps": [
+        {
+          "place": "over-92x41",
+          "action": "Die Scherben nach Tonhöhe einsetzen",
+          "level": 34,
+          "enemies": [
+            "Holyclay01"
+          ],
+          "clue": [
+            "Die linke Figur brummt tief, die rechte klingt hell. Die mittlere Scherbe passt zwischen beide.",
+            [
+              "Hell, tief, mittel",
+              "Tief, mittel, hell",
+              "Mittel, hell, tief"
+            ],
+            1
+          ],
+          "formation": [
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 38,
+              "vitality": 1,
+              "force": 1.08
+            }
+          ]
+        },
+        {
+          "place": "over-92x41",
+          "action": "Am Tor auf Onilads Antwort hören",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "karawane",
+      "title": "Staub über der Karawane",
+      "npc": "Amil",
+      "offer": "over-92x43",
+      "requires": [
+        "Aurandal.WinFinalRound"
+      ],
+      "dialogue": "Heute kennt in der Stadt jeder meinen Namen. Keiner weiß, wer das Wasser für die Arena bringt. Die Wagen warten draußen.",
+      "ending": "Amil: „Goldstaub am Brunnen! Das Erz laden die Händler am Karawanenhalt in Darandal ab.“",
+      "reference": "E141",
+      "steps": [
+        {
+          "place": "over-92x41",
+          "action": "Die Zugtiere durch den Staub führen",
+          "level": 38,
+          "enemies": [
+            "Cactus02",
+            "Firebombbird01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Cactus02",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Firebombbird01",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Firebombbird01",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Firebombbird01",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Firebombbird01",
+              "level": 42,
+              "vitality": 1,
+              "force": 1.3
+            }
+          ]
+        },
+        {
+          "place": "over-92x41",
+          "action": "Den Brunnen im Windschatten freilegen",
+          "level": 40,
+          "enemies": [
+            "Tornadomonster01"
+          ],
+          "clue": [
+            "Im Staub kann das Zugtier nichts sehen. Hinter der Brunnenmauer ist die Luft klar.",
+            [
+              "An der Luvseite führen",
+              "In den Windschatten führen"
+            ],
+            1
+          ],
+          "formation": [
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 40,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ofenhueter",
+      "title": "Der Zug der Ofenhüter",
+      "npc": "Töpferin",
+      "offer": "over-104x77",
+      "requires": [
+        "ton",
+        "Aurandal.SearchForTheScale"
+      ],
+      "dialogue": "Bis zum Tor hat man uns gehört. Dahinter ist nur noch Wind.",
+      "ending": "Die Töpferin: „Die letzte Glut hält. Du hast gesehen, welche Figuren an jedes Feuer gehören.“",
+      "reference": "E158",
+      "steps": [
+        {
+          "place": "over-92x41",
+          "action": "Die erste Wegfigur ausrichten",
+          "recipe": "Holyclay02",
+          "formation": []
+        },
+        {
+          "place": "over-92x41",
+          "action": "Das Passtor halten",
+          "level": 43,
+          "enemies": [
+            "Holyclay01",
+            "Aironi01"
+          ],
+          "recipe": "Aironi02",
+          "formation": [
+            {
+              "monsterId": "Holyclay01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Aironi01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Aironi01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Aironi01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            },
+            {
+              "monsterId": "Holyclay01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.22
+            }
+          ]
+        },
+        {
+          "place": "over-92x41",
+          "action": "Den letzten Brennofen erreichen",
+          "veteran": 1.65,
+          "reserves": 5,
+          "level": 45,
+          "enemies": [
+            "Ballfire01",
+            "Firesamurai01"
+          ],
+          "recipe": "Ballfire02",
+          "formation": [
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Firesamurai01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            },
+            {
+              "monsterId": "Ballfire01",
+              "level": 49,
+              "vitality": 3.3824999999999994,
+              "force": 2.5905
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "waage",
+      "title": "Die Waage im Sturm",
+      "npc": "Amil",
+      "offer": "over-104x77",
+      "requires": [
+        "karawane",
+        "Aurandal.SearchForTheScale"
+      ],
+      "dialogue": "Die Waage zeigt bei jeder Böe mehr Erz an. Stell dich mit dem Rücken zum Wind. Jetzt siehst du, wer in der Schale sitzt.",
+      "ending": "Amil: „Endlich steht die Waage still. Hier sind meine Zeichnungen vom Erz und vom Sturm am Mast.“",
+      "reference": "E158",
+      "steps": [
+        {
+          "place": "over-108x46",
+          "action": "Die Erzrinne von Sand befreien",
+          "level": 43,
+          "enemies": [
+            "Goldslime01",
+            "Cactus02"
+          ],
+          "recipe": "Goldslime02",
+          "formation": [
+            {
+              "monsterId": "Goldslime01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Goldslime01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Goldslime01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Cactus02",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            },
+            {
+              "monsterId": "Goldslime01",
+              "level": 47,
+              "vitality": 1,
+              "force": 1.47
+            }
+          ]
+        },
+        {
+          "place": "over-92x41",
+          "action": "Die Windfahne am Mast sichern",
+          "level": 46,
+          "enemies": [
+            "Tornadomonster01",
+            "Thunderfox03"
+          ],
+          "recipe": "Tornadomonster02",
+          "formation": [
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Tornadomonster01",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 50,
+              "vitality": 1.58,
+              "force": 1.44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "feuerwege",
+      "title": "Die drei Feuerwege",
+      "npc": "Urid",
+      "offer": "over-104x77",
+      "requires": [
+        "Aurandal.SearchForTheScale"
+      ],
+      "dialogue": "Die Bergleute haben an jeder Abzweigung einen Keil eingeschlagen. Folge den blanken. Dort läuft noch jemand entlang.",
+      "ending": "Urid: „Jetzt finden die Bergleute auch im Rauch zurück. An den drei Keilen kannst du die Bewohner des Vulkans wieder aufsuchen.“",
+      "reference": "E163",
+      "steps": [
+        {
+          "place": "over-101x37",
+          "room": "Ascheweide",
+          "action": "Den ersten Keil freilegen",
+          "veteran": 1.3,
+          "reserves": 5,
+          "level": 43,
+          "enemies": [
+            "Lavabull01",
+            "Lavabull01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 43,
+              "vitality": 1.3,
+              "force": 1.3
+            }
+          ]
+        },
+        {
+          "place": "over-101x37",
+          "room": "Abbaukante",
+          "action": "Den Weg neben dem Nest markieren",
+          "clue": [
+            "Neben dem Nest liegen ein verrußter Keil und ein blanker. Die Bergleute haben den sicheren Weg frisch markiert.",
+            [
+              "Dem blanken Keil folgen",
+              "Das Nest berühren"
+            ],
+            0
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-101x37",
+          "room": "Lavastollen",
+          "action": "Den Rückweg aus dem Becken sichern",
+          "level": 47,
+          "enemies": [
+            "Lavagigant01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 51,
+              "vitality": 1.12,
+              "force": 1.71
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "esse",
+      "title": "Die Hüter der Esse",
+      "npc": "Schmied",
+      "offer": "over-101x37",
+      "requires": [
+        "feuerwege"
+      ],
+      "dialogue": "Wenn die Pyrobull den roten Himmel sehen, laufen sie hangaufwärts. Mach das untere Gatter auf. Ich komme euch entgegen.",
+      "ending": "Der Schmied: „Die obere Esse zieht wieder. Merk dir, wie die Tiere ihre Hitze zusammenführen.“",
+      "reference": "E161",
+      "steps": [
+        {
+          "place": "over-101x37",
+          "room": "Ascheweide",
+          "action": "Das untere Gatter öffnen",
+          "level": 46,
+          "enemies": [
+            "Lavabull01",
+            "Lavabull02"
+          ],
+          "recipe": "Lavabull02",
+          "formation": [
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull01",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            },
+            {
+              "monsterId": "Lavabull02",
+              "level": 50,
+              "vitality": 1.12,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-101x37",
+          "room": "Abbaukante",
+          "action": "Den oberen Ofen wieder anzünden",
+          "level": 48,
+          "enemies": [
+            "Ifrit01",
+            "Firedragoon01",
+            "Ifrit01"
+          ],
+          "recipe": "Ifrit02",
+          "formation": [
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Ifrit01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 52,
+              "vitality": 1.4,
+              "force": 1.17
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schmelze",
+      "title": "Das Ende der Schmelze",
+      "npc": "Schmied",
+      "offer": "over-101x37",
+      "requires": [
+        "feuerwege",
+        "Kallaku.ConvinceFrostSerpent"
+      ],
+      "dialogue": "Dieses Stück ist am Rand abgekühlt, das andere im Kern. Nimm beide Zangen mit. Ich will wissen, welches zuerst springt.",
+      "ending": "Der Schmied: „Lass den Kern langsam kühlen. An seiner Schichtung erkennst du die Anordnung der Lavariesen.“",
+      "reference": "E191",
+      "steps": [
+        {
+          "place": "over-101x37",
+          "room": "Abbaukante",
+          "action": "Die Randprobe kühlen",
+          "reserves": 5,
+          "level": 54,
+          "enemies": [
+            "Firedragoon01",
+            "Fourfiresnake01"
+          ],
+          "recipe": "Firedragoon02",
+          "formation": [
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 54,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-101x37",
+          "room": "Lavastollen",
+          "action": "Die Kernprobe bergen",
+          "veteran": 1.65,
+          "reserves": 5,
+          "level": 56,
+          "enemies": [
+            "Lavagigant01",
+            "Lavagigant01"
+          ],
+          "recipe": "Lavagigant02",
+          "formation": [
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            },
+            {
+              "monsterId": "Lavagigant01",
+              "level": 60,
+              "vitality": 1.65,
+              "force": 2.2769999999999997
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schlote",
+      "title": "Vier Schlote",
+      "npc": "Urid",
+      "offer": "over-104x77",
+      "requires": [
+        "feuerwege",
+        "Priory.FindDeucalion"
+      ],
+      "dialogue": "Drei Rauchsäulen sehe ich schon von Handal aus. Früher waren es vier. Schick jemanden zum vierten Schacht.",
+      "ending": "Urid: „Vier Arme, eine Strömung. Das ist die Zeichnung, die dir für Hydrablazer gefehlt hat.“",
+      "reference": "E215",
+      "steps": [
+        {
+          "place": "over-101x37",
+          "room": "Lavastollen",
+          "action": "Den vierten Schacht freilegen",
+          "level": 65,
+          "enemies": [
+            "Firedragoon01",
+            "Ifrit02",
+            "Fourfiresnake01",
+            "Fourfiresnake01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Firedragoon01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Ifrit02",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Ifrit02",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Fourfiresnake01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Firedragoon01",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Ifrit02",
+              "level": 65,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-101x37",
+          "room": "Lavastollen",
+          "action": "Den Strom auf vier Arme verteilen",
+          "recipe": "Fourfiresnake02",
+          "clue": [
+            "Vier Ausgänge glühen. In der Mitte läuft das Gestein bereits über.",
+            [
+              "Alle vier Arme öffnen",
+              "In die Mitte zurückleiten"
+            ],
+            0
+          ],
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "spuren",
+      "title": "Spuren unter dem Schnee",
+      "npc": "Mariki",
+      "offer": "over-102x26",
+      "requires": [
+        "Sholai.ScanCave"
+      ],
+      "dialogue": "Snowstags treten die Kruste mit dem Huf ein. Hier liegt der Schnee obenauf. Geh zwei Schritte zurück und schau unter die Birken.",
+      "ending": "Mariki: „Unter den Birken geht die zweite Spur weiter. Behalte sie am Pass im Auge.“",
+      "reference": "E176",
+      "steps": [
+        {
+          "place": "over-100x25",
+          "action": "Die Hufspur im Schneefeld prüfen",
+          "level": 47,
+          "enemies": [
+            "Deer03"
+          ],
+          "formation": [
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 51,
+              "vitality": 1,
+              "force": 1.79
+            }
+          ]
+        },
+        {
+          "place": "over-100x25",
+          "action": "Unter den Birken die zweite Fährte lesen",
+          "clue": [
+            "Die breite Hufspur endet im offenen Schnee. Unter den Birken läuft eine zweite, schmale Fährte weiter.",
+            [
+              "Die Hufspur weiterverfolgen",
+              "Unter den Birken nachsehen"
+            ],
+            1
+          ],
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "schatten",
+      "title": "Der zweite Schatten",
+      "npc": "Mariki",
+      "offer": "over-102x26",
+      "requires": [
+        "spuren",
+        "Kallaku.ConvinceFrostSerpent"
+      ],
+      "dialogue": "Stell dich wieder hinter den Baum. Unser Jäger sagt dir gleich, welcher von euch den zweiten Schatten wirft.",
+      "ending": "Mariki: „Sieh auf den Abstand zwischen den Abdrücken. Jetzt kannst du auch Shadowstalker erkennen.“",
+      "reference": "E184",
+      "steps": [
+        {
+          "place": "over-23x20",
+          "action": "An der Schneegrenze die Doppelspur lesen",
+          "clue": [
+            "Auf der Kruste liegen zwei versetzte Abdrücke. Nur einer setzt sich hinter dem Baum fort.",
+            [
+              "Hinter der Birke prüfen",
+              "Auf der freigefegten Fläche bleiben"
+            ],
+            0
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-23x20",
+          "action": "Die Passwache im Birkenhain besiegen",
+          "level": 53,
+          "enemies": [
+            "Ghostcheetah01",
+            "Thunderfox03",
+            "Ghostcheetah01"
+          ],
+          "recipe": "Ghostcheetah02",
+          "formation": [
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            },
+            {
+              "monsterId": "Ghostcheetah01",
+              "level": 57,
+              "vitality": 1.34,
+              "force": 1.63
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passofen",
+      "title": "Ein Ofen für die Passwacht",
+      "npc": "Hyren",
+      "offer": "over-59x17",
+      "requires": [
+        "Kallaku.ConvinceFrostSerpent"
+      ],
+      "dialogue": "Eine ganze Stadt werde ich mit diesem Ofen kaum wärmen. Aber im Wachhaus friert heute Nacht jemand. Können wir dort anfangen?",
+      "ending": "Hyren: „Der Kamin zieht wieder! Vom Wachhaus führt der warme Gang zur Quelle und zum Eisnest.“",
+      "reference": "E189",
+      "steps": [
+        {
+          "place": "over-24x16",
+          "room": "Wachhaus",
+          "action": "Den Kaminabzug freiräumen",
+          "level": 49,
+          "enemies": [
+            "Icebear03",
+            "Icebear03"
+          ],
+          "formation": [
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 53,
+              "vitality": 1.55,
+              "force": 1.76
+            }
+          ]
+        },
+        {
+          "place": "over-24x16",
+          "room": "Quelle",
+          "action": "Mit Holz den Ofen anheizen",
+          "formation": []
+        }
+      ]
+    },
+    {
+      "id": "quellen",
+      "title": "Zwei Winterquellen",
+      "npc": "Mariki",
+      "offer": "over-102x26",
+      "requires": [
+        "spuren",
+        "passofen"
+      ],
+      "dialogue": "Der von Sholai hat einen Sprung. Wenn er unterwegs zufriert, seht ihr wenigstens, wann es passiert ist.",
+      "ending": "Mariki: „Dieselbe Kälte, zwei ganz verschiedene Quellen. Leg die Zeichnungen nebeneinander.“",
+      "reference": "E180",
+      "steps": [
+        {
+          "place": "over-100x25",
+          "action": "Die erste Quelle messen",
+          "level": 49,
+          "enemies": [
+            "Deer03",
+            "Icecube01"
+          ],
+          "recipe": "Icecube02",
+          "formation": [
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 49
+            },
+            {
+              "monsterId": "Icecube01",
+              "level": 49
+            }
+          ]
+        },
+        {
+          "place": "over-24x16",
+          "room": "Quelle",
+          "action": "Die zweite Messung vergleichen",
+          "level": 54,
+          "enemies": [
+            "Icegoddess01",
+            "Icebear03"
+          ],
+          "recipe": "Icegoddess02",
+          "formation": [
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icebear03",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            },
+            {
+              "monsterId": "Icegoddess01",
+              "level": 58,
+              "vitality": 1.54,
+              "force": 1.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blitz",
+      "title": "Blitz über den Gipfeln",
+      "npc": "Carogi",
+      "offer": "over-25x20",
+      "requires": [
+        "passofen"
+      ],
+      "dialogue": "Die Stange summt, bevor der Grat hell wird. Wenn du das hörst, geh zum nächsten Ring. Den letzten halte ich selbst.",
+      "ending": "Carogi: „Der dritte Ring hält. Hier siehst du, wo die drei Windra beim letzten Gewitter standen.“",
+      "reference": "E190",
+      "steps": [
+        {
+          "place": "over-23x20",
+          "action": "Den ersten Ring ausrichten",
+          "clue": [
+            "Der obere Ring summt. Unter ihm läuft ein Kupferseil zum Grat.",
+            [
+              "Oberen Ring zum Seil drehen",
+              "Kupferseil lösen"
+            ],
+            0
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-23x20",
+          "action": "Den zweiten Ableiter erden",
+          "clue": [
+            "Das Seil endet an einem feuchten Fels unter dem zweiten Ring.",
+            [
+              "Ring hochhalten",
+              "Am feuchten Fels erden"
+            ],
+            1
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-23x20",
+          "action": "Den letzten Ring gegen den Sturm halten",
+          "level": 57,
+          "enemies": [
+            "Thunderhydra01",
+            "Thunderhydra01",
+            "Thunderfox03"
+          ],
+          "recipe": "Thunderhydra02",
+          "formation": [
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            },
+            {
+              "monsterId": "Thunderhydra01",
+              "level": 61,
+              "vitality": 1.05,
+              "force": 1.51
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eisrezept",
+      "title": "Das Gedächtnis des Eises",
+      "npc": "Carogi",
+      "offer": "over-25x20",
+      "requires": [
+        "passofen",
+        "Priory.DefeatTiamat"
+      ],
+      "dialogue": "Siehst du die fünf trüben Stellen? Jede war einmal eine Atemöffnung. Hör hin, bevor du auf die Decke trittst.",
+      "ending": "Carogi: „Fünf Atembahnen laufen unter der Kammer zusammen. So entsteht Cryowyrm.“",
+      "reference": "E221",
+      "steps": [
+        {
+          "place": "over-24x16",
+          "room": "Wächterkammer",
+          "action": "Die fünf Atemöffnungen verfolgen",
+          "clue": [
+            "Fünf trübe Kreise zeigen den Atem unter dem Eis. Zwischen ihnen liegt ein klarer Streifen.",
+            [
+              "Auf die trüben Kreise treten",
+              "Den klaren Streifen entlanggehen"
+            ],
+            1
+          ],
+          "formation": []
+        },
+        {
+          "place": "over-24x16",
+          "room": "Wächterkammer",
+          "action": "Den Schutzwechsel der Wächter überwinden",
+          "level": 76,
+          "enemies": [
+            "Deer03",
+            "Icegoddess02",
+            "Wallmonster01"
+          ],
+          "recipe": "Icedargon01",
+          "formation": [
+            {
+              "monsterId": "Deer03",
+              "level": 80,
+              "vitality": 1.11,
+              "force": 1.61
+            },
+            {
+              "monsterId": "Icegoddess02",
+              "level": 80,
+              "vitality": 1.11,
+              "force": 1.61
+            },
+            {
+              "monsterId": "Wallmonster01",
+              "level": 80,
+              "vitality": 1.11,
+              "force": 1.61
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 80,
+              "vitality": 1.11,
+              "force": 1.61
+            },
+            {
+              "monsterId": "Icegoddess02",
+              "level": 80,
+              "vitality": 1.11,
+              "force": 1.61
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ewigeseis",
+      "title": "Unter dem ewigen Eis",
+      "npc": "Hyren",
+      "offer": "over-25x20",
+      "requires": [
+        "eisrezept",
+        "epilogue"
+      ],
+      "dialogue": "Lass sie am Ufer stehen. Wenn sich die Flamme im See spiegelt, siehst du, wo das Eis noch trägt.",
+      "ending": "Hyren: „Jetzt brennt die Laterne wieder ruhig. Geh ans Ufer des Eissees. Dort kannst du Cryowyrm aufspüren.“",
+      "reference": "E221",
+      "steps": [
+        {
+          "place": "over-24x16",
+          "room": "Windgang",
+          "action": "Den Windgang durchqueren",
+          "level": 92,
+          "enemies": [
+            "Windninja02",
+            "Thunderfox03",
+            "Thunderhydra02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Windninja02",
+              "level": 96,
+              "vitality": 1.53,
+              "force": 1.54
+            },
+            {
+              "monsterId": "Thunderfox03",
+              "level": 96,
+              "vitality": 1.53,
+              "force": 1.54
+            },
+            {
+              "monsterId": "Thunderhydra02",
+              "level": 96,
+              "vitality": 1.53,
+              "force": 1.54
+            }
+          ]
+        },
+        {
+          "place": "over-24x16",
+          "room": "Frostkammer",
+          "action": "Die Frostwache überwinden",
+          "level": 95,
+          "enemies": [
+            "Deer03",
+            "Icegoddess02",
+            "Steelfish02"
+          ],
+          "formation": [
+            {
+              "monsterId": "Deer03",
+              "level": 99,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Icegoddess02",
+              "level": 99,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Steelfish02",
+              "level": 99,
+              "vitality": 1,
+              "force": 1.69
+            },
+            {
+              "monsterId": "Deer03",
+              "level": 99,
+              "vitality": 1,
+              "force": 1.69
+            }
+          ]
+        },
+        {
+          "place": "over-24x16",
+          "room": "Eissee",
+          "action": "Den geladenen Angriff des Wächters überstehen",
+          "level": 99,
+          "enemies": [
+            "Icedargon01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Icedargon01",
+              "level": 103,
+              "vitality": 2.71,
+              "force": 3.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "werk",
+      "title": "Das Werk am Turm",
+      "npc": "Werkmeister",
+      "offer": "over-42x47",
+      "requires": [
+        "Priory.FindDeucalion"
+      ],
+      "dialogue": "Drei Bänke. An der ersten liegen Späne, an der zweiten ist Ruß, an der dritten sind tiefe Krallen im Boden. Wer hier gearbeitet hat, hat seine Werkzeuge selbst auf die Probe gestellt.",
+      "ending": "Der Werkmeister: „Tor und Teststeg laufen. Jetzt kannst du die Maschinen in ihren eigenen Abteilen aufsuchen.“",
+      "reference": "E215",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Wachtor",
+          "action": "Das Wachtor öffnen",
+          "level": 62,
+          "enemies": [
+            "Robotwolf01",
+            "Roboscorpion01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Robotwolf01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 66,
+              "vitality": 1.21,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Teststeg",
+          "action": "Die Werkbänke in Betrieb nehmen",
+          "level": 65,
+          "enemies": [
+            "Mechadragon01",
+            "Robodragon01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Mechadragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 69,
+              "vitality": 1.22,
+              "force": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "abnahme",
+      "title": "Abnahme der Werkstatt",
+      "npc": "Werkmeister",
+      "offer": "over-16x43",
+      "requires": [
+        "werk"
+      ],
+      "dialogue": "Am Ofen wartest du, bis es abkühlt. Auf dem Steg kostet dich Warten den Vorsprung. Und wenn ich unter die Presse muss, hältst du mir den Rücken frei.",
+      "ending": "Der Werkmeister: „Die Presse steht. Du hast mir gerade die Hand gerettet. Hier, die letzte Zeichnung.“",
+      "reference": "E215",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Schmelzofen",
+          "action": "Die Ofenprobe bestehen",
+          "level": 64,
+          "enemies": [
+            "Robodragon01",
+            "Robodragon02"
+          ],
+          "recipe": "Robodragon02",
+          "formation": [
+            {
+              "monsterId": "Robodragon01",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon02",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon02",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon02",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon02",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon01",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robodragon02",
+              "level": 64,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Teststeg",
+          "action": "Den Schnelllauf bestehen",
+          "level": 67,
+          "enemies": [
+            "Windninja02",
+            "Mechadragon01"
+          ],
+          "recipe": "Mechadragon02",
+          "formation": [
+            {
+              "monsterId": "Windninja02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Windninja02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Windninja02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Windninja02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Windninja02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Mechadragon01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Montagehalle",
+          "action": "Den Werkmeister an der Presse schützen",
+          "level": 70,
+          "enemies": [
+            "Roboscorpion01",
+            "Robolion02"
+          ],
+          "recipe": "Robolion02",
+          "formation": [
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion02",
+              "level": 70,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schicht",
+      "title": "Schichtwechsel",
+      "npc": "Werkmeister",
+      "offer": "over-16x43",
+      "requires": [
+        "abnahme"
+      ],
+      "dialogue": "Die neue Schicht steht am Tor. Drinnen läuft die Sortierung rückwärts. Hörst du das Mahlen? So lange kann ich keinen reinlassen.",
+      "ending": "Der Werkmeister: „Der letzte Wagen ist durch. Komm wieder, wenn am Wachtor die nächste Schicht antritt.“",
+      "reference": "E215",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Schrottgraben",
+          "action": "Die Sortierung von innen stoppen",
+          "level": 68,
+          "enemies": [
+            "Roboscorpion01",
+            "Rockdragon01",
+            "Roboscorpion01"
+          ],
+          "recipe": "Roboscorpion02",
+          "formation": [
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Roboscorpion01",
+              "level": 72,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Wachtor",
+          "action": "Den Konvoi am Wachtor sichern",
+          "level": 71,
+          "enemies": [
+            "Robotwolf01",
+            "Robolion01",
+            "Robotwolf02"
+          ],
+          "recipe": "Robotwolf02",
+          "formation": [
+            {
+              "monsterId": "Robotwolf01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf02",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf02",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf02",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 71,
+              "vitality": 1,
+              "force": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kreise",
+      "title": "Die getrennten Schaltkreise",
+      "npc": "Franz",
+      "offer": "over-16x47",
+      "requires": [
+        "epilogue",
+        "werk"
+      ],
+      "dialogue": "In der Tiefe standen die hellen und die roten Maschinen zusammen. Hier hat jemand eigens eine Wand zwischen die Leitungen gezogen. Wozu?",
+      "ending": "Franz: „Kein Überschlag mehr. Die hellen Maschinen bleiben in der Kalibrierkammer, die roten im Entladungsraum.“",
+      "reference": "E223",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Kalibrierkammer",
+          "action": "Den Schutzkreis isolieren",
+          "level": 76,
+          "enemies": [
+            "Miniwhite01",
+            "Miniwhite01",
+            "Robolion01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Miniwhite01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Robolion01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 80,
+              "vitality": 1,
+              "force": 1.8
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Entladungsraum",
+          "action": "Die Entladungsleitung trennen",
+          "level": 79,
+          "enemies": [
+            "Minired01",
+            "Minired01",
+            "Robotwolf01"
+          ],
+          "formation": [
+            {
+              "monsterId": "Minired01",
+              "level": 83,
+              "vitality": 1.23,
+              "force": 1.73
+            },
+            {
+              "monsterId": "Minired01",
+              "level": 83,
+              "vitality": 1.23,
+              "force": 1.73
+            },
+            {
+              "monsterId": "Robotwolf01",
+              "level": 83,
+              "vitality": 1.23,
+              "force": 1.73
+            },
+            {
+              "monsterId": "Minired01",
+              "level": 83,
+              "vitality": 1.23,
+              "force": 1.73
+            },
+            {
+              "monsterId": "Minired01",
+              "level": 83,
+              "vitality": 1.23,
+              "force": 1.73
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kern",
+      "title": "Zwei Seiten des Kerns",
+      "npc": "Franz",
+      "offer": "over-16x43",
+      "requires": [
+        "kreise"
+      ],
+      "dialogue": "Jetzt verstehe ich die Wand. Als der Schutzkreis ausgefallen ist, blieb auf der anderen Seite noch genug Zeit, den Strom abzustellen. Probiere es von Hand.",
+      "ending": "Franz: „Jetzt kann ich beide Einheiten einzeln abschalten. Die beiden Schaltbilder gehören dir.“",
+      "reference": "E223",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Kalibrierkammer",
+          "action": "Den Schutzkreis unter Last stabilisieren",
+          "level": 86,
+          "enemies": [
+            "Miniwhite01",
+            "Mechawhite01",
+            "Miniwhite01"
+          ],
+          "recipe": "Mechawhite01",
+          "formation": [
+            {
+              "monsterId": "Miniwhite01",
+              "level": 90,
+              "vitality": 1,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Mechawhite01",
+              "level": 90,
+              "vitality": 1,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 90,
+              "vitality": 1,
+              "force": 1.58
+            },
+            {
+              "monsterId": "Miniwhite01",
+              "level": 90,
+              "vitality": 1,
+              "force": 1.58
+            }
+          ]
+        },
+        {
+          "place": "over-16x43",
+          "room": "Entladungsraum",
+          "action": "Die zweite Einheit von Hand herunterfahren",
+          "level": 89,
+          "enemies": [
+            "Minired01",
+            "Mechared01",
+            "Minired01"
+          ],
+          "recipe": "Mechared01",
+          "formation": [
+            {
+              "monsterId": "Minired01",
+              "level": 93,
+              "vitality": 1.22,
+              "force": 1.49
+            },
+            {
+              "monsterId": "Mechared01",
+              "level": 93,
+              "vitality": 1.22,
+              "force": 1.49
+            },
+            {
+              "monsterId": "Minired01",
+              "level": 93,
+              "vitality": 1.22,
+              "force": 1.49
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "garin",
+      "title": "Was Garin zurückließ",
+      "npc": "Franz",
+      "offer": "over-16x47",
+      "requires": [
+        "kern"
+      ],
+      "dialogue": "Beide Kreise sind aus. Aber der Trennkeil in der zweiten Einheit ist älter als unsere Reparatur. Sieh dir an, womit ihn jemand eingeschlagen hat.",
+      "ending": "Santi bleibt bei den Leuten vom Spähtrupp. Garin setzt sich neben sie. Diesmal wartet er, bis sie ausgesprochen hat.",
+      "steps": [
+        {
+          "place": "over-16x43",
+          "room": "Entladungsraum",
+          "action": "Den alten Trennkeil herausziehen",
+          "lines": [
+            [
+              "Franz",
+              "Ein Hering von einem Teradin-Zelt. Und hier, auf der Rückseite, ist der Weg zum alten Stollen bei Arborun eingeritzt. Jemand hat diese Leitung absichtlich unterbrochen."
+            ]
+          ]
+        },
+        {
+          "place": "over-123x108",
+          "action": "Den Rückweg für den Spähtrupp freihalten",
+          "lines": [
+            [
+              "Garin",
+              "Ja, der Keil ist von mir. Als die Maschine anlief, hat hier unten die Decke gebebt. Hör hin. Dreimal Klopfen heißt, dass noch jemand lebt."
+            ],
+            [
+              "Späherin",
+              "Der hintere Stempel bricht! Wenn die Tiere noch einmal gegen das Holz rennen, kommen wir hier nie raus."
+            ],
+            [
+              "Garin",
+              "Ich nehme die Winde. Halt mir den Gang frei, bis die Letzte durch ist."
+            ]
+          ],
+          "level": 90,
+          "formation": [
+            {
+              "monsterId": "Rockdragon01",
+              "level": 88
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 90
+            },
+            {
+              "monsterId": "Rockdragon01",
+              "level": 88
+            },
+            {
+              "monsterId": "Mammut02",
+              "level": 92
+            }
+          ],
+          "background": "CaveCombat.jpg"
+        },
+        {
+          "place": "over-123x110",
+          "position": "{8.5,8}",
+          "action": "Die Späher zu Santi begleiten",
+          "lines": [
+            [
+              "Späherin",
+              "Alle vier da. Garin hat das Seil erst losgelassen, als ich auf der anderen Seite war."
+            ],
+            [
+              "Santi",
+              "Danke, Garin. Jetzt setz dich. Damals in der Grotte bist du gegangen, während ich noch am Boden lag. Warum?"
+            ],
+            [
+              "Garin",
+              "Ich hatte Angst, dass du wieder aufstehst und mich fragst, was ich getan habe. Ich hätte bleiben müssen."
+            ],
+            [
+              "Santi",
+              "Das hat es schlimmer gemacht. Wenn du mir erzählen willst, was im Werk passiert ist, hast du jetzt Zeit."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "heimkehr",
+      "title": "Die erste Reise",
+      "npc": "Karen",
+      "offer": "over-39x83",
+      "requires": [
+        "kamiwyrm"
+      ],
+      "dialogue": "Weißt du noch, welcher Schwimmer an die Außenseite der Reuse gehört? Ein junger Fänger am Wellenbrecher könnte heute jemanden brauchen, der ihm das zeigt.",
+      "ending": "Charles schiebt das Buch über den Tisch. Unter der Skizze eines roten Schwimmers steht jetzt dein Name.",
+      "steps": [
+        {
+          "place": "over-38x74",
+          "action": "Mit dem jungen Fänger das Netz flicken",
+          "lines": [
+            [
+              "Junger Fänger",
+              "Du steckst den Schwimmer nach außen? Ach so! Jetzt zieht die Strömung den Riss zu. Ist das da drüben dein Archedion? Wie fängt man so eins?"
+            ],
+            [
+              "Du",
+              "Das hier? Dafür musste ich erst alle anderen kennenlernen."
+            ],
+            [
+              "Junger Fänger",
+              "Dann fange ich hier an. Wenn du mal in Agramis bist, komm zur Arena. Ich möchte sehen, wie es kämpft."
+            ],
+            [
+              "Karen",
+              "Hier. Ein Stück von der alten roten Leine. Bring es Charles in Yelan für sein Buch."
+            ]
+          ]
+        },
+        {
+          "place": "over-25x20",
+          "position": "{12.5,10}",
+          "action": "Die rote Leine bei Charles ins Register legen",
+          "lines": [
+            [
+              "Charles",
+              "Ich hatte schon Platz für eine weitere Nummer gelassen. Aber du willst mir erzählen, wem du mit dem Netz geholfen hast? Gut. Dafür nehmen wir die ganze Seite."
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "name": "Wellenbrecher",
+      "anchor": [
+        36,
+        74
+      ],
+      "via": [
+        37,
+        74
+      ],
+      "end": [
+        38,
+        74
+      ],
+      "quest": "schleppkorb"
+    },
+    {
+      "name": "Kiesbank am Varda",
+      "anchor": [
+        73,
+        109
+      ],
+      "via": [
+        73,
+        110
+      ],
+      "end": [
+        73,
+        111
+      ],
+      "quest": "kiesbank"
+    },
+    {
+      "name": "Leuchtfeuer",
+      "anchor": [
+        100,
+        131
+      ],
+      "via": [
+        101,
+        131
+      ],
+      "end": [
+        102,
+        131
+      ],
+      "quest": "leuchtfeuer"
+    },
+    {
+      "name": "Pflanzrinne",
+      "anchor": [
+        123,
+        108
+      ],
+      "via": [
+        124,
+        108
+      ],
+      "end": [
+        125,
+        108
+      ],
+      "quest": "pflanzrinne"
+    },
+    {
+      "name": "Abflussstollen",
+      "anchor": [
+        127,
+        74
+      ],
+      "via": [
+        126,
+        74
+      ],
+      "end": [
+        126,
+        73
+      ],
+      "quest": "bohrer"
+    },
+    {
+      "name": "Außenriff",
+      "anchor": [
+        115,
+        47
+      ],
+      "via": [
+        116,
+        47
+      ],
+      "end": [
+        117,
+        47
+      ],
+      "quest": "geleit"
+    },
+    {
+      "name": "Wärterpfad",
+      "anchor": [
+        24,
+        18
+      ],
+      "via": [
+        24,
+        17
+      ],
+      "end": [
+        24,
+        16
+      ],
+      "quest": "passofen"
+    },
+    {
+      "name": "Reparaturwerk",
+      "anchor": [
+        16,
+        45
+      ],
+      "via": [
+        16,
+        44
+      ],
+      "end": [
+        16,
+        43
+      ],
+      "quest": "werk"
+    }
+  ],
+  "habitats": [
+    {
+      "species": "Kraken01",
+      "place": "over-38x74",
+      "room": "Reuse",
+      "requires": [
+        "schleppkorb"
+      ],
+      "levels": [
+        9,
+        12
+      ]
+    },
+    {
+      "species": "Blacklion01",
+      "place": "over-33x71",
+      "room": "Kalter Seitenbach",
+      "requires": [
+        "Agramis.DeliverEnvelope"
+      ],
+      "levels": [
+        8,
+        10
+      ]
+    },
+    {
+      "species": "Dilophosaur01",
+      "place": "over-73x111",
+      "room": "Sonnenbank",
+      "requires": [
+        "kiesbank"
+      ],
+      "levels": [
+        11,
+        14
+      ]
+    },
+    {
+      "species": "Earthdino01",
+      "place": "over-90x90",
+      "room": "Hangweide",
+      "requires": [
+        "Geat.MessageToFinam"
+      ],
+      "levels": [
+        13,
+        16
+      ]
+    },
+    {
+      "species": "Fireelasmotherium01",
+      "place": "over-90x90",
+      "room": "Hangkante",
+      "requires": [
+        "Heorot.CaptureTheKing"
+      ],
+      "levels": [
+        12,
+        14
+      ]
+    },
+    {
+      "species": "Gigantshark01",
+      "place": "over-88x92",
+      "room": "Schleppleine",
+      "requires": [
+        "schleppkorb",
+        "Geat.MessageToFinam"
+      ],
+      "levels": [
+        13,
+        17
+      ]
+    },
+    {
+      "species": "Icetriceratops01",
+      "place": "over-96x90",
+      "room": "Kalte Mulde",
+      "requires": [
+        "Heorot.CaptureTheKing"
+      ],
+      "levels": [
+        12,
+        14
+      ]
+    },
+    {
+      "species": "Firecaracal01",
+      "place": "over-92x110",
+      "room": "Kochfeuer",
+      "requires": [
+        "Earun.Commotion"
+      ],
+      "levels": [
+        14,
+        17
+      ]
+    },
+    {
+      "species": "Windninja01",
+      "place": "over-98x106",
+      "room": "Uferkamm",
+      "requires": [
+        "windwache"
+      ],
+      "levels": [
+        15,
+        18
+      ]
+    },
+    {
+      "species": "Steelfish01",
+      "place": "over-98x106",
+      "room": "Geschützte Bucht",
+      "requires": [
+        "schleppkorb",
+        "Heorot.ReportToEarun"
+      ],
+      "levels": [
+        19,
+        22
+      ]
+    },
+    {
+      "species": "Shisalion01",
+      "place": "over-101x129",
+      "room": "Waldtor",
+      "requires": [
+        "Arborun.SaveArborus"
+      ],
+      "levels": [
+        17,
+        21
+      ]
+    },
+    {
+      "species": "Naga01",
+      "place": "over-102x131",
+      "room": "Gezeitentümpel",
+      "requires": [
+        "leuchtfeuer"
+      ],
+      "levels": [
+        8,
+        10
+      ]
+    },
+    {
+      "species": "Mandragora01",
+      "place": "over-125x108",
+      "room": "Saatbeet",
+      "requires": [
+        "pflanzrinne"
+      ],
+      "levels": [
+        23,
+        26
+      ]
+    },
+    {
+      "species": "Earthtiger01",
+      "place": "over-125x108",
+      "room": "Kleewiese",
+      "requires": [
+        "pflanzrinne"
+      ],
+      "levels": [
+        13,
+        15
+      ]
+    },
+    {
+      "species": "Airbluedragon01",
+      "place": "over-123x108",
+      "room": "Aufwind",
+      "requires": [
+        "Arborun.SaveArborus"
+      ],
+      "levels": [
+        18,
+        22
+      ]
+    },
+    {
+      "species": "Bushgolem01",
+      "place": "over-123x110",
+      "room": "Moosstümpfe",
+      "requires": [
+        "pflanzrinne"
+      ],
+      "levels": [
+        24,
+        28
+      ]
+    },
+    {
+      "species": "Garuda01",
+      "place": "over-122x103",
+      "room": "Aussichtsfels",
+      "requires": [
+        "windwache",
+        "Arborun.SaveArborus"
+      ],
+      "levels": [
+        26,
+        30
+      ]
+    },
+    {
+      "species": "Bonefish01",
+      "place": "over-126x106",
+      "room": "Abfluss",
+      "requires": [
+        "mauer",
+        "Arborun.SaveArborus"
+      ],
+      "levels": [
+        27,
+        30
+      ]
+    },
+    {
+      "species": "Securityrobot01",
+      "place": "over-126x73",
+      "room": "Wartungsgang",
+      "requires": [
+        "bohrer"
+      ],
+      "levels": [
+        30,
+        34
+      ]
+    },
+    {
+      "species": "Rockdragon01",
+      "place": "over-126x73",
+      "room": "Geröllhalle",
+      "requires": [
+        "bohrer",
+        "Aurandal.WinFinalRound"
+      ],
+      "levels": [
+        37,
+        42
+      ]
+    },
+    {
+      "species": "Crystalgolem01",
+      "place": "over-126x73",
+      "room": "Kristallnische",
+      "requires": [
+        "bohrer",
+        "Aurandal.WinFinalRound"
+      ],
+      "levels": [
+        37,
+        42
+      ]
+    },
+    {
+      "species": "Ballfire01",
+      "place": "over-92x41",
+      "room": "Brennofen",
+      "requires": [
+        "ton"
+      ],
+      "levels": [
+        34,
+        37
+      ]
+    },
+    {
+      "species": "Aironi01",
+      "place": "over-92x41",
+      "room": "Windtor",
+      "requires": [
+        "ton"
+      ],
+      "levels": [
+        35,
+        38
+      ]
+    },
+    {
+      "species": "Holyclay01",
+      "place": "over-92x41",
+      "room": "Tonfiguren",
+      "requires": [
+        "ton",
+        "Aurandal.WinFinalRound"
+      ],
+      "levels": [
+        38,
+        42
+      ]
+    },
+    {
+      "species": "Tornadomonster01",
+      "place": "over-92x41",
+      "room": "Sandwirbel",
+      "requires": [
+        "karawane"
+      ],
+      "levels": [
+        38,
+        42
+      ]
+    },
+    {
+      "species": "Slimegolem01",
+      "place": "over-126x73",
+      "room": "Absetzbecken",
+      "requires": [
+        "bohrer",
+        "Aurandal.SearchForTheScale"
+      ],
+      "levels": [
+        42,
+        47
+      ]
+    },
+    {
+      "species": "Mummydragon01",
+      "place": "over-98x65",
+      "room": "Grabgewölbe",
+      "requires": [
+        "mauer",
+        "Aurandal.SearchForTheScale"
+      ],
+      "levels": [
+        42,
+        46
+      ]
+    },
+    {
+      "species": "Cerberus01",
+      "place": "over-98x65",
+      "room": "Wachhof",
+      "requires": [
+        "mauer",
+        "Aurandal.SearchForTheScale"
+      ],
+      "levels": [
+        42,
+        46
+      ]
+    },
+    {
+      "species": "Pirateoctopus01",
+      "place": "over-117x47",
+      "room": "Riffkante",
+      "requires": [
+        "leuchtfeuer",
+        "Quests.DarandalPirates"
+      ],
+      "levels": [
+        43,
+        47
+      ]
+    },
+    {
+      "species": "Goldslime01",
+      "place": "over-108x46",
+      "room": "Erzrinne",
+      "requires": [
+        "karawane",
+        "Aurandal.SearchForTheScale"
+      ],
+      "levels": [
+        44,
+        47
+      ]
+    },
+    {
+      "species": "Lavabull01",
+      "place": "over-101x37",
+      "room": "Ascheweide",
+      "requires": [
+        "feuerwege"
+      ],
+      "levels": [
+        43,
+        47
+      ]
+    },
+    {
+      "species": "Ifrit01",
+      "place": "over-101x37",
+      "room": "Steinpferch",
+      "requires": [
+        "feuerwege"
+      ],
+      "levels": [
+        43,
+        47
+      ]
+    },
+    {
+      "species": "Firedragoon01",
+      "place": "over-101x37",
+      "room": "Abbaukante",
+      "requires": [
+        "feuerwege"
+      ],
+      "levels": [
+        44,
+        48
+      ]
+    },
+    {
+      "species": "Fourfiresnake01",
+      "place": "over-101x37",
+      "room": "Felsspalten",
+      "requires": [
+        "feuerwege"
+      ],
+      "levels": [
+        44,
+        48
+      ]
+    },
+    {
+      "species": "Lavagigant01",
+      "place": "over-101x37",
+      "room": "Lavastollen",
+      "requires": [
+        "feuerwege"
+      ],
+      "levels": [
+        44,
+        48
+      ]
+    },
+    {
+      "species": "Icecube01",
+      "place": "over-100x25",
+      "room": "Schneemulde",
+      "requires": [
+        "spuren"
+      ],
+      "levels": [
+        46,
+        50
+      ]
+    },
+    {
+      "species": "Ghostcheetah01",
+      "place": "over-23x20",
+      "room": "Birkenlichtung",
+      "requires": [
+        "spuren",
+        "Sholai.GoToKallaku"
+      ],
+      "levels": [
+        48,
+        52
+      ]
+    },
+    {
+      "species": "Icegoddess01",
+      "place": "over-24x16",
+      "room": "Quelle",
+      "requires": [
+        "passofen"
+      ],
+      "levels": [
+        49,
+        54
+      ]
+    },
+    {
+      "species": "Miniwyrm01",
+      "place": "over-24x16",
+      "room": "Eisnest",
+      "requires": [
+        "passofen"
+      ],
+      "levels": [
+        49,
+        54
+      ]
+    },
+    {
+      "species": "Thunderhydra01",
+      "place": "over-23x20",
+      "room": "Windgrat",
+      "requires": [
+        "passofen"
+      ],
+      "levels": [
+        50,
+        55
+      ]
+    },
+    {
+      "species": "Mechadragon01",
+      "place": "over-16x43",
+      "room": "Teststeg",
+      "requires": [
+        "werk"
+      ],
+      "levels": [
+        61,
+        65
+      ]
+    },
+    {
+      "species": "Robodragon01",
+      "place": "over-16x43",
+      "room": "Schmelzofen",
+      "requires": [
+        "werk"
+      ],
+      "levels": [
+        61,
+        65
+      ]
+    },
+    {
+      "species": "Robolion01",
+      "place": "over-16x43",
+      "room": "Montagehalle",
+      "requires": [
+        "werk"
+      ],
+      "levels": [
+        61,
+        65
+      ]
+    },
+    {
+      "species": "Roboscorpion01",
+      "place": "over-16x43",
+      "room": "Schrottgraben",
+      "requires": [
+        "werk"
+      ],
+      "levels": [
+        61,
+        65
+      ]
+    },
+    {
+      "species": "Robotwolf01",
+      "place": "over-16x43",
+      "room": "Wachtor",
+      "requires": [
+        "werk"
+      ],
+      "levels": [
+        61,
+        65
+      ]
+    },
+    {
+      "species": "Basilisk01",
+      "place": "over-34x11",
+      "room": "Kristallgang",
+      "requires": [
+        "pfeiler",
+        "Priory.FindDeucalion"
+      ],
+      "levels": [
+        65,
+        69
+      ]
+    },
+    {
+      "species": "Miniwhite01",
+      "place": "over-16x43",
+      "room": "Kalibrierkammer",
+      "requires": [
+        "kreise"
+      ],
+      "levels": [
+        76,
+        79
+      ]
+    },
+    {
+      "species": "Minired01",
+      "place": "over-16x43",
+      "room": "Entladungsraum",
+      "requires": [
+        "kreise"
+      ],
+      "levels": [
+        76,
+        79
+      ]
+    },
+    {
+      "species": "Bushgolem02",
+      "place": "over-125x108",
+      "room": "Wurzelkessel",
+      "requires": [
+        "wurzel"
+      ],
+      "levels": [
+        90,
+        96
+      ]
+    },
+    {
+      "species": "Steelfish02",
+      "place": "over-117x47",
+      "room": "Äußeres Riff",
+      "requires": [
+        "blockade"
+      ],
+      "levels": [
+        92,
+        97
+      ]
+    },
+    {
+      "species": "Icedargon01",
+      "place": "over-24x16",
+      "room": "Eissee",
+      "requires": [
+        "ewigeseis"
+      ],
+      "levels": [
+        95,
+        99
+      ]
+    }
+  ],
+  "eggCommissions": [
+    {
+      "id": "Electricgorilla01",
+      "name": "Spark",
+      "element": "Air",
+      "stars": 2
+    },
+    {
+      "id": "Dinoturtle01",
+      "name": "Brakie",
+      "element": "Earth",
+      "stars": 2
+    },
+    {
+      "id": "Fireboar01",
+      "name": "Snorkling",
+      "element": "Fire",
+      "stars": 2
+    },
+    {
+      "id": "Icecat01",
+      "name": "Frostkit",
+      "element": "Water",
+      "stars": 2
+    },
+    {
+      "id": "Icesamurai01",
+      "name": "Samuraice",
+      "element": "Water",
+      "stars": 4
+    },
+    {
+      "id": "Firered01",
+      "name": "Volcadog",
+      "element": "Fire",
+      "stars": 4
+    },
+    {
+      "id": "Firespinosaurus01",
+      "name": "Spinoheat",
+      "element": "Fire",
+      "stars": 4
+    },
+    {
+      "id": "Robospider01",
+      "name": "Minespider",
+      "element": "Arcane",
+      "stars": 9
+    },
+    {
+      "id": "Thunderstego01",
+      "name": "Minispine",
+      "element": "Air",
+      "stars": 3
+    },
+    {
+      "id": "Armoredkangaroo01",
+      "name": "Roosquire",
+      "element": "Earth",
+      "stars": 5
+    },
+    {
+      "id": "Deathpanther01",
+      "name": "Darkpaw",
+      "element": "Death",
+      "stars": 6
+    },
+    {
+      "id": "Holylion01",
+      "name": "Starleo",
+      "element": "Life",
+      "stars": 6
+    },
+    {
+      "id": "Holywizard01",
+      "name": "Wizpur",
+      "element": "Life",
+      "stars": 6
+    },
+    {
+      "id": "Deathwizard01",
+      "name": "Felichanter",
+      "element": "Death",
+      "stars": 6
+    },
+    {
+      "id": "Pegasus01",
+      "name": "Pegahoof",
+      "element": "Life",
+      "stars": 6
+    }
+  ],
+  "friendlyDuel": {
+    "place": "over-28x94",
+    "position": "{6.0,8}",
+    "title": "Ein Freundschaftskampf in Agramis",
+    "question": "Gegen den jungen Fänger antreten? Du kannst Kamiwyrm vorher in deine Mannschaft nehmen.",
+    "formation": [
+      {
+        "monsterId": "Rudefish01",
+        "level": 5
+      },
+      {
+        "monsterId": "Crab01",
+        "level": 6
+      }
+    ],
+    "background": "FieldCombat.jpg",
+    "ending": "Jetzt habe ich gesehen, wie deine Mannschaft kämpft. Beim nächsten Mal sichere ich den Schwimmer gleich richtig!"
+  },
+  "registerMemory": "Die erste Reise · Windon. Mit dem jungen Fänger das Netz am Wellenbrecher geflickt. Die rote Leine liegt zwischen diesen Seiten.",
+  "directions": {
+    "over-38x74": "Verlasse Windon nach Osten. Halte dich an den nächsten vier Abzweigen nach Norden. Biege dann nach Osten zum Wellenbrecher ab.",
+    "over-102x131": "Verlasse Larkel nach Westen. Bleib am ersten Abzweig auf dem westlichen Weg. Hinter der Südkurve führt der östliche Abzweig zum Leuchtfeuer.",
+    "over-117x47": "Verlasse Darandal nach Osten. Halte dich an beiden Abzweigen östlich und folge dem Küstenweg bis zum Außenriff.",
+    "over-73x111": "Nimm den östlichen Ausgang von Maldan. Am ersten Kreuzweg führt der südliche Abzweig zur Kiesbank am Varda.",
+    "over-86x112": "Westlich von Earun steht die erste Signalpfeife. Folge vom Stadtausgang dem Weg bis zur nächsten Station.",
+    "over-98x106": "Verlasse Theign nach Westen. Nimm an beiden Abzweigen den Weg nach Norden bis zum Signalmast.",
+    "over-122x103": "Verlasse Vasek nach Westen und biege an der ersten Gabelung nach Süden ab. Halte dich zweimal westlich, dann führt der südliche Weg zur hohen Warte.",
+    "over-87x100": "Betritt in Heorot das Verlies unter der alten Mauer.",
+    "over-126x106": "Verlasse Arborun nach Norden und geh am Abzweig zur Pflanzrinne vorbei. Nimm an der nächsten Gabelung den östlichen Weg zum Abfluss.",
+    "over-98x65": "Verlasse Nazandal nach Westen. Biege am ersten Kreuzweg nach Süden ab und folge dem Weg weiter südwärts bis zur Sarkor-Höhle.",
+    "over-125x108": "Nimm den nördlichen Ausgang von Arborun. Biege an der ersten Wegstation nach Osten zur Pflanzrinne ab.",
+    "over-126x73": "Verlasse Takran nach Westen. Nimm zweimal den nördlichen Abzweig. Folge dann dem Weg nach Osten, nach Norden und zuletzt nach Westen in den Abflussstollen.",
+    "over-92x41": "Verlasse Aurandal nach Norden. Der Karawanenhalt liegt an der ersten Wegstation vor der Stadt.",
+    "over-108x46": "Nimm in Darandal den östlichen Ausgang. Die Erzrinne liegt an der ersten Wegstation.",
+    "over-101x37": "Verlasse Aurandal nach Osten. Biege am dritten Kreuzweg nach Norden ab. Halte dich am nächsten Abzweig nördlich, dann östlich und zuletzt nördlich bis zum Berg Rakken.",
+    "over-100x25": "Verlasse Sholai nach Westen. Das Schneefeld mit den Birken und der ersten Quelle liegt an der ersten Wegstation.",
+    "over-23x20": "Folge von Yelan aus dem Weg nach Westen. Gleich an der ersten Wegstation liegt die Schneegrenze.",
+    "over-24x16": "Verlasse Yelan nach Westen. Biege an der Schneegrenze nach Norden ab und nimm an der nächsten Gabelung den nördlichen Weg zum Wärterpfad.",
+    "over-16x43": "Nimm am Turm den östlichen Ausgang. Biege am Kreuzweg nach Norden ab. Folge der Westkurve und nimm den nördlichen Abzweig zum Reparaturwerk.",
+    "over-123x108": "Verlasse Arborun nach Norden. Halte an der ersten Wegstation am Waldsaum, vor dem Abzweig zur Pflanzrinne.",
+    "over-123x110": "Kehre nach Arborun zurück und suche Santi in der Stadt auf.",
+    "over-25x20": "Suche Charles in Yelan auf. Er führt das Register in der Stadt."
+  }
+}

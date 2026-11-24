@@ -2,7 +2,18 @@
 //! FSR 1.2 for the desktop compatibility-profile presenter.
 
 use super::present::UpscaleMode;
+#[cfg(not(target_os = "android"))]
 use super::shader_raw as gl;
+#[cfg(target_os = "android")]
+mod gl {
+    pub use super::super::shader_raw::*;
+    pub use super::super::shader_raw::{
+        BindFramebuffer as BindFramebufferEXT, CheckFramebufferStatus as CheckFramebufferStatusEXT,
+        FramebufferTexture2D as FramebufferTexture2DEXT, GenFramebuffers as GenFramebuffersEXT,
+        COLOR_ATTACHMENT0 as COLOR_ATTACHMENT0_EXT, FRAMEBUFFER as FRAMEBUFFER_EXT,
+        FRAMEBUFFER_BINDING as FRAMEBUFFER_BINDING_EXT, FRAMEBUFFER_COMPLETE as FRAMEBUFFER_COMPLETE_EXT,
+    };
+}
 use crate::matrix::Matrix;
 use std::ffi::CString;
 use std::ptr;
@@ -18,12 +29,14 @@ const VERTEX: &str = "#version 120\n\
         uv = sourceRotation * (gl_Vertex.xy * 0.5 + 0.5);\n\
     }\n";
 
+#[cfg(not(target_os = "android"))]
 struct FilterNotice {
     width: u32,
     height: u32,
     pixels: Vec<u8>,
 }
 
+#[cfg(not(target_os = "android"))]
 impl FilterNotice {
     fn new(label: &str) -> Self {
         use crate::font::{Font, TextAlignment};
@@ -128,6 +141,18 @@ impl Program {
 }
 
 unsafe fn compile(kind: u32, source: &str) -> Result<u32, String> {
+    #[cfg(target_os = "android")]
+    let source = {
+        let body = source.strip_prefix("#version 120\n").ok_or("unknown shader version")?;
+        if kind == gl::VERTEX_SHADER {
+            format!("#version 300 es\nlayout(location=0) in vec4 pos;\n{}", body.replace("varying ", "out ").replace("gl_Vertex", "pos"))
+        } else {
+            format!("#version 300 es\nprecision highp float; precision highp int; out vec4 colorOut;\n{}",
+                body.replace("varying ", "in ").replace("gl_FragColor", "colorOut").replace("texture2D(", "texture("))
+        }
+    };
+    #[cfg(target_os = "android")]
+    let source = source.as_str();
     let shader = gl::CreateShader(kind);
     let source = CString::new(source).unwrap();
     gl::ShaderSource(shader, 1, &source.as_ptr(), ptr::null());
@@ -159,6 +184,7 @@ pub(super) struct FsrPresenter {
     texture: u32,
     target: Option<((u32, u32), bool)>,
     logged: Option<UpscaleMode>,
+#[cfg(not(target_os = "android"))]
     notice: Option<(UpscaleMode, FilterNotice)>,
 }
 
@@ -170,6 +196,13 @@ fn program(result: Result<Program, String>, pass: &str) -> Option<Program> {
             None
         }
     }
+}
+
+unsafe fn draw_quad() {
+    #[cfg(target_os = "android")]
+    gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
+    #[cfg(not(target_os = "android"))]
+    gl::DrawArrays(gl::TRIANGLES, 0, 6);
 }
 
 impl FsrPresenter {
@@ -247,7 +280,7 @@ impl FsrPresenter {
             gl::FALSE,
             rotation.columns().as_ptr().cast(),
         );
-        gl::DrawArrays(gl::TRIANGLES, 0, 6);
+        draw_quad();
 
         if sharpen {
             gl::BindFramebufferEXT(gl::FRAMEBUFFER_EXT, previous_framebuffer as u32);
@@ -258,7 +291,7 @@ impl FsrPresenter {
             gl::Uniform1i(rcas.image, sampler);
             gl::Uniform2f(rcas.image_size, width as f32, height as f32);
             gl::Uniform2f(rcas.origin, x as f32, y as f32);
-            gl::DrawArrays(gl::TRIANGLES, 0, 6);
+            draw_quad();
             gl::BindTexture(gl::TEXTURE_2D, source_texture as u32);
             applied = UpscaleMode::FsrSharpened;
         }
@@ -276,6 +309,7 @@ impl FsrPresenter {
         Some(applied)
     }
 
+#[cfg(not(target_os = "android"))]
     pub(super) unsafe fn draw_notice(
         &mut self,
         mode: UpscaleMode,

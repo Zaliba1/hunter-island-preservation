@@ -29,11 +29,13 @@ final class SaveStore {
         this.context=context;
         File external=context.getExternalFilesDir(null);
         if(external==null)throw new IOException("Save storage is unavailable");
-        String profile=selectedProfile?ModOptions.selectedProfile(context):IpaInspector.BUNDLE;
-        boolean testing=!profile.equals(IpaInspector.BUNDLE);
+        String campaign=ModOptions.campaignProfile(context);
+        String profile=selectedProfile?ModOptions.selectedProfile(context):campaign;
+        boolean testing=!profile.equals(campaign);
         parent=external.toPath().resolve("touchHLE_sandbox");root=parent.resolve(profile);
-        backups=context.getFilesDir().toPath().resolve("save-backups");
-        journal=context.getFilesDir().toPath().resolve(testing?"test-save-import-journal.json":"save-import-journal.json");
+        String suffix=campaign.equals(IpaInspector.BUNDLE)?"":"-expansion";
+        backups=context.getFilesDir().toPath().resolve("save-backups"+suffix);
+        journal=context.getFilesDir().toPath().resolve((testing?"test-save-import-journal":"save-import-journal")+suffix+".json");
     }
     private static void stopped() throws IOException {
         if(MainActivity.gameThreadRunning())throw new IOException("Close the game and reopen the launcher first.");

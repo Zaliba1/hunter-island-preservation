@@ -530,6 +530,10 @@ pub fn inspect_file(
 }
 
 pub(crate) fn save_key(ipa: &std::path::Path) -> Result<[u8; 32], String> {
+    checked_save_key(ipa, None)
+}
+
+pub(crate) fn checked_save_key(ipa: &std::path::Path, executable_sha256: Option<&str>) -> Result<[u8; 32], String> {
     let mut archive = zip::ZipArchive::new(std::fs::File::open(ipa).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
     if archive.len() > 50000 {
@@ -585,10 +589,10 @@ pub(crate) fn save_key(ipa: &std::path::Path) -> Result<[u8; 32], String> {
     if binary.len() > 128 * 1024 * 1024 {
         return Err("Oversized executable".into());
     }
-    key_from_macho(&binary)
+    key_from_macho(&binary, executable_sha256)
 }
 
-fn key_from_macho(binary: &[u8]) -> Result<[u8; 32], String> {
+fn key_from_macho(binary: &[u8], executable_sha256: Option<&str>) -> Result<[u8; 32], String> {
     fn u32_at(b: &[u8], p: usize, big: bool) -> Result<u32, String> {
         let a: [u8; 4] = b
             .get(p..p.checked_add(4).ok_or("Offset overflow")?)
@@ -626,6 +630,9 @@ fn key_from_macho(binary: &[u8]) -> Result<[u8; 32], String> {
     };
     if u32_at(b, 0, false)? != 0xfeedface || u32_at(b, 4, false)? != 12 {
         return Err("Expected the decrypted ARMv7 executable".into());
+    }
+    if executable_sha256.is_some_and(|expected| hex(&hash(b)) != expected) {
+        return Err("This executable does not match the supported Hunter Island 2.02 build".into());
     }
     let count = u32_at(b, 16, false)? as usize;
     let end = 28usize
