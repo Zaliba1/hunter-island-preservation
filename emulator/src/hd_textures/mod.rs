@@ -222,8 +222,31 @@ impl Cache {
             }
             let is_atlas = matches!(name, "MonsterPortraits-hd.png" | "HeroWalkFrames-hd.png");
             let kind = match name {
-                "Tavern.jpg" | "CourtRoom.jpg" | "StoneHouse.jpg" | "CastleCombat.jpg" => {
-                    Artwork::Painted
+                "Tavern.jpg" | "CourtRoom.jpg" | "StoneHouse.jpg"
+                | "ArenaCombat.jpg"
+                | "BeachCombat.jpg"
+                | "BridgeCombat.jpg"
+                | "CastleCombat.jpg"
+                | "CaveCombat.jpg"
+                | "DesertCombat.jpg"
+                | "DungeonCombat.jpg"
+                | "FieldCombat.jpg"
+                | "FireCaveCombat.jpg"
+                | "ForestCombat.jpg"
+                | "HighlandCombat.jpg"
+                | "MountainCombat.jpg"
+                | "PyramidCombat.jpg"
+                | "RoadCombat.jpg"
+                | "RuinsCombat.jpg"
+                | "SnowCaveCombat.jpg"
+                | "SnowFieldCombat.jpg"
+                | "SnowForestCombat.jpg"
+                | "SnowMountainCombat.jpg"
+                | "SpaceShipCombat.jpg"
+                | "WallCombat.jpg"
+                | "WaterCaveCombat.jpg" => Artwork::Painted,
+                "rarityStar-hd.png" | "smallRarityStar-hd.png" | "largeRarityStar-hd.png" => {
+                    Artwork::HudSymbol
                 }
                 n if monster(n) => Artwork::Monster,
                 // Fixed hero portraits include the two AssistantImage variants.
@@ -256,6 +279,7 @@ impl Cache {
                 kind
             };
             let key = match kind {
+                Artwork::HudSymbol => format!("hud2-v1-{:x}", digest.finalize()),
                 Artwork::Monster => format!("{:x}", digest.finalize()),
                 _ => format!("art2-v1-{:x}", digest.finalize()),
             };

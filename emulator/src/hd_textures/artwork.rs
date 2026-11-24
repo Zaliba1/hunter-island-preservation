@@ -8,6 +8,7 @@ use zip::ZipArchive;
 #[derive(Clone)]
 pub(super) enum Artwork {
     Monster,
+    HudSymbol,
     Painted,
     Portrait,
     Atlas(Arc<Vec<[usize; 4]>>),
@@ -49,10 +50,50 @@ impl Artwork {
                 }
                 out
             }
+            Self::HudSymbol => upscale_symbol(src, w, h),
             Self::Painted => blended(model, src, w, h, 4),
             Self::Portrait => blended(model, src, w, h, 8),
         }
     }
+}
+
+// HUD symbols have hard color boundaries and transparent outlines. Use the
+// quarter-pixel phases of a Catmull-Rom kernel, clamped to its central pair.
+fn upscale_symbol(src: &[u8], w: usize, h: usize) -> Vec<u8> {
+    fn row(src: &[u8], dst: &mut [u8], step: usize) {
+        let count = src.len() / step;
+        for x in 0..2 * count {
+            let left = (x as isize - 1).div_euclid(2);
+            let sample = |i: isize, c| {
+                i32::from(src[i.clamp(0, count as isize - 1) as usize * step + c])
+            };
+            for c in 0..step {
+                let a = sample(left - 1, c);
+                let b = sample(left, c);
+                let d = sample(left + 1, c);
+                let e = sample(left + 2, c);
+                let sum = if x % 2 == 0 {
+                    -3 * a + 29 * b + 111 * d - 9 * e
+                } else {
+                    -9 * a + 111 * b + 29 * d - 3 * e
+                };
+                dst[x * step + c] = ((sum + 64) / 128).clamp(b.min(d), b.max(d)) as u8;
+            }
+        }
+    }
+    let mut wide = vec![0; w * h * 8];
+    for (input, output) in src.chunks_exact(w * 4).zip(wide.chunks_exact_mut(w * 8)) {
+        row(input, output, 4);
+    }
+    let mut result = vec![0; w * h * 16];
+    row(&wide, &mut result, w * 8);
+    for p in result.chunks_exact_mut(4) {
+        let alpha = p[3];
+        for color in &mut p[..3] {
+            *color = (*color).min(alpha);
+        }
+    }
+    result
 }
 
 fn blended(model: &Model, src: &[u8], w: usize, h: usize, weight: u32) -> Vec<u8> {
@@ -194,4 +235,25 @@ pub(super) fn dimensions(data: &[u8]) -> Option<(usize, usize)> {
         i += n;
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::upscale_symbol;
+
+    #[test]
+    fn symbol_edges_remain_bounded_and_centered_on_both_axes() {
+        let on = [152, 93, 44, 180];
+        let off = [0; 4];
+        let line = [off, off, on, on].concat();
+        let horizontal = upscale_symbol(&line, 4, 1);
+        let vertical = upscale_symbol(&line, 1, 4);
+        let coverage: Vec<_> = horizontal[..32].chunks_exact(4).map(|p| p[3]).collect();
+        assert_eq!(coverage, [0, 0, 0, 37, 143, 180, 180, 180]);
+        for (x, pixel) in horizontal[..32].chunks_exact(4).enumerate() {
+            assert_eq!(&vertical[x * 8..x * 8 + 4], pixel);
+            assert!(pixel[..3].iter().all(|&c| c <= pixel[3]));
+        }
+        assert_eq!(upscale_symbol(&on, 1, 1), on.repeat(4));
+    }
 }

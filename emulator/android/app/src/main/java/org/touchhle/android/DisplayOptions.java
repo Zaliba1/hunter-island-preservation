@@ -59,7 +59,7 @@ final class DisplayOptions {
 
         CheckBox hd = new CheckBox(context);
         hd.setTag("hunter-hd-textures");
-        hd.setText("Local HD artwork (monsters 4×, characters and selected scenes 2×)");
+        hd.setText("Local HD artwork (monsters 4×, characters, scenes and rarity stars 2×)");
         hd.setChecked(preferences.getBoolean("hdTextures", false));
         hd.setOnCheckedChangeListener((button, checked) ->
             preferences.edit().putBoolean("hdTextures", checked).apply());

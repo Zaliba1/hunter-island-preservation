@@ -58,7 +58,7 @@ final class LauncherBackground: NSView {
             displayOptions.alignment = .centerY
             displayOptions.spacing = 14
             stack.addArrangedSubview(displayOptions)
-            hdTextures = displayToggle("Local HD artwork (monsters 4×, characters and selected scenes 2×)", key: "hdTextures")
+            hdTextures = displayToggle("Local HD artwork (monsters 4×, characters, scenes and rarity stars 2×)", key: "hdTextures")
             hdTextures.toolTip = "Artwork is processed on this device in the background and appears the next time the game loads it."
             stack.addArrangedSubview(hdTextures)
             stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
