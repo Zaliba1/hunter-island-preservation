@@ -636,6 +636,45 @@ impl CGBitmapContextDrawer<'_> {
         }
     }
 
+    /// Render a second copy only for a fresh packed gray text bitmap. Its
+    /// pixels are host-owned; CoreGraphics continues to expose the guest copy.
+    pub fn double_gray_text(
+        &self,
+        render: impl FnOnce(&mut CGBitmapContextDrawer),
+    ) -> Option<Vec<u8>> {
+        let mut info = self.bitmap_info;
+        if info.color_space != kCGColorSpaceGenericGray
+            || info.alpha_info != kCGImageAlphaNone
+            || info.bits_per_component != 8
+            || info.bytes_per_row != info.width
+            || info.width > 2048
+            || info.height > 2048
+            || self.pixels.len() > 512 * 1024
+            || self.pixels.iter().any(|&v| v != 0)
+        {
+            return None;
+        }
+        info.width *= 2;
+        info.height *= 2;
+        info.bytes_per_row *= 2;
+        let mut transform = self.transform;
+        transform.tx *= 2.;
+        transform.ty *= 2.;
+        let mut pixels = vec![0; self.pixels.len() * 4];
+        render(&mut CGBitmapContextDrawer {
+            bitmap_info: info,
+            rgb_fill_color: self.rgb_fill_color,
+            blend_mode: self.blend_mode,
+            transform,
+            pixels: &mut pixels,
+        });
+        Some(pixels)
+    }
+
+    pub fn bitmap_bytes(&self) -> &[u8] {
+        self.pixels
+    }
+
     pub fn width(&self) -> GuestUSize {
         self.bitmap_info.width
     }

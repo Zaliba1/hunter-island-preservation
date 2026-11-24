@@ -1236,12 +1236,119 @@ fn glTexImage2D(
     type_: GLenum,
     pixels: ConstVoidPtr,
 ) {
-    if target == gles11::TEXTURE_2D && level == 0 && border == 0 && !pixels.is_null()
-        && matches!((format, type_),
-            (gles11::RGBA | gles11::BGRA_EXT | gles11::RGB, gles11::UNSIGNED_BYTE)
-            | (gles11::RGBA, gles11::UNSIGNED_SHORT_4_4_4_4)
-            | (gles11::RGB, gles11::UNSIGNED_SHORT_5_6_5))
-        && env.framework_state.opengles.hd_textures.as_ref().is_some_and(|c| c.has_size(width,height))
+    if target == gles11::TEXTURE_2D
+        && level == 0
+        && border == 0
+        && !pixels.is_null()
+        && (width, height) == (512, 512)
+        && type_ == gles11::UNSIGNED_BYTE
+        && format == gles11::RGBA
+        && internalformat == format as i32
+        && env.framework_state.opengles.font_atlas.is_some()
+    {
+        let atlas = env.framework_state.opengles.font_atlas.take().unwrap();
+        let used = with_ctx_and_mem(env, |gles, mem| unsafe {
+            let mut max = 0;
+            gles.GetIntegerv(gles11::MAX_TEXTURE_SIZE, &mut max);
+            if max < 1024 {
+                return false;
+            }
+            let Some(data) = atlas.replacement(mem.bytes_at(pixels.cast(), 512 * 512 * 4)) else {
+                return false;
+            };
+            gles.TexImage2D(
+                target,
+                level,
+                internalformat,
+                1024,
+                1024,
+                0,
+                format,
+                type_,
+                data.as_ptr().cast(),
+            );
+            log_once!("Rendering the dialog bitmap font at 2x");
+            true
+        });
+        env.framework_state.opengles.font_atlas = Some(atlas);
+        if used {
+            return;
+        }
+    }
+    // Cocos2d expands its grayscale glyph bitmap into white luminance plus
+    // coverage. Verify every byte before substituting the vector-rasterized mask.
+    if level == 0
+        && border == 0
+        && target == gles11::TEXTURE_2D
+        && format == gles11::LUMINANCE_ALPHA
+        && internalformat == format as i32
+        && type_ == gles11::UNSIGNED_BYTE
+        && !pixels.is_null()
+        && env
+            .framework_state
+            .opengles
+            .text_mask
+            .as_ref()
+            .is_some_and(|m| (width, height) == (m.width as i32, m.height as i32))
+    {
+        let mask = env.framework_state.opengles.text_mask.take().unwrap();
+        let used = with_ctx_and_mem(env, |gles, mem| unsafe {
+            let (mut maximum, mut alignment) = (0, 0);
+            gles.GetIntegerv(gles11::MAX_TEXTURE_SIZE, &mut maximum);
+            gles.GetIntegerv(gles11::UNPACK_ALIGNMENT, &mut alignment);
+            if width * 2 > maximum || height * 2 > maximum || !matches!(alignment, 1 | 2 | 4 | 8) {
+                return false;
+            }
+            let row = width as usize * 2;
+            let stride = row.next_multiple_of(alignment as usize);
+            let raw = mem.bytes_at(pixels.cast(), ((height as usize - 1) * stride + row) as u32);
+            if !raw
+                .chunks(stride)
+                .flat_map(|r| r[..row].chunks_exact(2))
+                .zip(&mask.original)
+                .all(|(p, &a)| p == [255, a])
+            {
+                return false;
+            }
+            let la: Vec<u8> = mask.pixels.into_iter().flat_map(|a| [255, a]).collect();
+            gles.PixelStorei(gles11::UNPACK_ALIGNMENT, 1);
+            gles.TexImage2D(
+                target,
+                0,
+                internalformat,
+                width * 2,
+                height * 2,
+                0,
+                format,
+                type_,
+                la.as_ptr().cast(),
+            );
+            gles.PixelStorei(gles11::UNPACK_ALIGNMENT, alignment);
+            log_once!("Rendering UIKit text masks at 2x");
+            true
+        });
+        if used {
+            return;
+        }
+    }
+    if target == gles11::TEXTURE_2D
+        && level == 0
+        && border == 0
+        && !pixels.is_null()
+        && matches!(
+            (format, type_),
+            (
+                gles11::RGBA | gles11::BGRA_EXT | gles11::RGB,
+                gles11::UNSIGNED_BYTE
+            ) | (gles11::RGBA, gles11::UNSIGNED_SHORT_4_4_4_4)
+                | (gles11::RGB, gles11::UNSIGNED_SHORT_5_6_5)
+        )
+        && env
+            .framework_state
+            .opengles
+            .hd_textures
+            .as_ref()
+            .is_some_and(|c| c.has_size(width, height))
     {
         let mut cache = env.framework_state.opengles.hd_textures.take().unwrap();
         let used = with_ctx_and_mem(env, |gles,mem| unsafe {

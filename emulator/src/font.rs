@@ -25,6 +25,7 @@ pub struct Font {
     scale_factor: f32,
 }
 
+#[derive(Copy, Clone)]
 pub enum TextAlignment {
     Left,
     Center,
@@ -403,6 +404,7 @@ impl Font {
         origin: (f32, f32),
         wrap: Option<(f32, WrapMode)>,
         alignment: TextAlignment,
+        raster_scale: f32,
         mut draw_glyph: F,
     ) {
         let lines = self.break_lines(font_size, text, wrap);
@@ -418,8 +420,6 @@ impl Font {
         // a temporary bitmap for the glyph, and then the caller of this
         // function can provide a "draw glyph" callback that can do whatever it
         // wants with this bitmap.
-        // TODO: Do we need to increase the font size when scale transforms are
-        //       used, to avoid blurry text?
         let mut glyph_bitmap: Vec<f32> = Vec::new();
 
         for (line_width, line_text) in lines {
@@ -436,6 +436,25 @@ impl Font {
                     y: baseline,
                 },
             ) {
+                // Keep wrapping, advances and kerning in guest units. Only
+                // rasterize the positioned outline on the denser pixel grid.
+                let glyph = if raster_scale == 1.0 {
+                    glyph
+                } else {
+                    let p = glyph.position();
+                    let scale = glyph.scale();
+                    glyph
+                        .into_unpositioned()
+                        .into_unscaled()
+                        .scaled(rusttype::Scale {
+                            x: scale.x * raster_scale,
+                            y: scale.y * raster_scale,
+                        })
+                        .positioned(Point {
+                            x: p.x * raster_scale,
+                            y: p.y * raster_scale,
+                        })
+                };
                 let Some(glyph_bounds) = glyph.pixel_bounding_box() else {
                     continue;
                 };
@@ -444,7 +463,7 @@ impl Font {
                 // It's not mandatory since the caller can do it, but it would
                 // be more efficient.
                 if let Some((wrap_width, _)) = wrap {
-                    if glyph_bounds.min.x as f32 > origin.0 + wrap_width {
+                    if glyph_bounds.min.x as f32 > (origin.0 + wrap_width) * raster_scale {
                         // Avoid wasting effort on glyphs that are entirely
                         // clipped. Partial clipping is the responsibility of
                         // the draw_glyph implementation.

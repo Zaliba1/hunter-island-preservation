@@ -38,6 +38,7 @@ impl FilterNotice {
             (PADDING as f32, PADDING as f32),
             None,
             TextAlignment::Left,
+            1.0,
             |glyph| {
                 let (left, top) = glyph.origin();
                 let (glyph_width, glyph_height) = glyph.dimensions();

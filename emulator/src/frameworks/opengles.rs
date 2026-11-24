@@ -30,8 +30,18 @@ pub const DYLIB: crate::dyld::HostDylib = crate::dyld::HostDylib {
     function_exports: &[gles_guest::FUNCTIONS, gles2_guest::FUNCTIONS],
 };
 
+pub(crate) struct TextMask {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) original: Vec<u8>,
+    pub(crate) pixels: Vec<u8>,
+}
+
 #[derive(Default)]
 pub struct State {
+    pub(crate) crisp_text: bool,
+    pub(crate) font_atlas: Option<crate::text_atlas::TextAtlas>,
+    pub(crate) text_mask: Option<TextMask>,
     pub(crate) hd_textures: Option<crate::hd_textures::Cache>,
     texture_cleanup: texture_cleanup::Cleanup,
     #[cfg(feature = "diagnostic-live-cycles")]
@@ -43,6 +53,11 @@ pub struct State {
     /// Current EAGLContext for each thread
     current_ctxs: std::collections::HashMap<crate::ThreadId, Option<crate::objc::id>>,
     strings_cache: std::collections::HashMap<(u32, GLenum), ConstPtr<u8>>,
+}
+
+pub(crate) fn enable_crisp_text(env: &mut crate::Environment) {
+    env.framework_state.opengles.crisp_text = true;
+    env.framework_state.opengles.font_atlas = crate::text_atlas::TextAtlas::load(env);
 }
 
 pub(crate) fn enable_hd_textures(env: &mut crate::Environment, cache: crate::hd_textures::Cache) {

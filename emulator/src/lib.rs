@@ -44,6 +44,7 @@ mod gdb;
 mod gles;
 mod image;
 mod hd_textures;
+mod text_atlas;
 mod libc;
 mod licenses;
 mod mach_o;
@@ -409,6 +410,10 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             std::panic::resume_unwind(e)
         }
     };
+    if options.scale_hack.get() >= 2 && env.bundle.bundle_identifier() == "pockettrend.hunterisland"
+    {
+        frameworks::opengles::enable_crisp_text(&mut env);
+    }
     if options.hunter_hd_textures && env.bundle.bundle_identifier() == "pockettrend.hunterisland" {
         let dir = paths::user_data_base_path().join("hd-monsters-animev3-x4-v1");
         match hd_textures::Cache::open(&bundle_path, dir) {

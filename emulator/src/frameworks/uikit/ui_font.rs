@@ -354,6 +354,41 @@ pub fn draw_font_glyph(
     }
 }
 
+fn draw_string_bitmap(
+    drawer: &mut CGBitmapContextDrawer,
+    font: &Font,
+    size: f32,
+    text: &str,
+    origin: (f32, f32),
+    wrap: Option<(f32, WrapMode)>,
+    alignment: TextAlignment,
+    clip_x: Option<Range<f32>>,
+    clip_y: Option<Range<f32>>,
+    double: bool,
+) -> Option<crate::frameworks::opengles::TextMask> {
+    let fill = drawer.rgb_fill_color();
+    let draw = |target: &mut CGBitmapContextDrawer, factor: f32| {
+        let scale_clip =
+            |range: &Option<Range<f32>>| range.as_ref().map(|r| r.start * factor..r.end * factor);
+        let (x, y) = (scale_clip(&clip_x), scale_clip(&clip_y));
+        font.draw(size, text, origin, wrap, alignment, factor, |glyph| {
+            draw_font_glyph(target, glyph, fill, x.clone(), y.clone())
+        });
+    };
+    let high = if double {
+        drawer.double_gray_text(|d| draw(d, 2.))
+    } else {
+        None
+    };
+    draw(drawer, 1.);
+    high.map(|pixels| crate::frameworks::opengles::TextMask {
+        width: drawer.width(),
+        height: drawer.height(),
+        original: drawer.bitmap_bytes().to_vec(),
+        pixels,
+    })
+}
+
 /// Called by the `drawAtPoint:` method family on `NSString`.
 pub fn draw_at_point(
     env: &mut Environment,
@@ -362,6 +397,7 @@ pub fn draw_at_point(
     point: CGPoint,
     width_and_line_break_mode: Option<(CGFloat, UILineBreakMode)>,
 ) -> CGSize {
+    let crisp_text = env.framework_state.opengles.crisp_text;
     let context = UIGraphicsGetCurrentContext(env);
 
     let host_object = env.objc.borrow::<UIFontHostObject>(font);
@@ -379,25 +415,18 @@ pub fn draw_at_point(
         font.calculate_text_size(host_object.size, text, width_and_line_break_mode);
 
     let mut drawer = CGBitmapContextDrawer::new(&env.objc, &mut env.mem, context);
-    let fill_color = drawer.rgb_fill_color();
-
-    font.draw(
+    env.framework_state.opengles.text_mask = draw_string_bitmap(
+        &mut drawer,
+        font,
         host_object.size,
         text,
         (point.x, point.y),
         width_and_line_break_mode,
         TextAlignment::Left,
-        |raster_glyph| {
-            draw_font_glyph(
-                &mut drawer,
-                raster_glyph,
-                fill_color,
-                clip_x.clone(),
-                /* clip_y: */ None,
-            )
-        },
+        clip_x,
+        None,
+        crisp_text,
     );
-
     CGSize { width, height }
 }
 
@@ -410,6 +439,7 @@ pub fn draw_in_rect(
     line_break_mode: UILineBreakMode,
     alignment: UITextAlignment,
 ) -> CGSize {
+    let crisp_text = env.framework_state.opengles.crisp_text;
     let context = UIGraphicsGetCurrentContext(env);
 
     let text_size = size_with_font(env, font, text, Some((rect.size, line_break_mode)));
@@ -423,7 +453,6 @@ pub fn draw_in_rect(
     );
 
     let mut drawer = CGBitmapContextDrawer::new(&env.objc, &mut env.mem, context);
-    let fill_color = drawer.rgb_fill_color();
 
     let (origin_x_offset, alignment) = match alignment {
         UITextAlignmentLeft => (0.0, TextAlignment::Left),
@@ -432,23 +461,18 @@ pub fn draw_in_rect(
         _ => unimplemented!(),
     };
 
-    font.draw(
+    env.framework_state.opengles.text_mask = draw_string_bitmap(
+        &mut drawer,
+        font,
         host_object.size,
         text,
         (rect.origin.x + origin_x_offset, rect.origin.y),
         Some((rect.size.width, convert_line_break_mode(line_break_mode))),
         alignment,
-        |raster_glyph| {
-            draw_font_glyph(
-                &mut drawer,
-                raster_glyph,
-                fill_color,
-                /* clip_x: */ Some(rect.origin.x..(rect.origin.x + rect.size.width)),
-                /* clip_y: */ Some(rect.origin.y..(rect.origin.y + rect.size.height)),
-            )
-        },
+        Some(rect.origin.x..(rect.origin.x + rect.size.width)),
+        Some(rect.origin.y..(rect.origin.y + rect.size.height)),
+        crisp_text,
     );
-
     text_size
 }
 
