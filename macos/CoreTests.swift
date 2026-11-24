@@ -93,6 +93,12 @@ import Darwin
         }
         try require(gameArguments(language: "invalid", device: "iphone", mods: ["--unapproved": true]).contains("--preferred-languages=en"), "English fallback failed.")
         try require(gameArguments(language: nil, device: "ipad", mods: [:]).contains("--preferred-languages=en"), "English default failed.")
+        for internal2x in [false, true] {
+            for hd in [false, true] {
+                let args = gameArguments(language: nil, device: "ipad", mods: [:], hdTextures: hd, internal2x: internal2x)
+                try require(args.contains("--scale-hack=2") == internal2x && args.contains("--hunter-hd-textures") == hd, "Incorrect artwork or internal resolution settings.")
+            }
+        }
         for fullscreen in [false, true] {
             let hdArgs = gameArguments(language: nil, device: "ipad", mods: [:], hdTextures: true)
             try require(hdArgs.contains("--hunter-hd-textures"), "Missing HD texture flag.")

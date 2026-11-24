@@ -182,6 +182,22 @@ public class PreservationFrameworkTest {
         }
     }
 
+    @Test public void internalResolutionIsIndependentOfLocalTextures() {
+        try (ActivityController<LauncherActivity> controller =
+                Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            android.widget.CheckBox box = controller.get().getWindow().getDecorView().findViewWithTag("hunter-internal-2x");
+            assertFalse(box.isChecked());
+            box.performClick();
+            controller.recreate();
+            box = controller.get().getWindow().getDecorView().findViewWithTag("hunter-internal-2x");
+            assertTrue(box.isChecked());
+            List<String> args = new ArrayList<>();
+            DisplayOptions.appendArguments(controller.get(), args);
+            assertTrue(args.contains("--scale-hack=2"));
+            assertFalse(args.contains("--hunter-hd-textures"));
+        }
+    }
+
     @Test public void localTextureGenerationIsOptInAndSurvivesRecreation() {
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {

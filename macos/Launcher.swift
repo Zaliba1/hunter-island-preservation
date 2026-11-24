@@ -14,7 +14,7 @@ final class LauncherBackground: NSView {
 @main final class Launcher: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!, store: MacStore!, status: NSTextField!, playButton: NSButton!
     var language: NSPopUpButton!, device: NSPopUpButton!, mods = [NSButton](), buttons = [NSControl]()
-    var fullscreen: NSButton!, integerScaling: NSButton!, hdTextures: NSButton!
+    var fullscreen: NSButton!, integerScaling: NSButton!, hdTextures: NSButton!, internal2x: NSButton!
     var gameProcess: Process?, lockFD: Int32 = -1
     var busy = false
     static func main() {
@@ -52,7 +52,8 @@ final class LauncherBackground: NSView {
             device.target = self; device.action = #selector(saveOptions); buttons.append(device)
             fullscreen = displayToggle("Start in fullscreen", key: "fullscreen")
             integerScaling = displayToggle("Integer scaling", key: "integerScaling")
-            let displayOptions = NSStackView(views: [device, fullscreen, integerScaling])
+            internal2x = displayToggle("2× internal resolution", key: "internal2x")
+            let displayOptions = NSStackView(views: [device, fullscreen, integerScaling, internal2x])
             displayOptions.orientation = .horizontal
             displayOptions.alignment = .centerY
             displayOptions.spacing = 14
@@ -82,7 +83,7 @@ final class LauncherBackground: NSView {
                         if !available.contains(frame) { self.show(PreviewError.invalid("A launcher control is clipped: \(frame)")); return }
                     }
                     do {
-                        for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling"), (self.hdTextures!, "hdTextures")] {
+                        for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling"), (self.hdTextures!, "hdTextures"), (self.internal2x!, "internal2x")] {
                             let initialState = button.state
                             button.performClick(nil)
                             let reopened = try MacStore(root: self.store.root)
@@ -140,6 +141,7 @@ final class LauncherBackground: NSView {
         store.settings["device"] = device.indexOfSelectedItem == 0 ? "ipad" : "iphone"
         store.settings["fullscreen"] = fullscreen.state == .on
         store.settings["integerScaling"] = integerScaling.state == .on
+        store.settings["internal2x"] = internal2x.state == .on
         store.settings["hdTextures"] = hdTextures.state == .on
         store.settings["mods"] = Dictionary(uniqueKeysWithValues: zip(modChoices, mods).map { ($0.0.0, $0.1.state == .on) })
         do { let fd = try store.lock(); defer { flock(fd, LOCK_UN); close(fd) }; try store.save() } catch { show(error) }
@@ -177,7 +179,8 @@ final class LauncherBackground: NSView {
                     mods: self.store.settings["mods"] as? [String: Bool] ?? [:],
                     fullscreen: self.store.settings["fullscreen"] as? Bool ?? false,
                     integerScaling: self.store.settings["integerScaling"] as? Bool ?? false,
-                    hdTextures: self.store.settings["hdTextures"] as? Bool ?? false
+                    hdTextures: self.store.settings["hdTextures"] as? Bool ?? false,
+                    internal2x: self.store.settings["internal2x"] as? Bool ?? false
                 )
                 let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice

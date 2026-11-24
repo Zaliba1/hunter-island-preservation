@@ -49,6 +49,14 @@ final class DisplayOptions {
             preferences.edit().putBoolean("integerScaling", checked).apply());
         root.addView(integerScaling);
 
+        CheckBox internal2x = new CheckBox(context);
+        internal2x.setText("2× internal resolution");
+        internal2x.setTag("hunter-internal-2x");
+        internal2x.setChecked(preferences.getBoolean("internal2x", false));
+        internal2x.setOnCheckedChangeListener((button, checked) ->
+            preferences.edit().putBoolean("internal2x", checked).apply());
+        root.addView(internal2x);
+
         CheckBox hd = new CheckBox(context);
         hd.setTag("hunter-hd-textures");
         hd.setText("Generate HD artwork locally (monsters 4×, selected artwork 2×)");
@@ -64,6 +72,7 @@ final class DisplayOptions {
         arguments.add("ipad".equals(profile) ? "--device-family=ipad" : "--device-family=iphone");
         if ("iphone-retina".equals(profile)) arguments.add("--experimental-retina");
         if (preferences.getBoolean("integerScaling", false)) arguments.add("--integer-scaling");
+        if (preferences.getBoolean("internal2x", false)) arguments.add("--scale-hack=2");
         if (preferences.getBoolean("hdTextures", false)) arguments.add("--hunter-hd-textures");
     }
 
