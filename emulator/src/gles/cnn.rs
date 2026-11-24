@@ -152,6 +152,10 @@ impl Presenter {
         }
         // GL_RGBA16F is also available through ARB_texture_float on GL 2.1.
         let format = if i == 0 || i == 7 { gl::RGBA8 } else { 0x881a };
+        #[cfg(target_os = "android")]
+        let pixel_type = if format == gl::RGBA8 { gl::UNSIGNED_BYTE } else { gl::HALF_FLOAT };
+        #[cfg(not(target_os = "android"))]
+        let pixel_type = gl::FLOAT;
         gl::TexImage2D(
             gl::TEXTURE_2D,
             0,
@@ -160,7 +164,7 @@ impl Presenter {
             size.1 as i32,
             0,
             gl::RGBA,
-            gl::FLOAT,
+            pixel_type,
             ptr::null(),
         );
         gl::FramebufferTexture2DEXT(
@@ -200,9 +204,7 @@ impl Presenter {
         } else {
             src
         };
-        let threshold = if anime { 1.2 } else { 1.3 };
-        if vp.2 as f64 <= size.0 as f64 * threshold
-            || vp.3 as f64 <= size.1 as f64 * threshold
+        if !crate::gles::present::neural_enlargement_fits(mode, src, vp, rot)
             || !gl::BindFramebufferEXT::is_loaded()
             || !gl::GenFramebuffersEXT::is_loaded()
             || !gl::FramebufferTexture2DEXT::is_loaded()

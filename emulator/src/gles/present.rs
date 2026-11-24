@@ -34,6 +34,14 @@ pub enum UpscaleMode {
     Fsrcnnx,
 }
 
+/// The upstream CNN shaders specify a minimum enlargement in both dimensions.
+pub(crate) fn neural_enlargement_fits(mode: UpscaleMode, source: (u32, u32),
+                                       viewport: (u32, u32, u32, u32), rotation: Matrix<2>) -> bool {
+    let size = if rotation.columns()[0][0].abs() < 0.5 { (source.1, source.0) } else { source };
+    let threshold = if mode == UpscaleMode::Anime4K { 1.2 } else { 1.3 };
+    viewport.2 as f64 > size.0 as f64 * threshold && viewport.3 as f64 > size.1 as f64 * threshold
+}
+
 impl UpscaleMode {
     #[cfg(not(target_os = "android"))]
     pub fn next(self) -> Self {

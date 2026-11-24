@@ -359,6 +359,8 @@ pub struct Window {
     backing_scale: u32,
     scale_hack: NonZeroU32,
     internal_gl_ins: Option<Box<dyn GLESContext>>,
+    #[cfg(target_os = "android")]
+    pub(crate) composite_filter: Option<crate::gles::android_composite::CompositeFilter>,
     splash_image: Option<Image>,
     device_family: DeviceFamily,
     device_orientation: DeviceOrientation,
@@ -519,6 +521,8 @@ impl Window {
             backing_scale: if options.experimental_retina { 2 } else { 1 },
             scale_hack,
             internal_gl_ins: None,
+            #[cfg(target_os = "android")]
+            composite_filter: None,
             splash_image: launch_image,
             device_family,
             device_orientation,
@@ -550,6 +554,14 @@ impl Window {
             log!("Driver info: {}", unsafe { gl_ctx.driver_description() });
         }
         window.internal_gl_ins = Some(gl_ins);
+        #[cfg(target_os = "android")]
+        if options.upscale == UpscaleMode::Anime4K {
+            match crate::gles::android_composite::CompositeFilter::new(&window) {
+                Ok(filter) => window.composite_filter = Some(filter),
+                Err(error) => { log!("Android compositor filter unavailable: {error}"); }
+            }
+            drop(window.make_internal_gl_ctx_current());
+        }
 
         if window.splash_image.is_some() {
             window.display_splash();

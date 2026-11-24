@@ -2,8 +2,8 @@
 
 Windows, Android and macOS share one source tree. The preview.10 APK is accompanied by:
 
-- HunterIsland-Source-0.2.0-preview.10.zip
-- HunterIsland-SourceDependencies-0.2.0-preview.10.zip
+- HunterIsland-Source-0.2.0-preview.10-pixel.1.zip
+- HunterIsland-SourceDependencies-0.2.0-preview.10-pixel.1.zip
 
 Keep both archives alongside locally supplied APKs. Published builds provide
 them in [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).

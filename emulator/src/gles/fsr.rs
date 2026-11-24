@@ -128,7 +128,7 @@ impl Program {
                 buffer.as_mut_ptr().cast(),
             );
             gl::DeleteProgram(id);
-            return Err(String::from_utf8_lossy(&buffer[..length as usize]).into_owned());
+            return Err(format!("link program {id}, GL error 0x{:x}: {}", gl::GetError(), String::from_utf8_lossy(&buffer[..length as usize])));
         }
         Ok(Self {
             id,
@@ -169,7 +169,7 @@ unsafe fn compile(kind: u32, source: &str) -> Result<u32, String> {
             buffer.as_mut_ptr().cast(),
         );
         gl::DeleteShader(shader);
-        return Err(String::from_utf8_lossy(&buffer[..length as usize]).into_owned());
+        return Err(format!("compile shader {shader} type 0x{kind:x}, GL error 0x{:x}: {}", gl::GetError(), String::from_utf8_lossy(&buffer[..length as usize])));
     }
     Ok(shader)
 }
