@@ -90,6 +90,51 @@ fn size_for_orientation(
         DeviceOrientation::LandscapeRight => (height * scale_hack, width * scale_hack),
     }
 }
+#[cfg(target_os = "windows")]
+fn fit_window_to_work_area(window: &mut sdl2::video::Window, preferred: (u32, u32), center: bool) {
+    use sdl2::video::WindowPos::Positioned;
+    let bounds = window.display_index().and_then(|i| window.subsystem().display_usable_bounds(i));
+    let (work, (top, left, bottom, right)) = match (bounds, window.border_size()) {
+        (Ok(work), Ok(borders)) => (work, borders),
+        _ => {
+            log!("Could not measure the Windows work area or window frame");
+            return;
+        }
+    };
+
+    // SDL positions the client origin. Leave room on every edge for the
+    // native frame, including the caption, inside this monitor's work area.
+    let available = (
+        work.width().saturating_sub(u32::from(left) + u32::from(right)).max(1),
+        work.height().saturating_sub(u32::from(top) + u32::from(bottom)).max(1),
+    );
+    let size = if preferred.0 <= available.0 && preferred.1 <= available.1 {
+        preferred
+    } else {
+        let ((_, _, w, h), _) = fullscreen_viewport(preferred, available, false);
+        (w.max(1), h.max(1))
+    };
+    let min_x = work.x() + i32::from(left);
+    let min_y = work.y() + i32::from(top);
+    let spare_x = (available.0 - size.0) as i32;
+    let spare_y = (available.1 - size.1) as i32;
+    let (x, y) = window.position();
+    let position = if center {
+        (min_x + spare_x / 2, min_y + spare_y / 2)
+    } else {
+        (x.clamp(min_x, min_x + spare_x), y.clamp(min_y, min_y + spare_y))
+    };
+    if window.size() != size {
+        if let Err(error) = window.set_size(size.0, size.1) {
+            log!("Could not resize the Windows game window: {error}");
+            return;
+        }
+    }
+    if window.position() != position {
+        window.set_position(Positioned(position.0), Positioned(position.1));
+    }
+}
+
 /// Fit the oriented backing pixels into the drawable with centered borders.
 /// A display smaller than the backing still gets a complete, filtered image.
 fn fullscreen_viewport(
@@ -403,6 +448,10 @@ impl Window {
                 size_for_orientation(device_family, device_orientation, scale_hack);
             let mut builder = video_ctx.window(title, width, height);
             builder.position_centered().opengl();
+            #[cfg(target_os = "windows")]
+            if !fullscreen {
+                builder.hidden();
+            }
             #[cfg(target_os = "macos")]
             builder.allow_highdpi();
             if fullscreen {
@@ -410,6 +459,13 @@ impl Window {
             }
             builder.build().unwrap()
         };
+
+        #[cfg(target_os = "windows")]
+        if !fullscreen {
+            let preferred = size_for_orientation(device_family, device_orientation, scale_hack);
+            fit_window_to_work_area(&mut window, preferred, true);
+            window.show();
+        }
 
         if env::consts::OS == "android" {
             // Sanity check
@@ -811,6 +867,13 @@ impl Window {
                     } else {
                         continue;
                     }
+                }
+                #[cfg(target_os = "windows")]
+                E::Window { win_event: sdl2::event::WindowEvent::DisplayChanged(_), .. }
+                    if !self.fullscreen => {
+                    let preferred = size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
+                    fit_window_to_work_area(&mut self.window, preferred, false);
+                    continue;
                 }
                 E::AppWillEnterBackground { .. } => {
                     log!("Received app-will-resign-active event.");
@@ -1449,6 +1512,9 @@ impl Window {
         if !self.fullscreen {
             let expected =
                 size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
+            #[cfg(target_os = "windows")]
+            fit_window_to_work_area(&mut self.window, expected, false);
+            #[cfg(not(target_os = "windows"))]
             if self.window.size() != expected {
                 if let Err(error) = self.window.set_size(expected.0, expected.1) {
                     log!("Could not restore window size: {error}");
@@ -1499,6 +1565,9 @@ impl Window {
                 self.viewport_y_offset = self.max_height - height;
             }
 
+            #[cfg(target_os = "windows")]
+            fit_window_to_work_area(&mut self.window, (width, height), false);
+            #[cfg(not(target_os = "windows"))]
             self.window.set_size(width, height).unwrap();
         }
 
@@ -1755,10 +1824,29 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
 
     let options = Options {
         device_family: Some(DeviceFamily::iPad),
+        scale_hack: NonZeroU32::new(2).unwrap(),
         initial_orientation: DeviceOrientation::LandscapeLeft,
         ..Options::default()
     };
     let mut window = Window::new("touchHLE fullscreen controls test", None, None, &options);
+    let assert_decorated_window_fits = |window: &Window| {
+        let win = &window.window;
+        let work = win.subsystem().display_usable_bounds(win.display_index().unwrap()).unwrap();
+        let (top, left, bottom, right) = win.border_size().unwrap();
+        let (x, y) = win.position();
+        let (w, h) = win.size();
+        assert!(top > bottom, "missing native caption: {top}, {bottom}");
+        assert!(x - i32::from(left) >= work.x() && y - i32::from(top) >= work.y());
+        assert!(x + w as i32 + i32::from(right) <= work.right());
+        assert!(y + h as i32 + i32::from(bottom) <= work.bottom());
+        assert_eq!(win.fullscreen_state(), FullscreenType::Off);
+    };
+    assert_decorated_window_fits(&window);
+    let initial_size = window.window.size();
+    window.rotate_device(DeviceOrientation::Portrait);
+    assert_decorated_window_fits(&window);
+    window.rotate_device(DeviceOrientation::LandscapeLeft);
+    assert_decorated_window_fits(&window);
     let events = window._sdl_ctx.event().unwrap();
     let window_id = window.window.id();
     let key = |window: &mut Window, keycode, scancode, repeat| {
@@ -1785,7 +1873,7 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
     let (viewport, nearest) = window.viewport_and_filter();
     assert_eq!(
         (viewport, nearest),
-        fullscreen_viewport((1024, 768), window.window.drawable_size(), true)
+        fullscreen_viewport((2048, 1536), window.window.drawable_size(), true)
     );
     let (vx, vy, vw, vh) = viewport;
     let (width, height) = window.window.size();
@@ -1813,7 +1901,8 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
 
     key(&mut window, Keycode::F11, Scancode::F11, false);
     assert_eq!(window.window.fullscreen_state(), FullscreenType::Off);
-    assert_eq!(window.window.size(), (1024, 768));
+    assert_decorated_window_fits(&window);
+    assert_eq!(window.window.size(), initial_size);
 
     // F9 from the window (with integer scaling remembered) should immediately
     // switch to fit-to-screen FSR, and further presses cycle effective filters.
