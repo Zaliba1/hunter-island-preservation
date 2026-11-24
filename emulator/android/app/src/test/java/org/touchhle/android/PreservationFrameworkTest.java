@@ -87,10 +87,10 @@ public class PreservationFrameworkTest {
     }
     @Test public void launcherModsDefaultOffAndReachTheGameIndependently() {
         String[] labels = {
-            "Zalibas Expansion",
+            "Zalibas Expansion · Developer recommended",
             "Find rare starter dragons more often (5% per wild battle)",
             "Exchange silver for gold (50:1)",
-            "Skip the 12-hour arena wait",
+            "Skip the 12-hour arena wait · Developer recommended",
             "Full collection and resources (separate save copy)",
             "New game with all monsters at level 1",
             "New game with 3 of each monster, level 99, rank S",
@@ -156,9 +156,22 @@ public class PreservationFrameworkTest {
             p.edit().putBoolean(flag,false).commit();
         }
     }
+    @Test public void easyPresetStartsEnabledAndCanBeDisabled() {
+        try (ActivityController<LauncherActivity> controller = Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            View root = controller.get().getWindow().getDecorView();
+            android.widget.CheckBox preset = root.findViewWithTag("recommended-view");
+            assertTrue(preset.isChecked());
+            List<String> args = new ArrayList<>();
+            DisplayOptions.appendArguments(controller.get(), args);
+            assertTrue(args.contains("--upscale=anime4k") && args.contains("--hunter-hd-textures"));
+            preset.performClick();
+            args.clear(); DisplayOptions.appendArguments(controller.get(), args);
+            assertFalse(args.contains("--upscale=anime4k") || args.contains("--hunter-hd-textures"));
+        }
+    }
     @Test public void integerScalingIsOptionalPersistsAndKeepsTheExistingDisplayProfile() {
         android.content.SharedPreferences display = context.getSharedPreferences("display", Context.MODE_PRIVATE);
-        display.edit().clear().putString("family", "ipad").commit();
+        display.edit().clear().putString("upscale", "bilinear").putString("family", "ipad").commit();
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {
             android.widget.CheckBox scaling = controller.get().getWindow().getDecorView()
@@ -196,11 +209,12 @@ public class PreservationFrameworkTest {
             List<String> args = new ArrayList<>();
             DisplayOptions.appendArguments(controller.get(), args);
             assertTrue(args.contains("--scale-hack=2"));
-            assertFalse(args.contains("--hunter-hd-textures"));
+            assertTrue(args.contains("--hunter-hd-textures"));
         }
     }
 
     @Test public void localTextureGenerationIsOptInAndSurvivesRecreation() {
+        context.getSharedPreferences("display", Context.MODE_PRIVATE).edit().putBoolean("hdTextures",false).putString("upscale","bilinear").commit();
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {
             android.widget.CheckBox hd = controller.get().getWindow().getDecorView().findViewWithTag("hunter-hd-textures");

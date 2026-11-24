@@ -14,7 +14,6 @@ export CXXFLAGS="$CFLAGS"
 if command -v cmake >/dev/null; then export CMAKE="$(command -v cmake)"; fi
 cd emulator
 cargo +1.90.0 test --locked --release --lib -- --test-threads=1
-cargo +1.90.0 test --locked --release --lib desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping -- --ignored --test-threads=1
 cargo +1.90.0 build --locked --release --bin touchHLE
 cd "$root"
 app="$root/dist/macos/Hunter Island.app"

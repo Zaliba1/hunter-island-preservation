@@ -55,7 +55,35 @@ final class ModOptions {
             java.io.File[] saves=slot.listFiles();
             if(saves!=null) for(java.io.File save:saves) if(save.isFile() && save.getName().matches("sv_[0-9]+")) return;
         }
+        if (selected.endsWith("-expansion") && "copy".equals(preferences(context).getString("expansionOrigin", "")) && hasCheckpoint(new java.io.File(parent,IpaInspector.BUNDLE))) return;
         throw new java.io.IOException("Save a normal game once before creating a full collection copy.");
+    }
+
+    private static boolean hasCheckpoint(java.io.File profile) {
+        java.io.File[] slots = new java.io.File(profile, "Documents").listFiles();
+        if (slots == null) return false;
+        for (java.io.File slot : slots) {
+            if (!slot.getName().matches("saves[0-9]+")) continue;
+            java.io.File[] saves = slot.listFiles(file -> file.isFile() && file.getName().matches("sv_[0-9]+"));
+            if (saves != null && saves.length > 0) return true;
+        }
+        return false;
+    }
+    static void chooseCampaign(Context context, Runnable accept, Runnable cancel) {
+        java.io.File external = context.getExternalFilesDir(null);
+        if (external == null) { cancel.run(); return; }
+        java.io.File parent = new java.io.File(external, "touchHLE_sandbox");
+        java.io.File expansion = new java.io.File(parent, IpaInspector.BUNDLE + "-expansion");
+        SharedPreferences p = preferences(context);
+        if (p.contains("expansionOrigin") || new java.io.File(expansion, ".campaign-origin-v1").exists()
+                || hasCheckpoint(expansion) || !hasCheckpoint(new java.io.File(parent, IpaInspector.BUNDLE))) {
+            accept.run(); return;
+        }
+        new android.app.AlertDialog.Builder(context).setTitle("Start Zalibas Expansion")
+            .setMessage("Copy your original campaign into a separate Expansion save, or start a new campaign?")
+            .setPositiveButton("Copy campaign", (d,w) -> { p.edit().putString("expansionOrigin","copy").apply(); accept.run(); })
+            .setNegativeButton("Start new", (d,w) -> { p.edit().putString("expansionOrigin","new").apply(); accept.run(); })
+            .setNeutralButton("Cancel", (d,w) -> cancel.run()).setOnCancelListener(d -> cancel.run()).show();
     }
 
     static void addControls(Context context, LinearLayout root) {
@@ -67,10 +95,14 @@ final class ModOptions {
         for (String[] option : OPTIONS) {
             String flag = option[0];
             CheckBox checkbox = new CheckBox(context);
-            checkbox.setText(option[1]);
+            checkbox.setText(option[1] + (flag.equals("--zalibas-expansion") || flag.equals("--hunter-no-arena-cooldown") ? " · Developer recommended" : ""));
             checkbox.setChecked(preferences.getBoolean(flag, false));
             boxes.put(flag,checkbox);
             checkbox.setOnCheckedChangeListener((button, checked) -> {
+                if (checked && flag.equals("--zalibas-expansion")) {
+                    chooseCampaign(context, () -> preferences.edit().putBoolean(flag, true).apply(), () -> checkbox.setChecked(false));
+                    return;
+                }
                 if(checked) for(String[] profile:PROFILES) if(profile[0].equals(flag)) {
                     for(String[] other:PROFILES) if(!other[0].equals(flag)) {
                         preferences.edit().putBoolean(other[0],false).apply();
@@ -89,6 +121,10 @@ final class ModOptions {
     static void appendArguments(Context context, List<String> arguments) {
         selectedProfile(context);
         SharedPreferences preferences = preferences(context);
+        String origin = preferences.getString("expansionOrigin", "");
+        if (preferences.getBoolean("--zalibas-expansion", false) && ("copy".equals(origin) || "new".equals(origin))) {
+            arguments.add("--expansion-" + origin + "-campaign");
+        }
         for (String[] option : OPTIONS) {
             if (preferences.getBoolean(option[0], false)) arguments.add(option[0]);
         }

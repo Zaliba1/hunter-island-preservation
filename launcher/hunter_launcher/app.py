@@ -33,6 +33,15 @@ def mod_arguments(settings):
     selected_test_directory(settings)
     return [flag for flag, _ in MOD_OPTIONS if mods.get(flag, False)]
 
+FILTERS = {'Bilinear': 'bilinear', 'FSR 1.2': 'fsr', 'FSR 1.2 + RCAS': 'fsr-sharpened',
+           'Anime4K CNN x2 S': 'anime4k', 'FSRCNNX x2': 'fsrcnnx'}
+
+def graphic_settings(settings):
+    mods = settings.get('mods', {})
+    fresh = '--hunter-hd-textures' not in mods and 'output_filter' not in settings
+    return (settings.get('output_filter', 'anime4k' if fresh else 'bilinear'),
+            mods.get('--hunter-hd-textures', fresh))
+
 def release_root():
     if getattr(sys,'frozen',False):
         return Path(sys.executable).resolve().parent
@@ -55,6 +64,16 @@ def play(store, release, timeout=None, test_taps=(), capture=False):
                 args.append('--device-family=ipad')
             args.extend(language_arguments(settings))
             args.extend(mod_arguments(settings))
+            output, hd = graphic_settings(settings)
+            if output in FILTERS.values() and output != 'bilinear':
+                args.append('--upscale=' + output)
+            if hd and '--hunter-hd-textures' not in args:
+                args.append('--hunter-hd-textures')
+            if settings.get('integer_scaling'): args.append('--integer-scaling')
+            if settings.get('fullscreen'): args.append('--fullscreen')
+            origin = settings.get('expansion_origin')
+            if '--zalibas-expansion' in args and origin in ('copy', 'new'):
+                args.append('--expansion-' + origin + '-campaign')
             if capture:
                 args.append('--capture-frames')
             for tap in test_taps:
@@ -88,8 +107,8 @@ def gui(store, release):
     def error_dialog(key, error):
         messagebox.showerror(text(key), issue_message(language, error), parent=root)
 
-    root.geometry('760x920')
-    root.minsize(710,890)
+    root.geometry(f"680x{min(640, root.winfo_screenheight()-90)}")
+    root.minsize(440, 360)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -97,27 +116,56 @@ def gui(store, release):
     style.configure('TLabel',background='#f3f5f7',foreground='#182c3d',font=('Segoe UI',10))
     style.configure('Title.TLabel',font=('Segoe UI',22,'bold'))
     style.configure('TButton',font=('Segoe UI',10),padding=(14,9))
-    frame = ttk.Frame(root,padding=18)
-    frame.pack(fill='both',expand=True)
+    canvas = tk.Canvas(root, highlightthickness=0, background='#f3f5f7')
+    scrollbar = ttk.Scrollbar(root, orient='vertical', command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    scrollbar.pack(side='right', fill='y'); canvas.pack(side='left', fill='both', expand=True)
+    frame = ttk.Frame(canvas, padding=18)
+    item = canvas.create_window(0, 0, anchor='nw', window=frame)
+    frame.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
+    canvas.bind('<Configure>', lambda e: canvas.itemconfigure(item, width=e.width))
+    root.bind('<MouseWheel>', lambda e: canvas.yview_scroll(-int(e.delta/120), 'units'))
     ttk.Label(frame,text='Hunter Island',style='Title.TLabel').pack(anchor='w')
     translate(ttk.Label(frame), 'version', version=VERSION).pack(anchor='w',pady=(2,18))
+    device = tk.StringVar(value=settings.get('device','ipad'))
+    translate(ttk.Label(frame), 'resolution').pack(anchor='w')
+    devices = ttk.Combobox(frame,textvariable=device,values=['ipad','iphone'],state='readonly',width=12)
+    devices.pack(anchor='w',pady=12)
+    ttk.Label(frame,text='iPad: 1024 × 768   ·   iPhone: 480 × 320',font=('Segoe UI',9)).pack(anchor='w')
+    output, initial_hd = graphic_settings(settings)
+    filter_choice = tk.StringVar(value=next((k for k,v in FILTERS.items() if v == output), 'Bilinear'))
+    integer = tk.BooleanVar(value=settings.get('integer_scaling', False))
+    fullscreen = tk.BooleanVar(value=settings.get('fullscreen', False))
+    preset = tk.BooleanVar(value=output == 'anime4k' and initial_hd and not integer.get())
+    preset_button = translate(ttk.Checkbutton(frame, variable=preset, name='recommended'), 'preset')
+    preset_button.pack(anchor='w', pady=8)
+    disclosure = translate(ttk.Button(frame, name='advanced'), 'advanced')
+    disclosure.pack(anchor='w')
+    advanced = ttk.Frame(frame)
+    def toggle_advanced():
+        if advanced.winfo_manager(): advanced.pack_forget()
+        else: advanced.pack(before=status_label, anchor='w', fill='x', pady=8)
+    disclosure.configure(command=toggle_advanced)
     status = tk.StringVar()
-    ttk.Label(frame,textvariable=status,wraplength=580,justify='left').pack(anchor='w',fill='x',pady=(0,16))
+    status_label = ttk.Label(frame,textvariable=status,wraplength=580,justify='left')
+    status_label.pack(anchor='w',fill='x',pady=(0,16))
     row = ttk.Frame(frame);row.pack(anchor='w',fill='x')
     import_button = translate(ttk.Button(row, name='import_ipa'), 'import')
     import_button.pack(side='left')
     start_button = translate(ttk.Button(row, name='play'), 'play')
     start_button.pack(side='left',padx=10)
-    device = tk.StringVar(value=settings.get('device','ipad'))
-    devices = ttk.Combobox(frame,textvariable=device,values=['ipad','iphone'],state='readonly',width=12)
-    devices.pack(anchor='w',pady=12)
-    ttk.Label(frame,text='iPad: 1024 × 768   ·   iPhone: 480 × 320',font=('Segoe UI',9)).pack(anchor='w')
+    translate(ttk.Label(advanced), 'output_filter').pack(anchor='w')
+    filters = ttk.Combobox(advanced, textvariable=filter_choice, values=list(FILTERS), state='readonly')
+    filters.pack(anchor='w')
     mod_values = {}
-    mod_controls = []
-    translate(ttk.Label(frame), 'language').pack(anchor='w',pady=(14,4))
-    languages = ttk.Combobox(frame, name='game_language', state='readonly', width=34)
+    mod_controls = [preset_button, disclosure]
+    for variable, key in [(integer,'integer_scaling'), (fullscreen,'fullscreen')]:
+        box = translate(ttk.Checkbutton(advanced, variable=variable, command=lambda: save_controls()), key)
+        box.pack(anchor='w'); mod_controls.append(box)
+    translate(ttk.Label(advanced), 'language').pack(anchor='w',pady=(14,4))
+    languages = ttk.Combobox(advanced, name='game_language', state='readonly', width=34)
     languages.pack(anchor='w')
-    translate(ttk.Label(frame, font=('Segoe UI',9), wraplength=650), 'language_hint').pack(anchor='w',pady=(3,0))
+    translate(ttk.Label(advanced, font=('Segoe UI',9), wraplength=650), 'language_hint').pack(anchor='w',pady=(3,0))
 
     def update_language(config):
         nonlocal language
@@ -127,6 +175,7 @@ def gui(store, release):
         languages.current(LANGUAGE_CODES.index(selected_language(config)))
         for widget, key, values in localized:
             widget.configure(text=text(key, **values))
+        update_recommendations()
 
     def save_language(_event):
         index = languages.current()
@@ -145,10 +194,10 @@ def gui(store, release):
         refresh()
 
     languages.bind('<<ComboboxSelected>>',save_language)
-    translate(ttk.Label(frame), 'mods').pack(anchor='w',pady=(14,4))
+    translate(ttk.Label(advanced), 'mods').pack(anchor='w',pady=(14,4))
     for flag, key in MOD_OPTIONS:
-        value = tk.BooleanVar(value=settings.get('mods', {}).get(flag, False))
-        control = translate(ttk.Checkbutton(frame, variable=value, name=key), key)
+        value = tk.BooleanVar(value=initial_hd if flag == '--hunter-hd-textures' else settings.get('mods', {}).get(flag, False))
+        control = translate(ttk.Checkbutton(advanced, variable=value, name=key, command=lambda f=flag: change_mod(f)), key)
         control.pack(anchor='w', pady=0)
         mod_values[flag] = value
         mod_controls.append(control)
@@ -159,16 +208,65 @@ def gui(store, release):
                     mod_values[other].set(False)
     for flag in TEST_PROFILES:
         mod_values[flag].trace_add('write',lambda *_args, flag=flag:choose_test(flag))
-    translate(ttk.Label(frame, wraplength=650, font=('Segoe UI',9)), 'collection_hint').pack(anchor='w',pady=(6,0))
-    ttk.Separator(frame).pack(fill='x',pady=18)
-    export_button = translate(ttk.Button(frame), 'export')
+    translate(ttk.Label(advanced, wraplength=650, font=('Segoe UI',9)), 'collection_hint').pack(anchor='w',pady=(6,0))
+    ttk.Separator(advanced).pack(fill='x',pady=18)
+    export_button = translate(ttk.Button(advanced), 'export')
     export_button.pack(anchor='w')
     saves = tk.BooleanVar(value=False)
-    save_check = translate(ttk.Checkbutton(frame, variable=saves), 'include_save')
+    save_check = translate(ttk.Checkbutton(advanced, variable=saves), 'include_save')
     save_check.pack(anchor='w',pady=8)
-    translate(ttk.Label(frame, wraplength=580, font=('Segoe UI',9)), 'privacy').pack(anchor='w',pady=(8,0))
+    translate(ttk.Label(advanced, wraplength=580, font=('Segoe UI',9)), 'privacy').pack(anchor='w',pady=(8,0))
     busy = False
     events = queue.Queue()
+    def update_recommendations():
+        for flag, key in MOD_OPTIONS:
+            recommended = key in ('arena', 'expansion')
+            if key == 'render_2x':
+                width, height = (1024,768) if device.get() == 'ipad' else (480,320)
+                recommended = root.winfo_screenwidth() >= width*2 and root.winfo_screenheight() >= height*2
+            widget = advanced.nametowidget(key)
+            widget.configure(text=text(key) + (' · ' + text('developer_recommended') if recommended else ''))
+
+    def choose_campaign(config):
+        if not mod_values['--zalibas-expansion'].get() or not store.needs_expansion_choice(config):
+            return True
+        answer = messagebox.askyesnocancel(text('expansion'), text('campaign_choice'), parent=root)
+        if answer is None:
+            return False
+        config['expansion_origin'] = 'copy' if answer else 'new'
+        return True
+    def save_controls(_event=None, *, starting=False, expansion_changed=False):
+        try:
+            with store.lock():
+                config = store.settings()
+                if not choose_campaign(config):
+                    mod_values['--zalibas-expansion'].set(False)
+                    return False
+                saved_mods = dict(config.get('mods', {}))
+                for flag in mod_values:
+                    if starting or flag in ('--hunter-hd-textures', '--scale-hack=2') or (expansion_changed and flag == '--zalibas-expansion'):
+                        saved_mods[flag] = mod_values[flag].get()
+                config.update(device=device.get(), mods=saved_mods,
+                              output_filter=FILTERS[filter_choice.get()], integer_scaling=integer.get(),
+                              fullscreen=fullscreen.get())
+                atomic_json(store.config, config)
+            preset.set(config['output_filter']=='anime4k' and mod_values['--hunter-hd-textures'].get() and not integer.get())
+            update_recommendations()
+            return True
+        except Exception as error:
+            error_dialog('start_error',error)
+            return False
+    def change_mod(flag):
+        if flag in ('--zalibas-expansion', '--hunter-hd-textures', '--scale-hack=2'):
+            save_controls(expansion_changed=flag == '--zalibas-expansion')
+    def apply_preset():
+        filter_choice.set('Anime4K CNN x2 S' if preset.get() else 'Bilinear')
+        mod_values['--hunter-hd-textures'].set(preset.get())
+        if preset.get(): integer.set(False)
+        save_controls()
+    preset_button.configure(command=apply_preset)
+    devices.bind('<<ComboboxSelected>>', save_controls)
+    filters.bind('<<ComboboxSelected>>', save_controls)
     def refresh():
         game = store.settings().get('game')
         if not busy:
@@ -177,7 +275,7 @@ def gui(store, release):
     def background(action, done, error_key):
         nonlocal busy
         busy = True
-        for widget in (import_button,start_button,export_button,save_check,devices,languages,*mod_controls):
+        for widget in (import_button,start_button,export_button,save_check,devices,languages,filters,*mod_controls):
             widget.configure(state='disabled')
         def worker():
             try:
@@ -195,6 +293,7 @@ def gui(store, release):
             busy = False
             for widget in (import_button,start_button,export_button,save_check,*mod_controls):
                 widget.configure(state='normal')
+            filters.configure(state='readonly')
             devices.configure(state='readonly')
             languages.configure(state='readonly')
             refresh()
@@ -212,14 +311,7 @@ def gui(store, release):
                     messagebox.showwarning(text('untested'), text('untested_body', version=info['version']), parent=root)
             background(lambda: store.import_ipa(source), imported, 'import_error')
     def start():
-        config = store.settings();config['device']=device.get()
-        config['mods'] = {flag: value.get() for flag, value in mod_values.items()}
-        try:
-            with store.lock():
-                atomic_json(store.config,config)
-        except Exception as error:
-            error_dialog('start_error', error)
-            return
+        if not save_controls(starting=True): return
         status.set(text('running'))
         def stopped(result):
             if result['exit_code']:

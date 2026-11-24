@@ -1841,7 +1841,37 @@ pub fn get_preferred_country_codes(env: &mut Environment) -> Vec<String> {
     })
 }
 
-#[cfg(all(test, any(target_os = "windows", target_os = "macos")))]
+/// Exercise AppKit on the process main thread, as required for native windows.
+#[cfg(target_os = "macos")]
+pub(crate) fn check_macos_work_area() -> Result<(), String> {
+    extern "C" { fn hunter_probe_window_fits() -> bool; }
+    let options = Options {
+        device_family: Some(DeviceFamily::iPad), initial_orientation: DeviceOrientation::LandscapeLeft,
+        scale_hack: NonZeroU32::new(2).unwrap(), ..Options::default()
+    };
+    let mut win = Window::new("Hunter Island work-area test", None, None, &options);
+    let check = |win: &mut Window| -> Result<(), String> {
+        for _ in 0..120 {
+            win.event_pump.pump_events();
+            if unsafe { hunter_probe_window_fits() } { return Ok(()); }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        Err(format!("macOS window extends outside the work area: {:?} {:?}", win.window.position(), win.window.size()))
+    };
+    check(&mut win)?;
+    win.rotate_device(DeviceOrientation::Portrait);
+    check(&mut win)?;
+    win.rotate_device(DeviceOrientation::LandscapeLeft);
+    check(&mut win)?;
+    win.toggle_fullscreen();
+    if !win.fullscreen || win.upscale != UpscaleMode::Anime4K { return Err("Fullscreen did not select Anime4K".into()); }
+    win.toggle_fullscreen();
+    check(&mut win)?;
+    echo!("Native macOS 2x window, rotation, fullscreen and restoration verified.");
+    Ok(())
+}
+
+#[cfg(all(test, target_os = "windows"))]
 #[test]
 #[ignore = "opens a native OpenGL window on the interactive desktop"]
 fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {

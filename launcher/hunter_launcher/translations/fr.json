@@ -53,5 +53,13 @@
   "isolation_error": "La vérification de l’isolation Windows a échoué. Le jeu n’a pas pu démarrer en toute sécurité.",
   "choose_new_export": "Choisissez un nouveau nom de fichier pour le diagnostic.",
   "export_size": "Les sauvegardes sont trop volumineuses pour être exportées.",
-  "save_changed": "Les sauvegardes ont changé pendant l’export. Réessayez."
+  "save_changed": "Les sauvegardes ont changé pendant l’export. Réessayez.",
+  "resolution": "Résolution",
+  "preset": "Affichage recommandé · Anime4K + graphismes HD locaux",
+  "advanced": "Avancé",
+  "output_filter": "Filtre de sortie",
+  "integer_scaling": "Échelle entière",
+  "fullscreen": "Démarrer en plein écran",
+  "developer_recommended": "Recommandé par le développeur",
+  "campaign_choice": "Copier la partie actuelle dans une sauvegarde distincte pour l’extension ? Oui pour copier, Non pour recommencer, Annuler pour revenir."
 }

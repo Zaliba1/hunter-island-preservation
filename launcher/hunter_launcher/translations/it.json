@@ -53,5 +53,13 @@
   "isolation_error": "Il controllo di isolamento di Windows non è riuscito. Il gioco non è stato avviato in sicurezza.",
   "choose_new_export": "Scegli un nuovo nome per il file di diagnostica.",
   "export_size": "I salvataggi sono troppo grandi per essere esportati.",
-  "save_changed": "I salvataggi sono cambiati durante l’esportazione. Riprova."
+  "save_changed": "I salvataggi sono cambiati durante l’esportazione. Riprova.",
+  "resolution": "Risoluzione",
+  "preset": "Grafica consigliata · Anime4K + grafica HD locale",
+  "advanced": "Avanzate",
+  "output_filter": "Filtro di uscita",
+  "integer_scaling": "Scala intera",
+  "fullscreen": "Avvia a schermo intero",
+  "developer_recommended": "Consigliato dallo sviluppatore",
+  "campaign_choice": "Copiare la partita in un salvataggio separato per l’espansione? Sì per copiare, No per ricominciare o Annulla per tornare indietro."
 }

@@ -22,29 +22,43 @@ public final class LauncherActivity extends Activity {
         int pad=(int)(24*getResources().getDisplayMetrics().density);root.setPadding(pad,pad,pad,pad);
         TextView title=new TextView(this);title.setText("Hunter Island");title.setTextSize(28);root.addView(title);
         TextView subtitle=new TextView(this);subtitle.setText("Android preview · touchHLE");root.addView(subtitle);
-        DisplayOptions.addControls(this, root);
-        LanguageOptions.addControls(this, root);
-        ModOptions.addControls(this, root);
+        LinearLayout advanced = new LinearLayout(this);
+        advanced.setOrientation(LinearLayout.VERTICAL);
+        DisplayOptions.addControls(this, root, advanced);
+        Button disclosure = new Button(this); disclosure.setText("Advanced ▸"); root.addView(disclosure);
+        root.addView(advanced); advanced.setVisibility(android.view.View.GONE);
+        disclosure.setOnClickListener(v -> {
+            boolean open = advanced.getVisibility() != android.view.View.VISIBLE;
+            advanced.setVisibility(open ? android.view.View.VISIBLE : android.view.View.GONE);
+            disclosure.setText(open ? "Advanced ▾" : "Advanced ▸");
+        });
+        LanguageOptions.addControls(this, advanced);
+        ModOptions.addControls(this, advanced);
         status=new TextView(this);status.setPadding(0,pad,0,pad);root.addView(status);
         choose=new Button(this);choose.setText("Import your IPA…");root.addView(choose);
         start=new Button(this);start.setText("Play");root.addView(start);
-        export=new Button(this);export.setText("Export diagnostics…");root.addView(export);
-        saveImport=new Button(this);saveImport.setText("Import save…");root.addView(saveImport);
-        saveExport=new Button(this);saveExport.setText("Export save…");root.addView(saveExport);
-        backupExport=new Button(this);backupExport.setText("Export pre-import backup…");root.addView(backupExport);
-        Button licenses=new Button(this);licenses.setText("Licenses and source information");root.addView(licenses);
+        export=new Button(this);export.setText("Export diagnostics…");advanced.addView(export);
+        saveImport=new Button(this);saveImport.setText("Import save…");advanced.addView(saveImport);
+        saveExport=new Button(this);saveExport.setText("Export save…");advanced.addView(saveExport);
+        backupExport=new Button(this);backupExport.setText("Export pre-import backup…");advanced.addView(backupExport);
+        Button licenses=new Button(this);licenses.setText("Licenses and source information");advanced.addView(licenses);
         TextView privacy=new TextView(this);privacy.setPadding(0,pad,0,0);
-        privacy.setText("Your game and saves stay on this device.");root.addView(privacy);
+        privacy.setText("Your game and saves stay on this device.");advanced.addView(privacy);
         ScrollView page=new ScrollView(this);page.setFillViewport(true);page.setFitsSystemWindows(true);page.addView(root);setContentView(page);
         try {store=new GameStore(this);refresh();}catch(Exception e){error(e);busy(true);}
         choose.setOnClickListener(v->{
             Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);intent.setType("*/*");intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent,IMPORT);
         });
-        start.setOnClickListener(v->run(()->{
-            File game=store.game();
-            ui(()->{Intent intent=new Intent(this,MainActivity.class);intent.putExtra("game",game.getAbsolutePath());startActivity(intent);});
-        }));
+        start.setOnClickListener(v -> {
+            Runnable launch = () -> run(() -> {
+                File game = store.game();
+                ui(() -> { Intent intent = new Intent(this, MainActivity.class); intent.putExtra("game",game.getAbsolutePath()); startActivity(intent); });
+            });
+            if (ModOptions.campaignProfile(this).endsWith("-expansion")) {
+                ModOptions.chooseCampaign(this, launch, () -> {});
+            } else { launch.run(); }
+        });
         export.setOnClickListener(v->{
             Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.setType("application/json");intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.putExtra(Intent.EXTRA_TITLE,"HunterIsland-Android-Diagnostics.json");startActivityForResult(intent,EXPORT);

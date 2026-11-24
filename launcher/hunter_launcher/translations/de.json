@@ -53,5 +53,13 @@
   "isolation_error": "Die Windows-Isolationsprüfung ist fehlgeschlagen. Das Spiel konnte nicht sicher gestartet werden.",
   "choose_new_export": "Wähle einen neuen Namen für das Diagnosepaket.",
   "export_size": "Die Spielstände sind zu groß für den Export.",
-  "save_changed": "Die Spielstände wurden beim Export verändert. Versuche es erneut."
+  "save_changed": "Die Spielstände wurden beim Export verändert. Versuche es erneut.",
+  "resolution": "Auflösung",
+  "preset": "Empfohlene Grafik · Anime4K + lokales HD-Artwork",
+  "advanced": "Erweitert",
+  "output_filter": "Ausgabefilter",
+  "integer_scaling": "Ganzzahlige Skalierung",
+  "fullscreen": "Im Vollbild starten",
+  "developer_recommended": "Vom Entwickler empfohlen",
+  "campaign_choice": "Deinen bisherigen Spielstand als eigene Kopie für die Expansion übernehmen? Ja kopiert ihn, Nein beginnt neu, Abbrechen kehrt zurück."
 }

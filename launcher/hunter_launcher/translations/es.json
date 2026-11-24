@@ -53,5 +53,13 @@
   "isolation_error": "Falló la comprobación de aislamiento de Windows. El juego no pudo iniciarse de forma segura.",
   "choose_new_export": "Elige un nombre nuevo para el archivo de diagnóstico.",
   "export_size": "Los datos guardados son demasiado grandes para exportarlos.",
-  "save_changed": "Los datos guardados cambiaron durante la exportación. Inténtalo de nuevo."
+  "save_changed": "Los datos guardados cambiaron durante la exportación. Inténtalo de nuevo.",
+  "resolution": "Resolución",
+  "preset": "Gráficos recomendados · Anime4K + gráficos HD locales",
+  "advanced": "Avanzado",
+  "output_filter": "Filtro de salida",
+  "integer_scaling": "Escala entera",
+  "fullscreen": "Iniciar en pantalla completa",
+  "developer_recommended": "Recomendado por el desarrollador",
+  "campaign_choice": "¿Copiar tu partida a una partida independiente de la expansión? Sí para copiar, No para empezar de cero o Cancelar para volver."
 }

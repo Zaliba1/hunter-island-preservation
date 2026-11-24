@@ -63,6 +63,16 @@ class Store:
         name = selected_test_directory(self.settings()) or ipa.BUNDLE
         return self.run / 'touchHLE_sandbox' / name
 
+    def needs_expansion_choice(self, config):
+        if config.get('expansion_origin') in ('copy', 'new'):
+            return False
+        parent = self.run / 'touchHLE_sandbox'
+        expansion = parent / (ipa.BUNDLE + '-expansion')
+        def saved(folder):
+            return any(p.is_file() and p.parent.name[5:].isdigit() and p.name[3:].isdigit()
+                       for p in (folder / 'Documents').glob('saves*/sv_*'))
+        return not (expansion / '.campaign-origin-v1').exists() and not saved(expansion) and saved(parent / ipa.BUNDLE)
+
     def require_testing_seed(self):
         selected = selected_test_directory(self.settings())
         if not selected or selected.removesuffix("-expansion") != "pockettrend.hunterisland-test-v1":
@@ -71,6 +81,8 @@ class Store:
             return
         suffix = '-expansion' if selected.endswith('-expansion') else ''
         normal = self.run / 'touchHLE_sandbox' / (ipa.BUNDLE + suffix) / 'Documents'
+        if suffix and self.settings().get('expansion_origin') == 'copy' and not any(normal.glob('saves*/sv_*')):
+            normal = self.run / 'touchHLE_sandbox' / ipa.BUNDLE / 'Documents'
         if not any(p.is_file() and p.name[3:].isdigit() for p in normal.glob('saves*/sv_*')):
             raise LauncherInputError('seed_required')
 

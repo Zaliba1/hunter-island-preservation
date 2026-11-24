@@ -373,12 +373,20 @@ fn number(name: &str, prefix: &str) -> Option<u64> {
 }
 
 fn has_checkpoints(documents: &Path) -> Result<bool, String> {
-    if !documents.try_exists().map_err(|e| e.to_string())? { return Ok(false); }
+    // AppContainer can return access denied for a metadata probe of a missing child.
+    // Inspect its accessible parent to distinguish an absent Documents directory.
+    let parent = documents.parent().unwrap();
+    let entries = std::fs::read_dir(parent).map_err(|e| format!("Open campaign folder: {e}"))?;
+    let mut present = false;
+    for entry in entries {
+        if entry.map_err(|e| format!("Inspect campaign folder: {e}"))?.file_name() == "Documents" { present = true; break; }
+    }
+    if !present { return Ok(false); }
     plain_file(documents)?;
-    for slot in std::fs::read_dir(documents).map_err(|e| e.to_string())? {
+    for slot in std::fs::read_dir(documents).map_err(|e| format!("Open Documents: {e}"))? {
         let slot = slot.map_err(|e| e.to_string())?;
         if number(&slot.file_name().to_string_lossy(), "saves").is_none() || !plain_file(&slot.path())?.is_dir() { continue; }
-        for entry in std::fs::read_dir(slot.path()).map_err(|e| e.to_string())? {
+        for entry in std::fs::read_dir(slot.path()).map_err(|e| format!("Open save slot: {e}"))? {
             let entry = entry.map_err(|e| e.to_string())?;
             if number(&entry.file_name().to_string_lossy(), "sv_").is_some() && plain_file(&entry.path())?.is_file() { return Ok(true); }
         }
@@ -390,7 +398,7 @@ fn has_checkpoints(documents: &Path) -> Result<bool, String> {
 /// only after every file is present; retain an existing empty campaign's settings.
 pub(crate) fn initialize_expansion(parent: &Path, copy: bool) -> Result<(), String> {
     let folder = parent.join(format!("{BUNDLE}-expansion"));
-    std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&folder).map_err(|e| format!("Create expansion folder: {e}"))?;
     plain_file(parent)?;
     plain_file(&folder)?;
     let marker = folder.join(".campaign-origin-v1");
@@ -407,18 +415,18 @@ pub(crate) fn initialize_expansion(parent: &Path, copy: bool) -> Result<(), Stri
         if !has_checkpoints(&source)? { return Err("The original campaign has no saved game to copy.".into()); }
         let stage = folder.join(format!(".seed-{}", uuid::Uuid::new_v4().simple()));
         let result = (|| {
-            copy_tree(&source, &stage, &mut 0, &mut 0)?;
+            copy_tree(&source, &stage, &mut 0, &mut 0).map_err(|e| format!("Stage expansion copy: {e}"))?;
             if documents.exists() { std::fs::rename(&documents, &previous).map_err(|e| e.to_string())?; }
             if let Err(error) = std::fs::rename(&stage, &documents) {
                 if previous.exists() { std::fs::rename(&previous, &documents).map_err(|e| e.to_string())?; }
-                return Err(error.to_string());
+                return Err(format!("Publish expansion documents: {error}"));
             }
             Ok(())
         })();
         if result.is_err() && stage.exists() { let _ = std::fs::remove_dir_all(&stage); }
         result?;
     }
-    std::fs::write(marker, if copy { "copy" } else { "new" }).map_err(|e| e.to_string())
+    std::fs::write(marker, if copy { "copy" } else { "new" }).map_err(|e| format!("Record expansion initialization: {e}"))
 }
 
 #[cfg(test)]

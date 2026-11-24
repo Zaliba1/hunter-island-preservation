@@ -53,5 +53,13 @@
   "isolation_error": "Windows の隔離チェックに失敗したため、安全にゲームを起動できませんでした。",
   "choose_new_export": "診断ファイルには新しいファイル名を指定してください。",
   "export_size": "セーブデータが大きすぎるため出力できません。",
-  "save_changed": "出力中にセーブデータが変更されました。もう一度お試しください。"
+  "save_changed": "出力中にセーブデータが変更されました。もう一度お試しください。",
+  "resolution": "解像度",
+  "preset": "推奨表示設定 · Anime4K とローカル HD 画像",
+  "advanced": "詳細設定",
+  "output_filter": "出力フィルター",
+  "integer_scaling": "整数倍スケーリング",
+  "fullscreen": "全画面で開始",
+  "developer_recommended": "開発者のおすすめ",
+  "campaign_choice": "現在のセーブデータを拡張版用にコピーしますか？「はい」でコピー、「いいえ」で新規開始、「キャンセル」で戻ります。"
 }

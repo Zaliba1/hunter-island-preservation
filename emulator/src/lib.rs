@@ -176,6 +176,8 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             echo!("{}", licenses::get_text());
             return Ok(());
         } else if arg == "--test-gles2-shaders" {
+            #[cfg(target_os = "macos")]
+            window::check_macos_work_area()?;
             return gles::gles2_shaders::render_probe();
         } else if arg == "--test-audio-buffering" {
             return frameworks::audio_toolbox::audio_queue::buffering_probe();
