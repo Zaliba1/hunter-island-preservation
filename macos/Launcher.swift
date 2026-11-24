@@ -57,8 +57,8 @@ final class LauncherBackground: NSView {
             displayOptions.alignment = .centerY
             displayOptions.spacing = 14
             stack.addArrangedSubview(displayOptions)
-            hdTextures = displayToggle("Generate and save HD monster textures locally (Real-ESRGAN 4×)", key: "hdTextures")
-            hdTextures.toolTip = "Encountered monsters are processed in the background. Their HD texture appears the next time it is loaded."
+            hdTextures = displayToggle("Generate HD artwork locally (monsters 4×, selected artwork 2×)", key: "hdTextures")
+            hdTextures.toolTip = "Artwork is processed on this device in the background and appears the next time the game loads it."
             stack.addArrangedSubview(hdTextures)
             stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]

@@ -91,11 +91,13 @@ before display scaling. A smaller output can smooth edges when the frame is
 downsampled. The tested iPad title screen rendered at 2048 × 1536 with this
 option. Full gameplay at this setting has yet to be tested.
 
-### Local HD monster textures on Mac and Android
+### Local HD artwork on Mac and Android
 
-In Display mode, enable **Generate and save HD monster textures locally (Real-ESRGAN 4×)** and start the game. When the emulator encounters a supported monster image, it processes the image from your imported IPA in a background CPU worker. The HD version appears on a subsequent texture load, for example when re-entering a battle. The cache survives a restart. Leave the option off to play with the original sprites. The initial release of this option targets standalone monster sprites, including Fang. Atlases, text and backgrounds use the game's normal graphics.
+Enable **Generate HD artwork locally (monsters 4×, selected artwork 2×)** in Display mode. A background CPU worker reads the artwork from your imported IPA. A completed texture appears on its next load and remains available after restarting.
 
-Generated textures stay in `hd-monsters-animev3-x4-v1` under the emulator data directory, separate from saves. Each cache entry belongs to the source PNG's SHA-256. To reclaim the space, close the game and remove this cache folder. Generation uses the bundled compact Real-ESRGAN animevideov3 ×4 model and requires no download or account.
+Standalone monsters use the compact Real-ESRGAN animevideov3 model at 4×. The tavern, courtroom, stone house and castle battlefield use a 2× blend with 25% model output. The first tournament NPC and the individual frames of the monster portrait and hero walking sheets use 12.5%. The worker preserves source transparency and processes each packed frame in isolation. Text, interface elements and other scenes use their original textures.
+
+Generated files stay in `hd-monsters-animev3-x4-v1` under the emulator data directory. Monster cache keys remain compatible with the original option. New entries include a processing version and a digest of the image and any frame rectangles. Close the game and remove this folder to reclaim space. All processing works offline.
 
 ## Saves
 

@@ -51,7 +51,7 @@ final class DisplayOptions {
 
         CheckBox hd = new CheckBox(context);
         hd.setTag("hunter-hd-textures");
-        hd.setText("Generate and save HD monster textures locally (Real-ESRGAN 4×)");
+        hd.setText("Generate HD artwork locally (monsters 4×, selected artwork 2×)");
         hd.setChecked(preferences.getBoolean("hdTextures", false));
         hd.setOnCheckedChangeListener((button, checked) ->
             preferences.edit().putBoolean("hdTextures", checked).apply());

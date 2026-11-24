@@ -216,6 +216,18 @@ pub(super) fn glGetFloatv(env: &mut Environment, pname: GLenum, params: MutPtr<G
         });
         return;
     }
+    let scale = env.options.scale_hack.get() as GLint;
+    if scale != 1 && matches!(pname, gles11::VIEWPORT | gles11::SCISSOR_BOX) {
+        with_ctx_and_mem(env, |gles, mem| unsafe {
+            let mut rect = [0.; 4];
+            gles.GetFloatv(pname, rect.as_mut_ptr());
+            let f = framebuffer_scale(gles, scale) as GLfloat;
+            for (i, value) in rect.into_iter().enumerate() {
+                mem.write(params + i as GuestUSize, value / f);
+            }
+        });
+        return;
+    }
     assert_ne!(gles11::NUM_COMPRESSED_TEXTURE_FORMATS, pname);
     assert_ne!(gles11::COMPRESSED_TEXTURE_FORMATS, pname);
     with_ctx_and_mem(env, |gles, mem| {
@@ -225,6 +237,18 @@ pub(super) fn glGetFloatv(env: &mut Environment, pname: GLenum, params: MutPtr<G
 }
 fn glGetIntegerv(env: &mut Environment, pname: GLenum, params: MutPtr<GLint>) {
     if super::gles2_guest::integer_parameter(env, pname, params) {
+        return;
+    }
+    let scale = env.options.scale_hack.get() as GLint;
+    if scale != 1 && matches!(pname, gles11::VIEWPORT | gles11::SCISSOR_BOX) {
+        with_ctx_and_mem(env, |gles, mem| unsafe {
+            let mut rect = [0; 4];
+            gles.GetIntegerv(pname, rect.as_mut_ptr());
+            let f = framebuffer_scale(gles, scale);
+            for (i, value) in rect.into_iter().enumerate() {
+                mem.write(params + i as GuestUSize, value / f);
+            }
+        });
         return;
     }
     with_ctx_and_mem(env, |gles, mem| {
@@ -425,24 +449,55 @@ fn glSampleCoveragex(env: &mut Environment, value: GLclampx, invert: GLboolean) 
 fn glShadeModel(env: &mut Environment, mode: GLenum) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.ShadeModel(mode) })
 }
+// Texture-backed framebuffers keep the guest's pixel dimensions.
+fn framebuffer_scale(gles: &mut dyn GLES, scale: GLint) -> GLint {
+    if scale == 1 { return 1; }
+    unsafe {
+        let mut framebuffer = 0;
+        gles.GetIntegerv(gles11::FRAMEBUFFER_BINDING_OES, &mut framebuffer);
+        if framebuffer != 0 {
+            let mut kind = 0;
+            gles.GetFramebufferAttachmentParameterivOES(
+                gles11::FRAMEBUFFER_OES, gles11::COLOR_ATTACHMENT0_OES,
+                gles11::FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES, &mut kind);
+            if kind as GLenum == gles11::TEXTURE { return 1; }
+        }
+    }
+    scale
+}
+// Guest viewport and scissor state survive a framebuffer switch. The host
+// rectangles must follow it even if the game never issues another glViewport.
+fn change_framebuffer(gles: &mut dyn GLES, scale: GLint, change: impl FnOnce(&mut dyn GLES)) {
+    if scale == 1 {
+        change(gles);
+        return;
+    }
+    let before = framebuffer_scale(gles, scale);
+    change(gles);
+    let after = framebuffer_scale(gles, scale);
+    if before == after { return; }
+    unsafe {
+        for pname in [gles11::VIEWPORT, gles11::SCISSOR_BOX] {
+            let mut rect = [0; 4];
+            gles.GetIntegerv(pname, rect.as_mut_ptr());
+            let [x, y, w, h] = rect.map(|value| (i64::from(value) * i64::from(after) / i64::from(before)) as GLint);
+            if pname == gles11::VIEWPORT { gles.Viewport(x,y,w,h); }
+            else { gles.Scissor(x,y,w,h); }
+        }
+    }
+}
 fn glScissor(env: &mut Environment, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {
-    // apply scale hack: assume framebuffer's size is larger than the app thinks
-    // and scale scissor appropriately
-    let factor = env.options.scale_hack.get() as GLsizei;
-    let (x, y) = (x * factor, y * factor);
-    let (width, height) = (width * factor, height * factor);
+    let scale = env.options.scale_hack.get() as GLsizei;
     with_ctx_and_mem(env, |gles, _mem| unsafe {
-        gles.Scissor(x, y, width, height)
+        let f = framebuffer_scale(gles, scale);
+        gles.Scissor(x * f, y * f, width * f, height * f)
     })
 }
 fn glViewport(env: &mut Environment, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {
-    // apply scale hack: assume framebuffer's size is larger than the app thinks
-    // and scale viewport appropriately
-    let factor = env.options.scale_hack.get() as GLsizei;
-    let (x, y) = (x * factor, y * factor);
-    let (width, height) = (width * factor, height * factor);
+    let scale = env.options.scale_hack.get() as GLsizei;
     with_ctx_and_mem(env, |gles, _mem| unsafe {
-        gles.Viewport(x, y, width, height)
+        let f = framebuffer_scale(gles, scale);
+        gles.Viewport(x * f, y * f, width * f, height * f)
     })
 }
 fn glLineWidth(env: &mut Environment, val: GLfloat) {
@@ -1183,8 +1238,9 @@ fn glTexImage2D(
 ) {
     if target == gles11::TEXTURE_2D && level == 0 && border == 0 && !pixels.is_null()
         && matches!((format, type_),
-            (gles11::RGBA | gles11::BGRA_EXT, gles11::UNSIGNED_BYTE)
-            | (gles11::RGBA, gles11::UNSIGNED_SHORT_4_4_4_4))
+            (gles11::RGBA | gles11::BGRA_EXT | gles11::RGB, gles11::UNSIGNED_BYTE)
+            | (gles11::RGBA, gles11::UNSIGNED_SHORT_4_4_4_4)
+            | (gles11::RGB, gles11::UNSIGNED_SHORT_5_6_5))
         && env.framework_state.opengles.hd_textures.as_ref().is_some_and(|c| c.has_size(width,height))
     {
         let mut cache = env.framework_state.opengles.hd_textures.take().unwrap();
@@ -1192,17 +1248,23 @@ fn glTexImage2D(
             let (mut maximum,mut alignment) = (0,0);
             gles.GetIntegerv(gles11::MAX_TEXTURE_SIZE,&mut maximum);
             gles.GetIntegerv(gles11::UNPACK_ALIGNMENT,&mut alignment);
-            if width*4 > maximum || height*4 > maximum || !matches!(alignment,1|2|4|8) {return false}
+            if maximum <= 0 || !matches!(alignment,1|2|4|8) {return false}
             let (w,h) = (width as usize,height as usize);
-            let row = w * if type_ == gles11::UNSIGNED_BYTE {4} else {2};
+            let channels = match (type_,format) {
+                (gles11::UNSIGNED_BYTE,gles11::RGB) => 3,
+                (gles11::UNSIGNED_BYTE,_) => 4,
+                _ => 2,
+            };
+            let row = w * channels;
             let stride = row.next_multiple_of(alignment as usize);
             let len = (h-1)*stride+row;
             let ptr = mem.ptr_at(pixels.cast::<u8>(),len as u32);
             let raw = std::slice::from_raw_parts(ptr,len);
-            if let Some(data) = cache.replacement((w,h),raw,stride,format,type_) {
-                gles.TexImage2D(target,level,gles11::RGBA as i32,width*4,height*4,0,
+            if let Some((scale,data)) = cache.replacement((w,h),raw,stride,format,type_,maximum as usize) {
+                let factor = scale as i32;
+                gles.TexImage2D(target,level,gles11::RGBA as i32,width*factor,height*factor,0,
                     gles11::RGBA,gles11::UNSIGNED_BYTE,data.as_ptr().cast());
-                log!("Local HD texture applied: {width}x{height}");
+                log!("Local HD texture applied: {width}x{height} at {factor}x");
                 return true
             }
             false
@@ -1407,8 +1469,9 @@ fn glIsRenderbufferOES(env: &mut Environment, renderbuffer: GLuint) -> GLboolean
     })
 }
 fn glBindFramebufferOES(env: &mut Environment, target: GLenum, framebuffer: GLuint) {
+    let scale = env.options.scale_hack.get() as GLint;
     with_ctx_and_mem(env, |gles, _mem| unsafe {
-        gles.BindFramebufferOES(target, framebuffer)
+        change_framebuffer(gles, scale, |gles| gles.BindFramebufferOES(target, framebuffer))
     })
 }
 fn glBindRenderbufferOES(env: &mut Environment, target: GLenum, renderbuffer: GLuint) {
@@ -1437,8 +1500,9 @@ fn glFramebufferRenderbufferOES(
     renderbuffertarget: GLenum,
     renderbuffer: GLuint,
 ) {
+    let scale = env.options.scale_hack.get() as GLint;
     with_ctx_and_mem(env, |gles, _mem| unsafe {
-        gles.FramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer)
+        change_framebuffer(gles, scale, |gles| gles.FramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer))
     })
 }
 fn glFramebufferTexture2DOES(
@@ -1449,8 +1513,9 @@ fn glFramebufferTexture2DOES(
     texture: GLuint,
     level: i32,
 ) {
+    let scale = env.options.scale_hack.get() as GLint;
     with_ctx_and_mem(env, |gles, _mem| unsafe {
-        gles.FramebufferTexture2DOES(target, attachment, textarget, texture, level)
+        change_framebuffer(gles, scale, |gles| gles.FramebufferTexture2DOES(target, attachment, textarget, texture, level))
     })
 }
 fn glGetFramebufferAttachmentParameterivOES(
@@ -1488,10 +1553,11 @@ fn glCheckFramebufferStatusOES(env: &mut Environment, target: GLenum) -> GLenum 
     })
 }
 fn glDeleteFramebuffersOES(env: &mut Environment, n: GLsizei, framebuffers: ConstPtr<GLuint>) {
+    let scale = env.options.scale_hack.get() as GLint;
     with_ctx_and_mem(env, |gles, mem| {
         let n_usize: GuestUSize = n.try_into().unwrap();
         let framebuffers = mem.ptr_at(framebuffers, n_usize);
-        unsafe { gles.DeleteFramebuffersOES(n, framebuffers) }
+        unsafe { change_framebuffer(gles, scale, |gles| gles.DeleteFramebuffersOES(n, framebuffers)) }
     })
 }
 fn glDeleteRenderbuffersOES(env: &mut Environment, n: GLsizei, renderbuffers: ConstPtr<GLuint>) {
