@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Optional, local Hunter Island monster texture cache. Guest sprite geometry
+//! Optional, local Hunter Island artwork cache. Guest sprite geometry
 //! and the contents of the imported IPA are unchanged.
 mod artwork;
 mod model;
@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{self, Receiver, SyncSender};
+use std::sync::mpsc::{self, Receiver, Sender};
 use zip::ZipArchive;
 
 const MAX_SIDE: usize = 2048;
@@ -32,15 +32,14 @@ struct Sprite {
 struct Job {
     artwork: Artwork,
     key: String,
-    size: (usize, usize),
-    pixels: Vec<u8>,
+    index: usize,
 }
 
 pub struct Cache {
     archive: ZipArchive<File>,
     sprites: HashMap<(usize, usize), Vec<Sprite>>,
     directory: PathBuf,
-    jobs: SyncSender<Job>,
+    jobs: Sender<Job>,
     done: Receiver<String>,
     pending: HashSet<String>,
 }
@@ -67,6 +66,69 @@ fn monster(name: &str) -> bool {
         && !base.starts_with("TournamentNPC")
         && bytes[..bytes.len() - 2].iter().all(u8::is_ascii_alphabetic)
         && bytes[bytes.len() - 2..].iter().all(u8::is_ascii_digit)
+}
+
+// Dialogs use either a plain image name or {image, forceSide}. Resolve
+// only standalone PNGs from the same app bundle as the dialog table.
+fn dialog_portraits(archive: &mut ZipArchive<File>) -> HashSet<String> {
+    let tables: Vec<_> = archive
+        .file_names()
+        .filter(|path| {
+            let mut parts = path.split('/');
+            parts.next() == Some("Payload")
+                && parts.next().is_some_and(|p| p.ends_with(".app"))
+                && parts.next() == Some("Chats.plist")
+                && parts.next().is_none()
+        })
+        .map(str::to_owned)
+        .collect();
+    let mut names = HashSet::new();
+    for table in tables {
+        let prefix = table.strip_suffix("Chats.plist").unwrap();
+        let mut bytes = Vec::new();
+        let Ok(member) = archive.by_name(&table) else {
+            continue;
+        };
+        if member.size() > MAX_MEMBER
+            || member.take(MAX_MEMBER + 1).read_to_end(&mut bytes).is_err()
+            || bytes.len() as u64 > MAX_MEMBER
+        {
+            continue;
+        }
+        let Ok(plist::Value::Dictionary(chats)) = plist::Value::from_reader(io::Cursor::new(bytes))
+        else {
+            continue;
+        };
+        let mut add = |chat: &plist::Dictionary| {
+            let Some(images) = chat.get("images").and_then(plist::Value::as_array) else {
+                return;
+            };
+            for image in images {
+                let name = image
+                    .as_string()
+                    .or_else(|| image.as_dictionary()?.get("image")?.as_string());
+                let Some(base) = name.and_then(|n| n.strip_suffix(".png")) else {
+                    continue;
+                };
+                if base != "empty"
+                    && !base.is_empty()
+                    && base
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-'))
+                {
+                    names.insert(format!("{prefix}{base}-hd.png"));
+                }
+            }
+        };
+        // The retail table has both top-level and chapter-scoped conversations.
+        for group in chats.values().filter_map(plist::Value::as_dictionary) {
+            add(group);
+            for chat in group.values().filter_map(plist::Value::as_dictionary) {
+                add(chat);
+            }
+        }
+    }
+    names
 }
 
 fn invalid() -> io::Error {
@@ -144,6 +206,7 @@ impl Cache {
     pub fn open(ipa: &Path, directory: PathBuf) -> io::Result<Self> {
         let mut archive = ZipArchive::new(File::open(ipa)?)?;
         let mut sprites: HashMap<_, Vec<_>> = HashMap::new();
+        let portraits = dialog_portraits(&mut archive);
         for index in 0..archive.len() {
             let entry = archive.by_index(index)?;
             let path = entry.name().to_owned();
@@ -162,8 +225,14 @@ impl Cache {
                 "Tavern.jpg" | "CourtRoom.jpg" | "StoneHouse.jpg" | "CastleCombat.jpg" => {
                     Artwork::Painted
                 }
-                "TournamentNPC1-hd.png" => Artwork::Portrait,
                 n if monster(n) => Artwork::Monster,
+                // Fixed hero portraits include the two AssistantImage variants.
+                "male_01-hd.png"
+                | "female_01-hd.png"
+                | "malefull_01-hd.png"
+                | "femalefull_01-hd.png"
+                | "TournamentNPC1-hd.png" => Artwork::Portrait,
+                _ if portraits.contains(&path) => Artwork::Portrait,
                 _ if is_atlas => Artwork::Portrait, // replaced after validating the local frame table
                 _ => continue,
             };
@@ -212,7 +281,10 @@ impl Cache {
         if fs::symlink_metadata(&directory)?.file_type().is_symlink() {
             return Err(invalid());
         }
-        let (jobs, queue) = mpsc::sync_channel::<Job>(3);
+        // Queue each encountered source once, including bursts at scene changes.
+        // Only indices and keys wait in memory; the worker decodes one image at a time.
+        let mut worker_archive = ZipArchive::new(File::open(ipa)?)?;
+        let (jobs, queue) = mpsc::channel::<Job>();
         let (finished, done) = mpsc::channel();
         let dir = directory.clone();
         std::thread::Builder::new()
@@ -221,20 +293,26 @@ impl Cache {
                 let mut model = None;
                 while let Ok(job) = queue.recv() {
                     let path = dir.join(&job.key);
-                    let (w, h) = job.size;
-                    let scale = job.artwork.scale();
-                    let hd = job.artwork.render(
-                        model.get_or_insert_with(model::Model::load),
-                        &job.pixels,
-                        w,
-                        h,
-                    );
-                    match write_cache(&path, &hd) {
-                        Ok(()) => {
+                    let result = (|| {
+                        let bytes = image_data(&mut worker_archive, job.index)?;
+                        let image = Image::from_bytes(&bytes).map_err(|_| invalid())?;
+                        let (w, h) = image.dimensions();
+                        let scale = job.artwork.scale();
+                        let hd = job.artwork.render(
+                            model.get_or_insert_with(model::Model::load),
+                            image.pixels(),
+                            w as usize,
+                            h as usize,
+                        );
+                        write_cache(&path, &hd)?;
+                        Ok::<_, io::Error>((w, h, scale))
+                    })();
+                    match result {
+                        Ok((w, h, scale)) => {
                             log!(
                                 "Local HD texture cached: {w}x{h} -> {}x{}",
-                                w * scale,
-                                h * scale
+                                w as usize * scale,
+                                h as usize * scale
                             );
                         }
                         Err(e) => {
@@ -309,7 +387,7 @@ impl Cache {
         };
         // Samples cheaply reject unrelated UI and atlas uploads. Verify the
         // full silhouette and color before substituting any texture.
-        let (sprite, img) = candidates.iter().find_map(|s| {
+        let sprite = candidates.iter().find_map(|s| {
             if w * s.artwork.scale() > maximum || h * s.artwork.scale() > maximum {
                 return None;
             }
@@ -333,7 +411,7 @@ impl Cache {
                             original[c].abs_diff(p[c]) <= 17 || original[c].abs_diff(premult) <= 17
                         })
                 });
-            same.then_some((s, img))
+            same.then_some(s)
         })?;
         let scale = sprite.artwork.scale();
         let path = self.directory.join(&sprite.key);
@@ -346,10 +424,9 @@ impl Cache {
         let job = Job {
             artwork: sprite.artwork.clone(),
             key: sprite.key.clone(),
-            size,
-            pixels: img.pixels().to_vec(),
+            index: sprite.index,
         };
-        if self.jobs.try_send(job).is_ok() {
+        if self.jobs.send(job).is_ok() {
             self.pending.insert(sprite.key.clone());
         }
         None

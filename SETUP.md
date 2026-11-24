@@ -95,9 +95,9 @@ option. Full gameplay at this setting has yet to be tested.
 
 Select **2× internal resolution** in Display mode to double the render dimensions on each axis, for example from 1024 × 768 to 2048 × 1536 on the iPad profile. This switch can be used independently of local HD artwork.
 
-Enable **Generate HD artwork locally (monsters 4×, selected artwork 2×)** in Display mode. A background CPU worker reads the artwork from your imported IPA. A completed texture appears on its next load and remains available after restarting.
+Enable **Local HD artwork (monsters 4×, characters and selected scenes 2×)** in Display mode. A background CPU worker reads the artwork from your imported IPA. A completed texture appears on its next load and remains available after restarting.
 
-Standalone monsters use the compact Real-ESRGAN animevideov3 model at 4×. The tavern, courtroom, stone house and castle battlefield use a 2× blend with 25% model output. The first tournament NPC and the individual frames of the monster portrait and hero walking sheets use 12.5%. The worker preserves source transparency and processes each packed frame in isolation. Text, interface elements and other scenes use their original textures.
+Standalone monsters use the compact Real-ESRGAN animevideov3 model at 4×. The tavern, courtroom, stone house and castle battlefield use a 2× blend with 25% model output. Dialog portraits are identified from the local Chats.plist. They, both heroes’ dialog and full-body pictures, and the individual frames of the monster portrait and hero walking sheets use a 2× blend with 12.5% model output. Speaking monsters already covered by the 4× monster profile retain it. The worker preserves source transparency and processes each packed frame in isolation. Text, interface elements and other scenes use their original textures.
 
 Generated files stay in `hd-monsters-animev3-x4-v1` under the emulator data directory. Monster cache keys remain compatible with the original option. New entries include a processing version and a digest of the image and any frame rectangles. Close the game and remove this folder to reclaim space. All processing works offline.
 

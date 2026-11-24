@@ -91,3 +91,67 @@ fn recognizes_jpeg_dimensions_before_decoding() {
     assert_eq!(artwork::dimensions(&header[..16]), None);
     assert_eq!(artwork::dimensions(&[255, 216, 255, 224, 0, 1]), None);
 }
+
+#[test]
+fn indexes_local_dialogs_and_heroes_with_monster_precedence() {
+    let root = std::env::temp_dir().join(format!("hi-dialog-{}", uuid::Uuid::new_v4()));
+    fs::create_dir(&root).unwrap();
+    let ipa = root.join("synthetic.ipa");
+    let mut zip = zip::ZipWriter::new(File::create(&ipa).unwrap());
+    let mut add = |name: &str, bytes: &[u8]| {
+        zip.start_file(name, zip::write::FileOptions::default())
+            .unwrap();
+        zip.write_all(bytes).unwrap();
+    };
+    add(
+        "Payload/F.app/Chats.plist",
+        br#"<?xml version="1.0"?>
+    <plist version="1.0"><dict>
+      <key>Single</key><dict><key>images</key><array><string>Solo.png</string></array></dict>
+      <key>Chapter</key><dict><key>Dialog</key><dict><key>images</key><array>
+      <dict><key>image</key><string>Npc.png</string></dict><string>Creature01.png</string>
+      <string>empty.png</string><string>../Ignore.png</string><string>$$AssistantImage$$</string>
+      </array></dict></dict></dict></plist>"#,
+    );
+    let input = include_bytes!("synthetic-edge.png");
+    for name in [
+        "Solo",
+        "Npc",
+        "Creature01",
+        "male_01",
+        "female_01",
+        "malefull_01",
+        "femalefull_01",
+        "Ignore",
+        "empty",
+        "Unknown",
+    ] {
+        add(&format!("Payload/F.app/{name}-hd.png"), input);
+    }
+    add("Payload/Other.app/Npc-hd.png", input);
+    zip.finish().unwrap();
+    let mut cache = Cache::open(&ipa, root.join("cache")).unwrap();
+    let mut chosen = std::collections::BTreeMap::new();
+    for sprite in &cache.sprites[&(48, 48)] {
+        let entry = cache.archive.by_index(sprite.index).unwrap();
+        assert!(entry.name().starts_with("Payload/F.app/"));
+        chosen.insert(
+            entry.name().split('/').last().unwrap().to_owned(),
+            sprite.artwork.scale(),
+        );
+    }
+    assert_eq!(chosen.len(), 7);
+    assert_eq!(chosen["Creature01-hd.png"], 4);
+    for name in [
+        "Solo",
+        "Npc",
+        "male_01",
+        "female_01",
+        "malefull_01",
+        "femalefull_01",
+    ] {
+        assert_eq!(chosen[&format!("{name}-hd.png")], 2);
+    }
+    drop(cache);
+    fs::remove_dir_all(root).unwrap();
+}
