@@ -2,7 +2,7 @@
 
 Windows, Android and macOS share one source tree. This Android test build is accompanied by:
 
-- HunterIsland-Source-0.2.0-preview.11-easy.1.zip
+- HunterIsland-Source-0.2.0-preview.11-easy.2.zip
 - HunterIsland-SourceDependencies-0.2.0-preview.11-easy.1.zip
 
 Keep both archives alongside locally supplied APKs. Published builds provide

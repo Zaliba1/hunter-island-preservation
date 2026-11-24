@@ -69,7 +69,7 @@ On Android, select **Integer scaling** in the launcher to use it on the next
 game launch. The Mac launcher offers **Start in fullscreen** and
 **Integer scaling**. The launcher remembers these choices.
 
-The launcher opens in Easy mode. Choose your display profile and toggle **Recommended view settings** for Anime4K and local HD artwork. **Advanced** exposes individual filters, internal resolution, integer scaling and optional mods. Windows labels 2× GPU as recommended when the selected profile fits twice in each screen dimension.
+The launcher opens in Easy mode. Choose your display profile and toggle **Recommended view settings** for bilinear output, local HD artwork and 2× internal resolution on Android, or Anime4K and local HD artwork on desktop. **Advanced** exposes individual filters, internal resolution, integer scaling and optional mods. Windows labels 2× GPU as recommended when the selected profile fits twice in each screen dimension.
 
 On Windows and Mac, **F11** enters fit-to-screen fullscreen with Anime4K selected and returns to a decorated window. **F9** cycles Anime4K, FSRCNNX, bilinear, FSR 1.2 and FSR + RCAS. From windowed or integer mode, F9 first selects Anime4K in fit-to-screen fullscreen. **F10** toggles integer scaling. Neural enlargement runs when the output is sufficiently larger than the rendered image.
 

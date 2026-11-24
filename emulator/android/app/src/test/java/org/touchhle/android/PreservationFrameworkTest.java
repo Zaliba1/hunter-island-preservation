@@ -190,11 +190,35 @@ public class PreservationFrameworkTest {
             assertTrue(preset.isChecked());
             List<String> args = new ArrayList<>();
             DisplayOptions.appendArguments(controller.get(), args);
-            assertTrue(args.contains("--upscale=anime4k") && args.contains("--hunter-hd-textures"));
+            assertEquals(Arrays.asList("--device-family=iphone", "--experimental-retina", "--scale-hack=2", "--hunter-hd-textures"), args);
             preset.performClick();
             args.clear(); DisplayOptions.appendArguments(controller.get(), args);
-            assertFalse(args.contains("--upscale=anime4k") || args.contains("--hunter-hd-textures"));
+            assertEquals(Arrays.asList("--device-family=iphone", "--experimental-retina"), args);
+            preset.performClick();
+            assertTrue(preset.isChecked());
         }
+    }
+    @Test public void savedFiltersMigrateBeforeGameLaunchAndCustomSettingsSurvive() {
+        android.content.SharedPreferences display = context.getSharedPreferences("display", Context.MODE_PRIVATE);
+        for (String filter : Arrays.asList("fsr", "fsr-sharpened", "anime4k", "fsrcnnx")) {
+            display.edit().clear().putString("family", "ipad").putString("upscale", filter)
+                    .putBoolean("hdTextures", false).putBoolean("internal2x", false).commit();
+            List<String> args = new ArrayList<>();
+            DisplayOptions.appendArguments(context, args);
+            if (filter.equals("fsr") || filter.equals("fsr-sharpened")) {
+                assertEquals("bilinear", display.getString("upscale", ""));
+                assertEquals(Collections.singletonList("--device-family=ipad"), args);
+            } else {
+                assertEquals(Arrays.asList("--upscale=" + filter, "--device-family=ipad"), args);
+            }
+        }
+        display.edit().clear().putString("upscale", "anime4k").putBoolean("hdTextures", true).commit();
+        List<String> args = new ArrayList<>();
+        DisplayOptions.appendArguments(context, args);
+        assertEquals(Arrays.asList("--device-family=iphone", "--experimental-retina", "--scale-hack=2", "--hunter-hd-textures"), args);
+        display.edit().putString("upscale", "anime4k").putBoolean("internal2x", false).commit();
+        args.clear(); DisplayOptions.appendArguments(context, args);
+        assertTrue(args.contains("--upscale=anime4k"));
     }
     @Test public void integerScalingIsOptionalPersistsAndKeepsTheExistingDisplayProfile() {
         android.content.SharedPreferences display = context.getSharedPreferences("display", Context.MODE_PRIVATE);
@@ -228,14 +252,14 @@ public class PreservationFrameworkTest {
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {
             android.widget.CheckBox box = controller.get().getWindow().getDecorView().findViewWithTag("hunter-internal-2x");
-            assertFalse(box.isChecked());
+            assertTrue(box.isChecked());
             box.performClick();
             controller.recreate();
             box = controller.get().getWindow().getDecorView().findViewWithTag("hunter-internal-2x");
-            assertTrue(box.isChecked());
+            assertFalse(box.isChecked());
             List<String> args = new ArrayList<>();
             DisplayOptions.appendArguments(controller.get(), args);
-            assertTrue(args.contains("--scale-hack=2"));
+            assertFalse(args.contains("--scale-hack=2"));
             assertTrue(args.contains("--hunter-hd-textures"));
         }
     }
