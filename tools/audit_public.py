@@ -30,6 +30,11 @@ def audit(root,release=False):
         for title in ("Zalibas Expansion", "--zalibas-expansion", "zalibas_expansion"):
             for encoding in ("utf-8", "utf-16-le"):
                 data=data.replace(title.lower().encode(encoding), b"<mod>")
+        if Path(label).name.lower() == "touchhle.exe":
+            # LLVM packs option-comparison constants together in the PE.
+            # Match both neighboring fragments, never a bare account name.
+            packed_flags = b"libas-expansion" + b"--zalibas-expansion"[:-3] + b"exchange"
+            data=data.replace(packed_flags, b"<packed option comparisons>")
         if any(marker in data or marker.decode(errors='ignore').encode('utf-16-le') in data for marker in markers):
             errors.append(label+': local identity/path marker')
         if re.search(rb'-----begin (?:[a-z0-9]+ )?private key-----',data) or re.search(rb'gh[pousr]_[a-z0-9]{30,}',data):
