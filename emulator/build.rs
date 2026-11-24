@@ -14,6 +14,11 @@ fn rerun_if_changed(path: &Path) {
 pub fn main() {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let package_root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
+        cc::Build::new().file("src/window_caption.m").compile("hunter_window_caption");
+        println!("cargo:rustc-link-lib=framework=AppKit");
+        rerun_if_changed(&package_root.join("src/window_caption.m"));
+    }
 
     // Generate a list of dependencies with license and author information.
     // This is used in license.rs

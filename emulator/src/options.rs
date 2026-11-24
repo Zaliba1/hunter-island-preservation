@@ -73,6 +73,7 @@ pub struct Options {
     pub legacy_deferred_texture_deletes: bool,
     pub hunter_hd_textures: bool,
     pub zalibas_expansion: bool,
+    pub expansion_copy_campaign: Option<bool>,
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_no_arena_cooldown: bool,
@@ -125,6 +126,7 @@ impl Default for Options {
             legacy_deferred_texture_deletes: false,
             hunter_hd_textures: false,
             zalibas_expansion: false,
+            expansion_copy_campaign: None,
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
             hunter_no_arena_cooldown: false,
@@ -313,6 +315,8 @@ impl Options {
             self.hunter_triple99_save = true;
         } else if arg == "--hunter-silver-exchange" {
             self.hunter_silver_exchange = true;
+        } else if arg == "--expansion-copy-campaign" || arg == "--expansion-new-campaign" {
+            self.expansion_copy_campaign = Some(arg == "--expansion-copy-campaign");
         } else if arg == "--zalibas-expansion" {
             self.zalibas_expansion = true;
         } else if arg == "--hunter-rare-dragons" {

@@ -5,6 +5,7 @@ import Darwin
 
 final class LauncherBackground: NSView {
     override var isOpaque: Bool { true }
+    override var isFlipped: Bool { true }
     override func draw(_ dirtyRect: NSRect) {
         NSColor.windowBackgroundColor.setFill(); NSBezierPath(rect: bounds).fill()
         super.draw(dirtyRect)
@@ -15,6 +16,8 @@ final class LauncherBackground: NSView {
     var window: NSWindow!, store: MacStore!, status: NSTextField!, playButton: NSButton!
     var language: NSPopUpButton!, device: NSPopUpButton!, mods = [NSButton](), buttons = [NSControl]()
     var fullscreen: NSButton!, integerScaling: NSButton!, hdTextures: NSButton!, internal2x: NSButton!
+    var preset: NSButton!, advancedButton: NSButton!, filter: NSPopUpButton!
+    let advanced = NSStackView()
     var gameProcess: Process?, lockFD: Int32 = -1
     var busy = false
     static func main() {
@@ -29,60 +32,75 @@ final class LauncherBackground: NSView {
         do {
             let explicit = ProcessInfo.processInfo.environment["HI_MAC_TEST_DATA"].map { URL(fileURLWithPath: $0) }
             store = try MacStore(root: explicit)
-            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 850), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-            window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: 850))
+            window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: min(540, (NSScreen.main?.visibleFrame.height ?? 620) - 60)), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            window.contentView = LauncherBackground(frame: NSRect(x: 0, y: 0, width: 680, height: min(540, (NSScreen.main?.visibleFrame.height ?? 620) - 60)))
             window.title = "Hunter Island · Mac Preview"; window.delegate = self; window.center()
             let stack = NSStackView(); stack.orientation = .vertical; stack.alignment = .leading; stack.spacing = 10
-            stack.translatesAutoresizingMaskIntoConstraints = false; window.contentView!.addSubview(stack)
-            NSLayoutConstraint.activate([stack.leadingAnchor.constraint(equalTo: window.contentView!.leadingAnchor, constant: 28), stack.trailingAnchor.constraint(equalTo: window.contentView!.trailingAnchor, constant: -28), stack.topAnchor.constraint(equalTo: window.contentView!.topAnchor, constant: 25)])
+            let scroll = NSScrollView(frame: window.contentView!.bounds)
+            scroll.autoresizingMask = [.width, .height]; scroll.hasVerticalScroller = true
+            window.contentView!.addSubview(scroll)
+            let doc = LauncherBackground(); doc.translatesAutoresizingMaskIntoConstraints = false
+            scroll.documentView = doc
+            stack.translatesAutoresizingMaskIntoConstraints = false; doc.addSubview(stack)
+            NSLayoutConstraint.activate([doc.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
+                stack.leadingAnchor.constraint(equalTo: doc.leadingAnchor, constant: 24), stack.trailingAnchor.constraint(equalTo: doc.trailingAnchor, constant: -24),
+                stack.topAnchor.constraint(equalTo: doc.topAnchor, constant: 20), stack.bottomAnchor.constraint(equalTo: doc.bottomAnchor, constant: -20)])
             let title = label("Hunter Island"); title.font = .boldSystemFont(ofSize: 26); stack.addArrangedSubview(title)
             stack.addArrangedSubview(label("Experimental Apple Silicon preview · macOS 13 or later"))
             status = label(""); status.maximumNumberOfLines = 3; stack.addArrangedSubview(status)
-            let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 12
-            actions.addArrangedSubview(button("Import your IPA…", #selector(importIPA)))
-            playButton = button("Play", #selector(play)); playButton.keyEquivalent = "\r"; actions.addArrangedSubview(playButton); stack.addArrangedSubview(actions)
-            stack.addArrangedSubview(label("Game language · saved for the next start"))
-            language = NSPopUpButton(); language.addItems(withTitles: languageChoices.map { $0.1 })
-            let savedLanguage = gameLanguage(store.settings["language"] as? String)
-            language.selectItem(at: languageChoices.firstIndex { $0.0 == savedLanguage } ?? 0)
-            language.target = self; language.action = #selector(saveOptions); buttons.append(language); stack.addArrangedSubview(language)
             stack.addArrangedSubview(label("Display mode"))
             device = NSPopUpButton(); device.addItems(withTitles: ["iPad · 1024 × 768", "iPhone · 480 × 320"])
             device.selectItem(at: store.settings["device"] as? String == "iphone" ? 1 : 0)
             device.target = self; device.action = #selector(saveOptions); buttons.append(device)
+            stack.addArrangedSubview(device)
+            preset = NSButton(checkboxWithTitle: "Recommended view settings · Anime4K + local HD artwork", target: self, action: #selector(applyPreset))
+            buttons.append(preset); stack.addArrangedSubview(preset)
+            advancedButton = button("Advanced ▸", #selector(toggleAdvanced)); stack.addArrangedSubview(advancedButton)
+            advanced.orientation = .vertical; advanced.alignment = .leading; advanced.spacing = 8
+            stack.addArrangedSubview(advanced); advanced.isHidden = true
+            let fresh = store.settings["hdTextures"] == nil && store.settings["integerScaling"] == nil
+            filter = NSPopUpButton(); filter.addItems(withTitles: ["Bilinear", "FSR 1.2", "FSR 1.2 + RCAS", "Anime4K CNN x2 S", "FSRCNNX x2"])
+            filter.selectItem(at: outputFilters.firstIndex(of: store.settings["outputFilter"] as? String ?? (fresh ? "anime4k" : "bilinear")) ?? 0)
+            filter.target = self; filter.action = #selector(saveOptions); buttons.append(filter)
+            advanced.addArrangedSubview(label("Output filter")); advanced.addArrangedSubview(filter)
             fullscreen = displayToggle("Start in fullscreen", key: "fullscreen")
             integerScaling = displayToggle("Integer scaling", key: "integerScaling")
             internal2x = displayToggle("2× internal resolution", key: "internal2x")
-            let displayOptions = NSStackView(views: [device, fullscreen, integerScaling, internal2x])
-            displayOptions.orientation = .horizontal
-            displayOptions.alignment = .centerY
-            displayOptions.spacing = 14
-            stack.addArrangedSubview(displayOptions)
-            hdTextures = displayToggle("Local HD artwork (monsters 4×, characters, scenes and rarity stars 2×)", key: "hdTextures")
-            hdTextures.toolTip = "Artwork is processed on this device in the background and appears the next time the game loads it."
-            stack.addArrangedSubview(hdTextures)
-            stack.addArrangedSubview(label("Optional mods · disabled on first launch"))
+            hdTextures = displayToggle("Local HD artwork", key: "hdTextures")
+            if fresh { hdTextures.state = .on }
+            for box in [fullscreen!, integerScaling!, internal2x!, hdTextures!] { advanced.addArrangedSubview(box) }
+            advanced.addArrangedSubview(label("Game language · saved for the next start"))
+            language = NSPopUpButton(); language.addItems(withTitles: languageChoices.map { $0.1 })
+            let savedLanguage = gameLanguage(store.settings["language"] as? String)
+            language.selectItem(at: languageChoices.firstIndex { $0.0 == savedLanguage } ?? 0)
+            language.target = self; language.action = #selector(saveOptions); buttons.append(language); advanced.addArrangedSubview(language)
+            advanced.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
-                let box = NSButton(checkboxWithTitle: text, target: self, action: #selector(saveMod(_:)))
+                let box = NSButton(checkboxWithTitle: ["--zalibas-expansion", "--hunter-no-arena-cooldown"].contains(flag) ? text + " · Developer recommended" : text, target: self, action: #selector(saveMod(_:)))
                 box.identifier = NSUserInterfaceItemIdentifier(flag)
-                box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); stack.addArrangedSubview(box)
+                box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); advanced.addArrangedSubview(box)
             }
-            stack.addArrangedSubview(label("Full test save: expands a copy of your normal campaign.\nLevel 1 / 3 each at level 99: fresh campaigns, no bonus resources.\nAll collection boxes unchecked: normal saves. Each has its own folder."))
-            stack.addArrangedSubview(button("Open saves, backups and local logs", #selector(openData)))
-            stack.addArrangedSubview(button("Licenses and source information", #selector(openLicenses)))
+            advanced.addArrangedSubview(label("Full test save: expands a copy of your normal campaign.\nLevel 1 / 3 each at level 99: fresh campaigns, no bonus resources.\nAll collection boxes unchecked: normal saves. Each has its own folder."))
+            advanced.addArrangedSubview(button("Open saves, backups and local logs", #selector(openData)))
+            advanced.addArrangedSubview(button("Licenses and source information", #selector(openLicenses)))
             let privacy = label("Import your own decrypted Hunter Island 2.02 IPA. Your game and saves stay local.\nThis preview includes no game copy and does not upload your data.")
-            privacy.maximumNumberOfLines = 3; privacy.font = .systemFont(ofSize: 12); stack.addArrangedSubview(privacy)
+            privacy.maximumNumberOfLines = 3; privacy.font = .systemFont(ofSize: 12); advanced.addArrangedSubview(privacy)
+            let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 12
+            actions.addArrangedSubview(button("Import your IPA…", #selector(importIPA)))
+            playButton = button("Play", #selector(play)); playButton.keyEquivalent = "\r"; actions.addArrangedSubview(playButton); stack.addArrangedSubview(actions)
+            syncDisplay()
             refresh(); window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
             if CommandLine.arguments.contains("--ui-smoke") {
                 DispatchQueue.main.asyncAfter(deadline: .now()+2) {
                     self.window.contentView!.layoutSubtreeIfNeeded()
                     let available = self.window.contentView!.bounds.insetBy(dx: 10, dy: 10)
-                    for view in stack.arrangedSubviews {
+                    for view in stack.arrangedSubviews where !view.isHidden {
                         let frame = view.convert(view.bounds, to: self.window.contentView!)
                         if !available.contains(frame) { self.show(PreviewError.invalid("A launcher control is clipped: \(frame)")); return }
                     }
                     do {
+                        self.toggleAdvanced()
                         for (button, key) in [(self.fullscreen!, "fullscreen"), (self.integerScaling!, "integerScaling"), (self.hdTextures!, "hdTextures"), (self.internal2x!, "internal2x")] {
                             let initialState = button.state
                             button.performClick(nil)
@@ -92,6 +110,7 @@ final class LauncherBackground: NSView {
                             button.performClick(nil)
                         }
                     } catch { self.show(error); return }
+                    self.toggleAdvanced()
                     if let destination = ProcessInfo.processInfo.environment["HI_MAC_UI_SNAPSHOT"] {
                         let content = self.window.contentView!
                         guard let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds) else {
@@ -129,7 +148,33 @@ final class LauncherBackground: NSView {
         playButton?.isEnabled = !busy && store.settings["gameHash"] is String
         if !busy { status?.stringValue = store.settings["gameHash"] is String ? "Hunter Island 2.02 imported. Ready to play." : "Import your compatible IPA to begin." }
     }
+    @objc func toggleAdvanced() {
+        advanced.isHidden.toggle()
+        advancedButton.title = advanced.isHidden ? "Advanced ▸" : "Advanced ▾"
+    }
+    func syncDisplay() {
+        preset.state = filter.indexOfSelectedItem == 3 && hdTextures.state == .on && integerScaling.state == .off ? .on : .off
+    }
+    @objc func applyPreset() {
+        filter.selectItem(at: preset.state == .on ? 3 : 0)
+        hdTextures.state = preset.state
+        if preset.state == .on { integerScaling.state = .off }
+        saveOptions()
+    }
+    func chooseCampaign() -> Bool {
+        guard store.needsCampaignChoice() else { return true }
+        let alert = NSAlert(); alert.messageText = "Start Zalibas Expansion"
+        alert.informativeText = "Copy your original campaign into a separate Expansion save, or start a new campaign?"
+        for title in ["Copy campaign", "Start new", "Cancel"] { alert.addButton(withTitle: title) }
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: store.settings["expansionOrigin"] = "copy"
+        case .alertSecondButtonReturn: store.settings["expansionOrigin"] = "new"
+        default: return false
+        }
+        return true
+    }
     @objc func saveMod(_ sender: NSButton) {
+        if sender.identifier?.rawValue == "--zalibas-expansion" && sender.state == .on && !chooseCampaign() { sender.state = .off; return }
         let profiles = collectionProfiles.map { $0.0 }
         if sender.state == .on && profiles.contains(sender.identifier?.rawValue ?? "") {
             for box in mods where box !== sender && profiles.contains(box.identifier?.rawValue ?? "") { box.state = .off }
@@ -137,6 +182,8 @@ final class LauncherBackground: NSView {
         saveOptions()
     }
     @objc func saveOptions() {
+        syncDisplay()
+        store.settings["outputFilter"] = outputFilters[filter.indexOfSelectedItem]
         store.settings["language"] = languageChoices[language.indexOfSelectedItem].0
         store.settings["device"] = device.indexOfSelectedItem == 0 ? "ipad" : "iphone"
         store.settings["fullscreen"] = fullscreen.state == .on
@@ -160,6 +207,7 @@ final class LauncherBackground: NSView {
     @objc func openData() { NSWorkspace.shared.open(store.root) }
     @objc func openLicenses() { NSWorkspace.shared.open(Bundle.main.resourceURL!.appendingPathComponent("notices")) }
     @objc func play() {
+        if mods.first?.state == .on && !chooseCampaign() { return }
         saveOptions()
         busy = true; refresh(); status.stringValue = "Verifying isolation and starting the game…"
         DispatchQueue.global(qos: .userInitiated).async {
@@ -180,7 +228,8 @@ final class LauncherBackground: NSView {
                     fullscreen: self.store.settings["fullscreen"] as? Bool ?? false,
                     integerScaling: self.store.settings["integerScaling"] as? Bool ?? false,
                     hdTextures: self.store.settings["hdTextures"] as? Bool ?? false,
-                    internal2x: self.store.settings["internal2x"] as? Bool ?? false
+                    internal2x: self.store.settings["internal2x"] as? Bool ?? false,
+                    filter: self.store.settings["outputFilter"] as? String ?? "anime4k", campaign: self.store.settings["expansionOrigin"] as? String
                 )
                 let process = try isolatedEngine(app: app, store: self.store, arguments: [game.path] + options)
                 process.standardOutput = handle; process.standardError = handle; process.standardInput = FileHandle.nullDevice

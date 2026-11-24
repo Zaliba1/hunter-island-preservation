@@ -90,14 +90,26 @@ fn size_for_orientation(
         DeviceOrientation::LandscapeRight => (height * scale_hack, width * scale_hack),
     }
 }
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+fn window_borders(window: &sdl2::video::Window) -> Result<(u16, u16, u16, u16), String> {
+    #[cfg(target_os = "windows")]
+    { window.border_size() }
+    #[cfg(target_os = "macos")]
+    {
+        extern "C" { fn hunter_caption_height() -> u16; }
+        let _ = window;
+        Ok((unsafe { hunter_caption_height() }, 0, 0, 0))
+    }
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 fn fit_window_to_work_area(window: &mut sdl2::video::Window, preferred: (u32, u32), center: bool) {
     use sdl2::video::WindowPos::Positioned;
     let bounds = window.display_index().and_then(|i| window.subsystem().display_usable_bounds(i));
-    let (work, (top, left, bottom, right)) = match (bounds, window.border_size()) {
+    let (work, (top, left, bottom, right)) = match (bounds, window_borders(window)) {
         (Ok(work), Ok(borders)) => (work, borders),
         _ => {
-            log!("Could not measure the Windows work area or window frame");
+            log!("Could not measure the desktop work area or window frame");
             return;
         }
     };
@@ -126,7 +138,7 @@ fn fit_window_to_work_area(window: &mut sdl2::video::Window, preferred: (u32, u3
     };
     if window.size() != size {
         if let Err(error) = window.set_size(size.0, size.1) {
-            log!("Could not resize the Windows game window: {error}");
+            log!("Could not resize the game window: {error}");
             return;
         }
     }
@@ -450,7 +462,7 @@ impl Window {
                 size_for_orientation(device_family, device_orientation, scale_hack);
             let mut builder = video_ctx.window(title, width, height);
             builder.position_centered().opengl();
-            #[cfg(target_os = "windows")]
+            #[cfg(any(target_os = "windows", target_os = "macos"))]
             if !fullscreen {
                 builder.hidden();
             }
@@ -462,7 +474,7 @@ impl Window {
             builder.build().unwrap()
         };
 
-        #[cfg(target_os = "windows")]
+        #[cfg(any(target_os = "windows", target_os = "macos"))]
         if !fullscreen {
             let preferred = size_for_orientation(device_family, device_orientation, scale_hack);
             fit_window_to_work_area(&mut window, preferred, true);
@@ -880,7 +892,7 @@ impl Window {
                         continue;
                     }
                 }
-                #[cfg(target_os = "windows")]
+                #[cfg(any(target_os = "windows", target_os = "macos"))]
                 E::Window { win_event: sdl2::event::WindowEvent::DisplayChanged(_), .. }
                     if !self.fullscreen => {
                     let preferred = size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
@@ -1008,7 +1020,7 @@ impl Window {
                     // integer scaling. Enter a mode where F9 can be compared.
                     if !self.fullscreen || self.integer_scaling {
                         self.integer_scaling = false;
-                        self.upscale = UpscaleMode::Fsr;
+                        self.upscale = UpscaleMode::Anime4K;
                         if !self.fullscreen {
                             self.toggle_fullscreen();
                         }
@@ -1521,12 +1533,16 @@ impl Window {
             return;
         }
         self.fullscreen = new_mode == FullscreenType::Desktop;
+        if self.fullscreen {
+            self.upscale = UpscaleMode::Anime4K;
+            self.integer_scaling = false;
+        }
         if !self.fullscreen {
             let expected =
                 size_for_orientation(self.device_family, self.device_orientation, self.scale_hack);
-            #[cfg(target_os = "windows")]
+            #[cfg(any(target_os = "windows", target_os = "macos"))]
             fit_window_to_work_area(&mut self.window, expected, false);
-            #[cfg(not(target_os = "windows"))]
+            #[cfg(not(any(target_os = "windows", target_os = "macos")))]
             if self.window.size() != expected {
                 if let Err(error) = self.window.set_size(expected.0, expected.1) {
                     log!("Could not restore window size: {error}");
@@ -1570,17 +1586,16 @@ impl Window {
             // Recreating the OpenGL context was an alternative workaround, but
             // that apparently stops other OpenGL contexts drawing to the
             // framebuffer!
+            #[cfg(any(target_os = "windows", target_os = "macos"))]
+            fit_window_to_work_area(&mut self.window, (width, height), false);
+            #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+            self.window.set_size(width, height).unwrap();
             #[cfg(target_os = "macos")]
             {
-                let (_old_width, old_height) = self.window.size();
-                self.max_height = self.max_height.max(old_height).max(height);
+                let height = self.window.size().1;
+                self.max_height = self.max_height.max(height);
                 self.viewport_y_offset = self.max_height - height;
             }
-
-            #[cfg(target_os = "windows")]
-            fit_window_to_work_area(&mut self.window, (width, height), false);
-            #[cfg(not(target_os = "windows"))]
-            self.window.set_size(width, height).unwrap();
         }
 
         if Self::rotatable_fullscreen() {
@@ -1826,7 +1841,7 @@ pub fn get_preferred_country_codes(env: &mut Environment) -> Vec<String> {
     })
 }
 
-#[cfg(all(test, target_os = "windows"))]
+#[cfg(all(test, any(target_os = "windows", target_os = "macos")))]
 #[test]
 #[ignore = "opens a native OpenGL window on the interactive desktop"]
 fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
@@ -1844,7 +1859,7 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
     let assert_decorated_window_fits = |window: &Window| {
         let win = &window.window;
         let work = win.subsystem().display_usable_bounds(win.display_index().unwrap()).unwrap();
-        let (top, left, bottom, right) = win.border_size().unwrap();
+        let (top, left, bottom, right) = window_borders(win).unwrap();
         let (x, y) = win.position();
         let (w, h) = win.size();
         assert!(top > bottom, "missing native caption: {top}, {bottom}");
@@ -1921,21 +1936,21 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
     key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.window.fullscreen_state(), FullscreenType::Desktop);
     assert!(!window.integer_scaling);
-    assert_eq!(window.upscale, UpscaleMode::Fsr);
+    assert_eq!(window.upscale, UpscaleMode::Anime4K);
     assert!(window.show_upscale_notice());
     key(&mut window, Keycode::F9, Scancode::F9, true);
-    assert_eq!(window.upscale, UpscaleMode::Fsr);
-    key(&mut window, Keycode::F9, Scancode::F9, false);
-    assert_eq!(window.upscale, UpscaleMode::FsrSharpened);
-    key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.upscale, UpscaleMode::Anime4K);
     key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.upscale, UpscaleMode::Fsrcnnx);
     key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.upscale, UpscaleMode::Bilinear);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::Fsr);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::FsrSharpened);
     key(&mut window, Keycode::F10, Scancode::F10, false);
     assert!(window.integer_scaling);
     key(&mut window, Keycode::F9, Scancode::F9, false);
     assert!(!window.integer_scaling);
-    assert_eq!(window.upscale, UpscaleMode::Fsr);
+    assert_eq!(window.upscale, UpscaleMode::Anime4K);
 }

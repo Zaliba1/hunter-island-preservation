@@ -252,6 +252,11 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     let test_mode = test_profile::Mode::from_options(&options)?;
     let expansion = options.zalibas_expansion;
     let root = paths::user_data_base_path();
+    if expansion && !just_info {
+        if let Some(copy) = options.expansion_copy_campaign {
+            test_profile::initialize_expansion(&root.join(paths::SANDBOX_DIR), copy)?;
+        }
+    }
     let test_sandbox = match (just_info, test_mode, expansion) {
         (false, Some(mode), _) => Some(test_profile::prepare(&bundle_path, &root, mode, expansion)?),
         (false, None, true) => Some(root.join(paths::SANDBOX_DIR).join("pockettrend.hunterisland-expansion")),

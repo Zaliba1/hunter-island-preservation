@@ -222,8 +222,13 @@ func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     try require(selected.count <= 1, "Choose only one testing collection.")
     return (selected.first?.1 ?? "pockettrend.hunterisland") + (mods["--zalibas-expansion"] == true ? "-expansion" : "")
 }
-func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false, hdTextures: Bool = false, internal2x: Bool = false) -> [String] {
+let outputFilters = ["bilinear", "fsr", "fsr-sharpened", "anime4k", "fsrcnnx"]
+func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false, hdTextures: Bool = false, internal2x: Bool = false, filter: String = "bilinear", campaign: String? = nil) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
+    if filter != "bilinear" && outputFilters.contains(filter) { args.append("--upscale=" + filter) }
+    if mods["--zalibas-expansion"] == true, let choice = campaign, ["copy", "new"].contains(choice) {
+        args.append("--expansion-" + choice + "-campaign")
+    }
     if fullscreen { args.append("--fullscreen") }
     if integerScaling { args.append("--integer-scaling") }
     if internal2x { args.append("--scale-hack=2") }
@@ -249,6 +254,20 @@ final class MacStore {
             guard let value = try JSONSerialization.jsonObject(with: Data(contentsOf: settingsURL)) as? [String: Any] else { throw PreviewError.invalid("Invalid local settings.") }
             settings = value
         } else { settings = [:] }
+    }
+    func needsCampaignChoice() -> Bool {
+        let parent = run.appendingPathComponent("touchHLE_sandbox")
+        func hasSave(_ profile: String) -> Bool {
+            let documents = parent.appendingPathComponent(profile + "/Documents")
+            let slots = (try? FileManager.default.contentsOfDirectory(at: documents, includingPropertiesForKeys: nil)) ?? []
+            return slots.contains { slot in
+                guard slot.lastPathComponent.range(of: "^saves[0-9]+$", options: .regularExpression) != nil else { return false }
+                return ((try? FileManager.default.contentsOfDirectory(atPath: slot.path)) ?? []).contains { $0.range(of: "^sv_[0-9]+$", options: .regularExpression) != nil }
+            }
+        }
+        return settings["expansionOrigin"] == nil &&
+            !FileManager.default.fileExists(atPath: parent.appendingPathComponent("pockettrend.hunterisland-expansion/.campaign-origin-v1").path) &&
+            !hasSave("pockettrend.hunterisland-expansion") && hasSave("pockettrend.hunterisland")
     }
     func save() throws {
         try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys]).write(to: settingsURL, options: .atomic)
@@ -284,7 +303,7 @@ final class MacStore {
                 while let file = files?.nextObject() as? URL {
                     if file.deletingLastPathComponent().lastPathComponent.range(of: "^saves[0-9]+$", options: .regularExpression) != nil && file.lastPathComponent.range(of: "^sv_[0-9]+$", options: .regularExpression) != nil { found = true; break }
                 }
-                try require(found, "Start and save a normal game first, then enable the separate test save.")
+                try require(found || (profile.hasSuffix("-expansion") && settings["expansionOrigin"] as? String == "copy"), "Start and save a normal game first, then enable the separate test save.")
             }
         }
         return url

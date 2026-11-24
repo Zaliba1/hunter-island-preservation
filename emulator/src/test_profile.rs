@@ -372,6 +372,73 @@ fn number(name: &str, prefix: &str) -> Option<u64> {
     s.parse().ok()
 }
 
+fn has_checkpoints(documents: &Path) -> Result<bool, String> {
+    if !documents.try_exists().map_err(|e| e.to_string())? { return Ok(false); }
+    plain_file(documents)?;
+    for slot in std::fs::read_dir(documents).map_err(|e| e.to_string())? {
+        let slot = slot.map_err(|e| e.to_string())?;
+        if number(&slot.file_name().to_string_lossy(), "saves").is_none() || !plain_file(&slot.path())?.is_dir() { continue; }
+        for entry in std::fs::read_dir(slot.path()).map_err(|e| e.to_string())? {
+            let entry = entry.map_err(|e| e.to_string())?;
+            if number(&entry.file_name().to_string_lossy(), "sv_").is_some() && plain_file(&entry.path())?.is_file() { return Ok(true); }
+        }
+    }
+    Ok(false)
+}
+
+/// The launcher holds its profile lock. Publish the copied Documents directory
+/// only after every file is present; retain an existing empty campaign's settings.
+pub(crate) fn initialize_expansion(parent: &Path, copy: bool) -> Result<(), String> {
+    let folder = parent.join(format!("{BUNDLE}-expansion"));
+    std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
+    plain_file(parent)?;
+    plain_file(&folder)?;
+    let marker = folder.join(".campaign-origin-v1");
+    let documents = folder.join("Documents");
+    let previous = folder.join(".documents-before-seed-v1");
+    if previous.exists() && !documents.exists() {
+        std::fs::rename(&previous, &documents).map_err(|e| e.to_string())?;
+    }
+    if marker.exists() || has_checkpoints(&documents)? { return Ok(()); }
+    if copy {
+        let base = parent.join(BUNDLE);
+        plain_file(&base)?;
+        let source = base.join("Documents");
+        if !has_checkpoints(&source)? { return Err("The original campaign has no saved game to copy.".into()); }
+        let stage = folder.join(format!(".seed-{}", uuid::Uuid::new_v4().simple()));
+        let result = (|| {
+            copy_tree(&source, &stage, &mut 0, &mut 0)?;
+            if documents.exists() { std::fs::rename(&documents, &previous).map_err(|e| e.to_string())?; }
+            if let Err(error) = std::fs::rename(&stage, &documents) {
+                if previous.exists() { std::fs::rename(&previous, &documents).map_err(|e| e.to_string())?; }
+                return Err(error.to_string());
+            }
+            Ok(())
+        })();
+        if result.is_err() && stage.exists() { let _ = std::fs::remove_dir_all(&stage); }
+        result?;
+    }
+    std::fs::write(marker, if copy { "copy" } else { "new" }).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+#[test]
+fn expansion_seed_preserves_both_campaigns_on_retry() {
+    let dir = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
+    let slot = dir.join(BUNDLE).join("Documents/saves0");
+    std::fs::create_dir_all(&slot).unwrap();
+    std::fs::write(slot.join("sv_1"), b"original").unwrap();
+    initialize_expansion(&dir, true).unwrap();
+    let copied = dir.join(format!("{BUNDLE}-expansion/Documents/saves0/sv_1"));
+    assert_eq!(std::fs::read(&copied).unwrap(), b"original");
+    std::fs::write(&copied, b"expansion").unwrap();
+    initialize_expansion(&dir, true).unwrap();
+    initialize_expansion(&dir, false).unwrap();
+    assert_eq!(std::fs::read(&copied).unwrap(), b"expansion");
+    assert_eq!(std::fs::read(slot.join("sv_1")).unwrap(), b"original");
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
 pub(crate) fn prepare(ipa: &Path, base: &Path, mode: Mode, expansion: bool) -> Result<PathBuf, String> {
     let key = preservation::save_key(ipa).map_err(|e|format!("Test-profile IPA inspection failed: {e}"))?;
     log!("Test profile: IPA metadata and data key checked.");
