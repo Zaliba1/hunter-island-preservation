@@ -38,6 +38,9 @@ with zipfile.ZipFile(apk) as archive:
   url=b'https://github.com/zaliba1/hunter-island-preservation'
   lower=lower.replace(url,b'https://github.com/project-owner/project')
   lower=lower.replace(url.decode().encode('utf-16-le'),'https://github.com/project-owner/project'.encode('utf-16-le'))
+  for title in ('Zalibas Expansion','--zalibas-expansion','zalibas_expansion'):
+   for encoding in ('utf-8','utf-16-le'):
+    lower=lower.replace(title.lower().encode(encoding),b'<mod>')
   assert not any(pattern in lower for pattern in patterns),('Known private marker',info.filename)
   if name.suffix=='.so':
    assert name.parts[:2]==('lib','arm64-v8a') and len(name.parts)==3

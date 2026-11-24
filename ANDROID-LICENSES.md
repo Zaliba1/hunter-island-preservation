@@ -1,4 +1,10 @@
-# Android licenses and acknowledgements — 0.2.0-preview.3
+# Android licenses and acknowledgements — 0.2.0-preview.10
+
+Output filtering uses AMD FidelityFX FSR (MIT), bloc97's Anime4K CNN x2 S
+(MIT), and igv's FSRCNNX x2 8-0-4-1 (LGPL-3.0-or-later). The notices are
+available offline under `licenses/AMD-FSR-MIT.txt`, `licenses/Anime4K-MIT.txt`,
+`licenses/LGPL-3.0.txt` and `licenses/GPL-3.0.txt`. The matching source
+archive includes the GLSL programs and the Android GLES adapter.
 
 touchHLE © 2023–2026 touchHLE project contributors. Independent modifications are based on touchHLE v0.3.0, commit 8eb3418b3343bc1e3d1a330b55cb1d708a015721. Original authorship and per-file notices are retained. This project is not endorsed by touchHLE, Apple or the game developer.
 

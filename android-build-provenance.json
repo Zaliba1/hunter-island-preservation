@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "0.2.0-preview.2",
-  "review_date": "2026-11-15",
+  "version": "0.2.0-preview.10",
+  "review_date": "2026-11-24",
   "target": "aarch64-linux-android",
   "rust": "1.90.0-x86_64-pc-windows-gnu",
   "java": "Eclipse Temurin 17",
@@ -15,7 +15,7 @@
   "source_terms": "MPL-2.0 and original component terms",
   "sdk_and_compiler_binaries_redistributed": false,
   "project_private_key_redistributed": false,
-  "status": "Clean native and signed APK builds completed; 36 host tests passed; no physical-device execution.",
+  "status": "Signed ARM64 APK. Android launcher and storage tests use Robolectric. The filter pass sources also ran in a host WebGL 2 software-rendering probe. Physical-device gameplay was not exercised.",
   "signer_matches_previous_release": true,
   "update_installation_tested": false
 }

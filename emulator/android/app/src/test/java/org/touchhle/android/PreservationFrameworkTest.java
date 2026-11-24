@@ -128,7 +128,7 @@ public class PreservationFrameworkTest {
                 android.widget.CheckBox box = (android.widget.CheckBox)
                     button(controller.get().getWindow().getDecorView(), label);
                 assertNotNull(box);
-                assertEquals(!label.equals(labels[3]) && !label.equals(labels[4]),box.isChecked());
+                assertEquals(!label.equals(labels[4]) && !label.equals(labels[5]),box.isChecked());
                 box.setChecked(false);
             }
         }

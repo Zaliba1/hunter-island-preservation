@@ -85,7 +85,7 @@ impl Pipeline {
                 } else {
                     sample
                 };
-                fragment.push_str(&format!("#define {name}_tex(p) {value}\n#define {name}_texOff(o) {name}_tex(uv+(o)/imageSize)\n"));
+                fragment.push_str(&format!("#define {name}_tex(p) {value}\n#define {name}_texOff(o) {name}_tex(uv+vec2(o)/imageSize)\n"));
             }
             for line in block.lines().skip(1).filter(|l| !l.starts_with("//!")) {
                 fragment.push_str(line);
