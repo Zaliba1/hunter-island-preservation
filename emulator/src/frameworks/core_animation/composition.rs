@@ -344,6 +344,9 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
 
     // Re-borrow
     let window = env.window.as_mut().unwrap();
+    #[cfg(target_os = "android")]
+    let window_filter_enabled = window.composite_filter.is_some()
+        && crate::gles::present::neural_enlargement_fits(window.upscale, (fb_width, fb_height), viewport, rotation);
     let mut gles = window.make_internal_gl_ctx_current();
 
     // Clean up some GL state
@@ -378,10 +381,28 @@ pub fn recomposite_if_necessary(env: &mut Environment, force: bool) -> Option<In
         gles.BindTexture(gles11::TEXTURE_2D, texture);
         set_presentation_filter(gles.as_mut(), nearest);
         gles.BindFramebufferOES(gles11::FRAMEBUFFER_OES, 0);
-        present_frame(gles.as_mut(), viewport, rotation, cursor, upscale, show_upscale_notice);
+    }
+    #[cfg(target_os = "android")]
+    let filtered = if !nearest && cursor.is_none() && window_filter_enabled {
+        // Complete writes before sampling the shared texture in another context.
+        unsafe { gles.Finish(); }
+        drop(gles);
+        let mut filter = window.composite_filter.take().unwrap();
+        let drawn = filter.draw(window, texture, (fb_width, fb_height), viewport, rotation);
+        if drawn {
+            window.swap_window();
+        }
+        window.composite_filter = Some(filter);
+        gles = window.make_internal_gl_ctx_current();
+        drawn
+    } else { false };
+    #[cfg(not(target_os = "android"))]
+    let filtered = false;
+    if !filtered {
+        unsafe { present_frame(gles.as_mut(), viewport, rotation, cursor, upscale, show_upscale_notice); }
     }
     std::mem::drop(gles);
-    window.swap_window();
+    if !filtered { window.swap_window(); }
 
     animation_state.update_started_and_finished_animations(env);
 
