@@ -52,8 +52,13 @@ impl Image {
             // - If we don't ask it to "unpremultiply" for us, it won't do the
             //   RGB conversion.
             // So this is the only correct way to use it. :(
-            stbi_convert_iphone_png_to_rgb(1);
-            stbi_set_unpremultiply_on_load(1);
+            // Both settings are process-global. Configure them once before
+            // either the game or the background HD worker decodes an image.
+            static CONFIGURE_STB: std::sync::Once = std::sync::Once::new();
+            CONFIGURE_STB.call_once(|| {
+                stbi_convert_iphone_png_to_rgb(1);
+                stbi_set_unpremultiply_on_load(1);
+            });
             stbi_load_from_memory(
                 bytes.as_ptr(),
                 len,
