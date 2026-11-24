@@ -1827,6 +1827,10 @@ fn desktop_shortcuts_change_sdl_window_mode_and_preserve_mouse_mapping() {
     key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.upscale, UpscaleMode::FsrSharpened);
     key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::Anime4K);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
+    assert_eq!(window.upscale, UpscaleMode::Fsrcnnx);
+    key(&mut window, Keycode::F9, Scancode::F9, false);
     assert_eq!(window.upscale, UpscaleMode::Bilinear);
     key(&mut window, Keycode::F10, Scancode::F10, false);
     assert!(window.integer_scaling);

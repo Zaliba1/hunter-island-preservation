@@ -7,6 +7,9 @@ use crate::matrix::Matrix;
 use std::ffi::CString;
 use std::ptr;
 
+#[path = "cnn.rs"]
+mod cnn;
+
 const VERTEX: &str = "#version 120\n\
     uniform mat2 sourceRotation;\n\
     varying vec2 uv;\n\
@@ -78,10 +81,14 @@ struct Program {
 
 impl Program {
     unsafe fn new(sharpen: bool) -> Result<Self, String> {
-        let vertex = compile(gl::VERTEX_SHADER, VERTEX)?;
         let define = if sharpen { "#define SHARPEN\n" } else { "" };
         let source = format!("#version 120\n{define}{}", include_str!("fsr.glsl"));
-        let fragment = compile(gl::FRAGMENT_SHADER, &source);
+        Self::link(VERTEX, &source)
+    }
+
+    unsafe fn link(vertex_source: &str, fragment_source: &str) -> Result<Self, String> {
+        let vertex = compile(gl::VERTEX_SHADER, vertex_source)?;
+        let fragment = compile(gl::FRAGMENT_SHADER, fragment_source);
         let fragment = match fragment {
             Ok(fragment) => fragment,
             Err(error) => {
@@ -145,6 +152,7 @@ unsafe fn compile(kind: u32, source: &str) -> Result<u32, String> {
 #[derive(Default)]
 pub(super) struct FsrPresenter {
     // These GL objects are owned by the context and are released with it.
+    neural: cnn::Presenter,
     easu: Option<Option<Program>>,
     rcas: Option<Option<Program>>,
     framebuffer: u32,
@@ -173,6 +181,16 @@ impl FsrPresenter {
         viewport: (u32, u32, u32, u32),
         rotation: Matrix<2>,
     ) -> Option<UpscaleMode> {
+        if matches!(mode, UpscaleMode::Anime4K | UpscaleMode::Fsrcnnx) {
+            if !self.neural.draw(mode, source_size, viewport, rotation) {
+                return None;
+            }
+            if self.logged != Some(mode) {
+                echo!("{} active: {:?} -> {:?}", mode.label(), source_size, (viewport.2, viewport.3));
+                self.logged = Some(mode);
+            }
+            return Some(mode);
+        }
         if self.easu.is_none() {
             self.easu = Some(program(Program::new(false), "EASU"));
         }

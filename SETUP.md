@@ -78,6 +78,8 @@ release, F9 enters fit-to-screen fullscreen with FSR 1.2 from the window
 or integer mode. Further presses cycle to FSR 1.2 with light RCAS sharpening,
 bilinear, and back to FSR 1.2. The active filter is displayed briefly.
 
+The desktop filter test build adds **Anime4K CNN x2 S** and **FSRCNNX x2 8-0-4-1** after FSR + RCAS in the F9 cycle. You can also select them with `--upscale=anime4k` or `--upscale=fsrcnnx`. These filters process the finished RGB frame, including the HUD. Anime4K activates above 1.20× enlargement on both axes and FSRCNNX above 1.30×. At smaller ratios the presenter uses bilinear sampling. Integer scaling has its own sampler. At 2560 × 1440 a 2× iPad frame (2048 × 1536) already exceeds the 1920 × 1440 game area.
+
 Desktop players can set startup defaults with a `touchHLE_options.txt` file
 in the local `profiles/default/run` directory. Use one line for the game:
 

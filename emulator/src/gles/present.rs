@@ -30,6 +30,10 @@ pub enum UpscaleMode {
     Bilinear,
     Fsr,
     FsrSharpened,
+    #[cfg(not(target_os = "android"))]
+    Anime4K,
+    #[cfg(not(target_os = "android"))]
+    Fsrcnnx,
 }
 
 impl UpscaleMode {
@@ -38,7 +42,9 @@ impl UpscaleMode {
         match self {
             Self::Bilinear => Self::Fsr,
             Self::Fsr => Self::FsrSharpened,
-            Self::FsrSharpened => Self::Bilinear,
+            Self::FsrSharpened => Self::Anime4K,
+            Self::Anime4K => Self::Fsrcnnx,
+            Self::Fsrcnnx => Self::Bilinear,
         }
     }
 
@@ -48,6 +54,8 @@ impl UpscaleMode {
             Self::Bilinear => "Bilinear",
             Self::Fsr => "FSR 1.2",
             Self::FsrSharpened => "FSR 1.2 + RCAS",
+            Self::Anime4K => "Anime4K CNN x2 S",
+            Self::Fsrcnnx => "FSRCNNX x2 8-0-4-1",
         }
     }
 }

@@ -16,6 +16,10 @@ derive from AMD's [FidelityFX SDK v1.1.4 shader reference](https://github.com/GP
 The GLSL adaptation is distributed under the MIT license in
 `licenses/AMD-FSR-MIT.txt`.
 
+The desktop filter test includes two unmodified GLSL shader files under `emulator/src/gles/filters/`:
+- [Anime4K CNN x2 S](https://github.com/bloc97/Anime4K/blob/7684e9586f8dcc738af08a1cdceb024cc184f426/glsl/Upscale/Anime4K_Upscale_CNN_x2_S.glsl), copyright bloc97, MIT. The full notice is in the shader.
+- [FSRCNNX x2 8-0-4-1, release 1.1](https://github.com/igv/FSRCNN-TensorFlow/releases/tag/1.1), copyright igv, LGPL-3.0-or-later. See `licenses/LGPL-3.0.txt` and `licenses/GPL-3.0.txt`. Rebuilding the emulator includes changes to these shader sources.
+
 Original attribution and license texts remain in licenses/, emulator/ and the
 matching SourceDependencies asset. See LICENSES.md and ANDROID-LICENSES.md.
 General-purpose SDK/compiler/Gradle tools are separately installed build tools.

@@ -174,7 +174,11 @@ impl Options {
                 "bilinear" => UpscaleMode::Bilinear,
                 "fsr" => UpscaleMode::Fsr,
                 "fsr-sharpened" => UpscaleMode::FsrSharpened,
-                _ => return Err("Expected --upscale=bilinear, fsr or fsr-sharpened".to_string()),
+                #[cfg(not(target_os = "android"))]
+                "anime4k" => UpscaleMode::Anime4K,
+                #[cfg(not(target_os = "android"))]
+                "fsrcnnx" => UpscaleMode::Fsrcnnx,
+                _ => return Err(format!("Unsupported output filter: {value}")),
             };
         } else if arg == "--portrait" {
             self.initial_orientation = DeviceOrientation::Portrait;
