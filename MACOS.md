@@ -22,7 +22,7 @@ or a Windows `.cmd` file. Developers need the tools described below.
    enabled, uses the selected game language.
 5. Select **Play**. Close the game window to return to the launcher.
 
-The launcher remembers **Start in fullscreen** and **Integer scaling**.
+The Easy view offers resolution and the recommended Anime4K and local HD artwork preset. **Advanced** includes individual filters, mods, **Start in fullscreen** and **Integer scaling**. In windowed mode, the game fits its frame inside the screen area available around the Dock and menu bar.
 During play, **F11** switches between a window and full screen. **F10** changes
 the fullscreen scaling mode. Integer scaling keeps pixels sharp and can leave
 larger borders, depending on the display and game resolution.

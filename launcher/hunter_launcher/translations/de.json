@@ -7,7 +7,7 @@
   "system": "Systemsprache",
   "language_hint": "Gilt sofort für den Launcher und beim Start für das Spiel.",
   "expansion": "Zalibas Expansion",
-  "hd_textures": "HD · Real-ESRGAN",
+  "hd_textures": "Lokales HD-Artwork",
   "render_2x": "2× GPU",
   "mods": "Optionale Mods",
   "rare": "Seltene Startdrachen häufiger finden (5 % pro Wildkampf)",

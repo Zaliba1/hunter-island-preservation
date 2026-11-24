@@ -107,7 +107,8 @@ def gui(store, release):
     def error_dialog(key, error):
         messagebox.showerror(text(key), issue_message(language, error), parent=root)
 
-    root.geometry(f"680x{min(640, root.winfo_screenheight()-90)}")
+    easy_height = min(420, root.winfo_screenheight()-90)
+    root.geometry(f"680x{easy_height}")
     root.minsize(440, 360)
     root.configure(bg='#f3f5f7')
     style = ttk.Style(root)
@@ -127,11 +128,11 @@ def gui(store, release):
     root.bind('<MouseWheel>', lambda e: canvas.yview_scroll(-int(e.delta/120), 'units'))
     ttk.Label(frame,text='Hunter Island',style='Title.TLabel').pack(anchor='w')
     translate(ttk.Label(frame), 'version', version=VERSION).pack(anchor='w',pady=(2,18))
-    device = tk.StringVar(value=settings.get('device','ipad'))
+    device_names = {'iPad · 1024 × 768': 'ipad', 'iPhone · 480 × 320': 'iphone'}
+    device = tk.StringVar(value=next(name for name, code in device_names.items() if code == settings.get('device','ipad')))
     translate(ttk.Label(frame), 'resolution').pack(anchor='w')
-    devices = ttk.Combobox(frame,textvariable=device,values=['ipad','iphone'],state='readonly',width=12)
-    devices.pack(anchor='w',pady=12)
-    ttk.Label(frame,text='iPad: 1024 × 768   ·   iPhone: 480 × 320',font=('Segoe UI',9)).pack(anchor='w')
+    devices = ttk.Combobox(frame, textvariable=device, values=list(device_names), state='readonly', width=24)
+    devices.pack(anchor='w', pady=(2,8))
     output, initial_hd = graphic_settings(settings)
     filter_choice = tk.StringVar(value=next((k for k,v in FILTERS.items() if v == output), 'Bilinear'))
     integer = tk.BooleanVar(value=settings.get('integer_scaling', False))
@@ -143,8 +144,14 @@ def gui(store, release):
     disclosure.pack(anchor='w')
     advanced = ttk.Frame(frame)
     def toggle_advanced():
-        if advanced.winfo_manager(): advanced.pack_forget()
-        else: advanced.pack(before=status_label, anchor='w', fill='x', pady=8)
+        if advanced.winfo_manager():
+            advanced.pack_forget()
+            height = easy_height
+            canvas.yview_moveto(0)
+        else:
+            advanced.pack(before=status_label, anchor='w', fill='x', pady=8)
+            height = min(780, root.winfo_screenheight()-90)
+        root.geometry(f"{root.winfo_width()}x{height}")
     disclosure.configure(command=toggle_advanced)
     status = tk.StringVar()
     status_label = ttk.Label(frame,textvariable=status,wraplength=580,justify='left')
@@ -222,7 +229,7 @@ def gui(store, release):
         for flag, key in MOD_OPTIONS:
             recommended = key in ('arena', 'expansion')
             if key == 'render_2x':
-                width, height = (1024,768) if device.get() == 'ipad' else (480,320)
+                width, height = (1024,768) if device_names[device.get()] == 'ipad' else (480,320)
                 recommended = root.winfo_screenwidth() >= width*2 and root.winfo_screenheight() >= height*2
             widget = advanced.nametowidget(key)
             widget.configure(text=text(key) + (' · ' + text('developer_recommended') if recommended else ''))
@@ -246,7 +253,7 @@ def gui(store, release):
                 for flag in mod_values:
                     if starting or flag in ('--hunter-hd-textures', '--scale-hack=2') or (expansion_changed and flag == '--zalibas-expansion'):
                         saved_mods[flag] = mod_values[flag].get()
-                config.update(device=device.get(), mods=saved_mods,
+                config.update(device=device_names[device.get()], mods=saved_mods,
                               output_filter=FILTERS[filter_choice.get()], integer_scaling=integer.get(),
                               fullscreen=fullscreen.get())
                 atomic_json(store.config, config)

@@ -1,6 +1,6 @@
 # Matching Android sources
 
-Windows, Android and macOS share one source tree. The preview.10 APK is accompanied by:
+Windows, Android and macOS share one source tree. This Android test build is accompanied by:
 
 - HunterIsland-Source-0.2.0-preview.11-easy.1.zip
 - HunterIsland-SourceDependencies-0.2.0-preview.11-easy.1.zip

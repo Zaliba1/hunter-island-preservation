@@ -54,6 +54,55 @@ class ModOptionsTest(unittest.TestCase):
                 gui(store,Path(folder))
             if failures:raise failures[0]
 
+    def test_easy_display_and_first_expansion_choice(self):
+        import tempfile
+        import tkinter as tk
+        from tkinter import ttk
+        from unittest.mock import patch
+        from hunter_launcher.app import gui
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(directory)
+            source = store.run / 'touchHLE_sandbox/pockettrend.hunterisland/Documents/saves0/sv_1'
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b'original')
+            root = tk.Tk()
+            errors = []
+            def visit(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from visit(child)
+            def exercise():
+                try:
+                    controls = {w.winfo_name(): w for w in visit(root)}
+                    preset = controls['recommended']
+                    advanced = controls['advanced']
+                    expansion = controls['expansion']
+                    self.assertTrue(root.getvar(str(preset.cget('variable'))))
+                    self.assertFalse(expansion.winfo_ismapped())
+                    advanced.invoke(); root.update_idletasks()
+                    self.assertTrue(expansion.winfo_ismapped())
+                    preset.invoke()
+                    self.assertEqual(store.settings()['output_filter'], 'bilinear')
+                    preset.invoke()
+                    self.assertTrue(store.settings()['mods']['--hunter-hd-textures'])
+                    self.assertEqual(store.settings()['output_filter'], 'anime4k')
+                    with patch('tkinter.messagebox.askyesnocancel', side_effect=[None, True]) as choice:
+                        expansion.invoke()
+                        self.assertFalse(root.getvar(str(expansion.cget('variable'))))
+                        expansion.invoke()
+                        self.assertEqual(choice.call_count, 2)
+                    self.assertEqual(store.settings()['expansion_origin'], 'copy')
+                    self.assertEqual(source.read_bytes(), b'original')
+                    self.assertTrue('Developer recommended' in expansion.cget('text'))
+                except BaseException as error:
+                    errors.append(error)
+                finally:
+                    for callback in root.tk.splitlist(root.tk.call('after','info')): root.after_cancel(callback)
+                    root.destroy()
+            root.after(150, exercise)
+            with patch('tkinter.Tk', return_value=root): gui(store, Path(directory))
+            if errors: raise errors[0]
+
     def test_testing_profile_and_normal_profile_are_separate(self):
         with tempfile.TemporaryDirectory() as directory:
             store = Store(directory)

@@ -156,6 +156,33 @@ public class PreservationFrameworkTest {
             p.edit().putBoolean(flag,false).commit();
         }
     }
+    @Test public void campaignDialogOffersSeparateCopyOrNewAndSkipsExistingProgress() throws Exception {
+        File parent = new File(context.getExternalFilesDir(null), "touchHLE_sandbox");
+        File source = new File(parent, IpaInspector.BUNDLE + "/Documents/saves0/sv_1");
+        Files.createDirectories(source.toPath().getParent()); Files.write(source.toPath(), new byte[]{1});
+        try (ActivityController<LauncherActivity> control = Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            LauncherActivity activity = control.get();
+            android.widget.CheckBox expansion = (android.widget.CheckBox)button(activity.getWindow().getDecorView(), "Zalibas Expansion · Developer recommended");
+            for (String origin : Arrays.asList("copy", "new")) {
+                context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().remove("expansionOrigin").commit();
+                expansion.performClick();
+                android.app.AlertDialog dialog = org.robolectric.shadows.ShadowAlertDialog.getLatestAlertDialog();
+                assertTrue(dialog.isShowing());
+                dialog.getButton(origin.equals("copy") ? android.content.DialogInterface.BUTTON_POSITIVE : android.content.DialogInterface.BUTTON_NEGATIVE).performClick();
+                org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle();
+                List<String> args = new ArrayList<>(); ModOptions.appendArguments(context,args);
+                assertTrue(args.contains("--zalibas-expansion") && args.contains("--expansion-" + origin + "-campaign"));
+                expansion.performClick();
+            }
+            context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().remove("expansionOrigin").commit();
+            File existing = new File(parent, IpaInspector.BUNDLE + "-expansion/Documents/saves0/sv_2");
+            Files.createDirectories(existing.toPath().getParent()); Files.write(existing.toPath(),new byte[]{2});
+            expansion.performClick();
+            List<String> args = new ArrayList<>(); ModOptions.appendArguments(context,args);
+            assertEquals(Collections.singletonList("--zalibas-expansion"),args);
+            assertArrayEquals(new byte[]{1},Files.readAllBytes(source.toPath()));
+        }
+    }
     @Test public void easyPresetStartsEnabledAndCanBeDisabled() {
         try (ActivityController<LauncherActivity> controller = Robolectric.buildActivity(LauncherActivity.class).setup()) {
             View root = controller.get().getWindow().getDecorView();

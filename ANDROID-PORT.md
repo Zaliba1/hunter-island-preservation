@@ -5,7 +5,7 @@ It uses SDL's Android activity and a native GLES3 context to support guest GLES2
 The default iPhone Retina mode uses 480 × 320 logical points and a 960 × 640
 backing surface. The launcher also offers ordinary iPhone and iPad modes.
 
-The launcher supplies the three opt-in mod arguments to the same emulator
+The Easy view offers resolution and recommended Anime4K and local HD artwork. Open **Advanced** to customize graphics, language, mods and save transfers. The launcher supplies opt-in mod arguments to the same emulator
 rules used by Windows. Settings are stored locally and take effect at the next
 game launch. Save import/export validates bounded paths, sizes, hashes and
 checkpoint-only manifests, with a pre-import backup and interrupted-import

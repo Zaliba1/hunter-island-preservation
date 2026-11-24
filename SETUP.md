@@ -69,16 +69,11 @@ On Android, select **Integer scaling** in the launcher to use it on the next
 game launch. The Mac launcher offers **Start in fullscreen** and
 **Integer scaling**. The launcher remembers these choices.
 
-While playing on Windows or Mac, press **F11** to switch between a window and
-full screen. Press **F10** to switch between fit-to-screen and integer scaling
-in full screen. Integer scaling uses whole pixels and may leave wider borders.
-The emulator fits the image to the screen if a whole-number scale cannot fit.
-The game keeps its original aspect ratio in either mode. In the Windows FSR
-release, F9 enters fit-to-screen fullscreen with FSR 1.2 from the window
-or integer mode. Further presses cycle to FSR 1.2 with light RCAS sharpening,
-bilinear, and back to FSR 1.2. The active filter is displayed briefly.
+The launcher opens in Easy mode. Choose your display profile and toggle **Recommended view settings** for Anime4K and local HD artwork. **Advanced** exposes individual filters, internal resolution, integer scaling and optional mods. Windows labels 2× GPU as recommended when the selected profile fits twice in each screen dimension.
 
-The desktop filter test build adds **Anime4K CNN x2 S** and **FSRCNNX x2 8-0-4-1** after FSR + RCAS in the F9 cycle. You can also select them with `--upscale=anime4k` or `--upscale=fsrcnnx`. These filters process the finished RGB frame, including the HUD. Anime4K activates above 1.20× enlargement on both axes and FSRCNNX above 1.30×. At smaller ratios the presenter uses bilinear sampling. Integer scaling has its own sampler. At 2560 × 1440 a 2× iPad frame (2048 × 1536) already exceeds the 1920 × 1440 game area.
+On Windows and Mac, **F11** enters fit-to-screen fullscreen with Anime4K selected and returns to a decorated window. **F9** cycles Anime4K, FSRCNNX, bilinear, FSR 1.2 and FSR + RCAS. From windowed or integer mode, F9 first selects Anime4K in fit-to-screen fullscreen. **F10** toggles integer scaling. Neural enlargement runs when the output is sufficiently larger than the rendered image.
+
+When enabling **Zalibas Expansion** with an existing original campaign, choose to copy that campaign or start fresh. The game creates a separate Expansion save on launch and resumes it on future starts. Cancel leaves the mod off when activating it.
 
 Desktop players can set startup defaults with a `touchHLE_options.txt` file
 in the local `profiles/default/run` directory. Use one line for the game:

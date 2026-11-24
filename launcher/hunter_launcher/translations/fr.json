@@ -7,7 +7,7 @@
   "system": "Langue du système",
   "language_hint": "S’applique au lanceur tout de suite et au jeu à son démarrage.",
   "expansion": "Zalibas Expansion",
-  "hd_textures": "HD · Real-ESRGAN",
+  "hd_textures": "Graphismes HD locaux",
   "render_2x": "2× GPU",
   "mods": "Mods facultatifs",
   "rare": "Dragons de départ rares plus fréquents (5 % par combat sauvage)",
