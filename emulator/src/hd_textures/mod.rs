@@ -149,7 +149,11 @@ fn image_data(archive: &mut ZipArchive<File>, index: usize) -> io::Result<Vec<u8
         return Err(invalid());
     }
     let (w, h) = artwork::dimensions(&data).ok_or_else(invalid)?;
-    if w == 0 || h == 0 || w > MAX_SIDE || h > MAX_SIDE || w * h > MAX_PIXELS {
+    let town_sheet = matches!(
+        member.name().rsplit('/').next(),
+        Some("towntiles-hd.png" | "worldmap-hd.png")
+    ) && (w, h) == (1024, 2048);
+    if w == 0 || h == 0 || w > MAX_SIDE || h > MAX_SIDE || (w * h > MAX_PIXELS && !town_sheet) {
         return Err(invalid());
     }
     Ok(data)
@@ -222,7 +226,9 @@ impl Cache {
             }
             let is_atlas = matches!(name, "MonsterPortraits-hd.png" | "HeroWalkFrames-hd.png");
             let kind = match name {
-                "Tavern.jpg" | "CourtRoom.jpg" | "StoneHouse.jpg"
+                "Tavern.jpg"
+                | "CourtRoom.jpg"
+                | "StoneHouse.jpg"
                 | "ArenaCombat.jpg"
                 | "BeachCombat.jpg"
                 | "BridgeCombat.jpg"
@@ -245,16 +251,27 @@ impl Cache {
                 | "SpaceShipCombat.jpg"
                 | "WallCombat.jpg"
                 | "WaterCaveCombat.jpg" => Artwork::Painted,
-                "rarityStar-hd.png" | "smallRarityStar-hd.png" | "largeRarityStar-hd.png" => {
-                    Artwork::HudSymbol
-                }
+                "towntiles-hd.png" | "worldmap-hd.png" => Artwork::TownTiles,
+                "retreatButton-hd.png"
+                | "monstersButton-hd.png"
+                | "delayButton-hd.png"
+                | "rarityStar-hd.png"
+                | "smallRarityStar-hd.png"
+                | "largeRarityStar-hd.png" => Artwork::HudSymbol,
                 n if monster(n) => Artwork::Monster,
                 // Fixed hero portraits include the two AssistantImage variants.
                 "male_01-hd.png"
                 | "female_01-hd.png"
                 | "malefull_01-hd.png"
-                | "femalefull_01-hd.png"
-                | "TournamentNPC1-hd.png" => Artwork::Portrait,
+                | "femalefull_01-hd.png" => Artwork::Portrait,
+                n if n
+                    .strip_prefix("TournamentNPC")
+                    .and_then(|s| s.strip_suffix("-hd.png"))
+                    .and_then(|s| s.parse::<u8>().ok())
+                    .is_some_and(|i| (1..=24).contains(&i)) =>
+                {
+                    Artwork::Portrait
+                }
                 _ if portraits.contains(&path) => Artwork::Portrait,
                 _ if is_atlas => Artwork::Portrait, // replaced after validating the local frame table
                 _ => continue,
@@ -281,6 +298,7 @@ impl Cache {
             let key = match kind {
                 Artwork::HudSymbol => format!("hud2-v1-{:x}", digest.finalize()),
                 Artwork::Monster => format!("{:x}", digest.finalize()),
+                Artwork::Portrait | Artwork::Atlas(_) => format!("art2-v2-{:x}", digest.finalize()),
                 _ => format!("art2-v1-{:x}", digest.finalize()),
             };
             let Ok(img) = Image::from_bytes(&data) else {
@@ -411,7 +429,7 @@ impl Cache {
         };
         // Samples cheaply reject unrelated UI and atlas uploads. Verify the
         // full silhouette and color before substituting any texture.
-        let sprite = candidates.iter().find_map(|s| {
+        let (sprite, image) = candidates.iter().find_map(|s| {
             if w * s.artwork.scale() > maximum || h * s.artwork.scale() > maximum {
                 return None;
             }
@@ -435,24 +453,29 @@ impl Cache {
                             original[c].abs_diff(p[c]) <= 17 || original[c].abs_diff(premult) <= 17
                         })
                 });
-            same.then_some(s)
+            same.then_some((s, img))
         })?;
         let scale = sprite.artwork.scale();
+        if matches!(sprite.artwork, Artwork::HudSymbol | Artwork::TownTiles) {
+            return Some((scale, sprite.artwork.immediate(image.pixels(), w, h)?));
+        }
         let path = self.directory.join(&sprite.key);
         if let Ok(bytes) = read_cache(&path, w * h * scale * scale * 4) {
             return Some((scale, bytes));
         }
-        if self.pending.contains(&sprite.key) {
-            return None;
+        if !self.pending.contains(&sprite.key) {
+            let job = Job {
+                artwork: sprite.artwork.clone(),
+                key: sprite.key.clone(),
+                index: sprite.index,
+            };
+            if self.jobs.send(job).is_ok() {
+                self.pending.insert(sprite.key.clone());
+            }
         }
-        let job = Job {
-            artwork: sprite.artwork.clone(),
-            key: sprite.key.clone(),
-            index: sprite.index,
-        };
-        if self.jobs.send(job).is_ok() {
-            self.pending.insert(sprite.key.clone());
-        }
-        None
+        sprite
+            .artwork
+            .immediate(image.pixels(), w, h)
+            .map(|pixels| (scale, pixels))
     }
 }

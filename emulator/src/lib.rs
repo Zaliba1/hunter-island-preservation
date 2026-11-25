@@ -133,7 +133,7 @@ Special options:
 
 pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     echo!(
-        "touchHLE {}{}{} — https://touchhle.org/",
+        "touchHLE {}{}{} â€” https://touchhle.org/",
         branding(),
         if branding().is_empty() { "" } else { " " },
         VERSION,
@@ -431,7 +431,7 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
             std::panic::resume_unwind(e)
         }
     };
-    if options.scale_hack.get() >= 2 && env.bundle.bundle_identifier() == "pockettrend.hunterisland"
+    if (options.scale_hack.get() >= 2 || options.hunter_hd_textures) && env.bundle.bundle_identifier() == "pockettrend.hunterisland"
     {
         frameworks::opengles::enable_crisp_text(&mut env);
     }

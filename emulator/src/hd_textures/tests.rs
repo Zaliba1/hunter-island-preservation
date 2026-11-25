@@ -155,3 +155,70 @@ fn indexes_local_dialogs_and_heroes_with_monster_precedence() {
     drop(cache);
     fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn town_sheet_cells_keep_their_own_edges_and_alpha() {
+    let (w, h) = (89, 45);
+    let mut src = vec![0; w * h * 4];
+    for y in 0..h {
+        for x in 0..w {
+            src[(y * w + x) * 4..(y * w + x + 1) * 4].copy_from_slice(&[
+                if x / 44 == 1 { 180 } else { 0 },
+                if y >= 44 { 50 } else { 0 },
+                0,
+                192,
+            ]);
+        }
+    }
+    let hd = Artwork::TownTiles.immediate(&src, w, h).unwrap();
+    for y in 0..2 * h {
+        for x in 0..2 * w {
+            let i = (y * 2 * w + x) * 4;
+            let orig = (y / 2 * w + x / 2) * 4;
+            assert_eq!(&hd[i..i + 4], &src[orig..orig + 4]);
+        }
+    }
+}
+
+#[test]
+fn retail_first_upload_covers_combat_orlen_and_harold() {
+    let Some(ipa) = std::env::var_os("HI_QA_ORIGINAL_IPA") else {
+        return;
+    };
+    let dir = std::env::temp_dir().join(format!("hi-first-hd-{}", uuid::Uuid::new_v4()));
+    let mut cache = Cache::open(Path::new(&ipa), dir.clone()).unwrap();
+    for base in [
+        "retreatButton",
+        "monstersButton",
+        "delayButton",
+        "Harold",
+        "RoyalEscort",
+        "TournamentNPC24",
+        "MonsterPortraits",
+        "towntiles",
+        "worldmap",
+    ] {
+        let path = format!("Payload/HunterIsland.app/{base}-hd.png");
+        let index = (0..cache.archive.len())
+            .find(|&i| cache.archive.by_index_raw(i).unwrap().name() == path)
+            .unwrap();
+        let bytes = image_data(&mut cache.archive, index).unwrap();
+        let image = Image::from_bytes(&bytes).unwrap();
+        let (w, h) = image.dimensions();
+        let (w, h) = (w as usize, h as usize);
+        let (scale, out) = cache
+            .replacement((w, h), image.pixels(), w * 4, 0x1908, 0x1401, 4096)
+            .unwrap_or_else(|| panic!("Missing first upload for {base}"));
+        assert_eq!(scale, 2);
+        assert_eq!(out.len(), w * h * 16);
+        if h == 2048 {
+            assert!(cache
+                .replacement((w, h), image.pixels(), w * 4, 0x1908, 0x1401, 2048)
+                .is_none());
+        }
+    }
+    // Let the worker finish outstanding items before deleting the test cache.
+    drop(cache.jobs);
+    for _ in cache.done.iter() {}
+    fs::remove_dir_all(dir).unwrap();
+}

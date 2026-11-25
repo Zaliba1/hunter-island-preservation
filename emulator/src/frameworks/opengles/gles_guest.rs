@@ -1280,7 +1280,7 @@ fn glTexImage2D(
     if level == 0
         && border == 0
         && target == gles11::TEXTURE_2D
-        && format == gles11::LUMINANCE_ALPHA
+        && matches!(format, gles11::LUMINANCE_ALPHA | gles11::ALPHA)
         && internalformat == format as i32
         && type_ == gles11::UNSIGNED_BYTE
         && !pixels.is_null()
@@ -1296,35 +1296,37 @@ fn glTexImage2D(
             let (mut maximum, mut alignment) = (0, 0);
             gles.GetIntegerv(gles11::MAX_TEXTURE_SIZE, &mut maximum);
             gles.GetIntegerv(gles11::UNPACK_ALIGNMENT, &mut alignment);
-            if width * 2 > maximum || height * 2 > maximum || !matches!(alignment, 1 | 2 | 4 | 8) {
+            let scale = mask.scale as i32;
+            if width * scale > maximum || height * scale > maximum || !matches!(alignment, 1 | 2 | 4 | 8) {
                 return false;
             }
-            let row = width as usize * 2;
+            let channels = if format == gles11::ALPHA { 1 } else { 2 };
+            let row = width as usize * channels;
             let stride = row.next_multiple_of(alignment as usize);
             let raw = mem.bytes_at(pixels.cast(), ((height as usize - 1) * stride + row) as u32);
             if !raw
                 .chunks(stride)
-                .flat_map(|r| r[..row].chunks_exact(2))
+                .flat_map(|r| r[..row].chunks_exact(channels))
                 .zip(&mask.original)
-                .all(|(p, &a)| p == [255, a])
+                .all(|(p, &a)| if channels == 1 { p == [a] } else { p == [255, a] })
             {
                 return false;
             }
-            let la: Vec<u8> = mask.pixels.into_iter().flat_map(|a| [255, a]).collect();
+            let data = if channels == 1 { mask.pixels } else { mask.pixels.into_iter().flat_map(|a| [255, a]).collect() };
             gles.PixelStorei(gles11::UNPACK_ALIGNMENT, 1);
             gles.TexImage2D(
                 target,
                 0,
                 internalformat,
-                width * 2,
-                height * 2,
+                width * scale,
+                height * scale,
                 0,
                 format,
                 type_,
-                la.as_ptr().cast(),
+                data.as_ptr().cast(),
             );
             gles.PixelStorei(gles11::UNPACK_ALIGNMENT, alignment);
-            log_once!("Rendering UIKit text masks at 2x");
+            log_once!("Rendering UIKit text masks at {scale}x");
             true
         });
         if used {

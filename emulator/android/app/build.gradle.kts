@@ -7,8 +7,8 @@ android {
         applicationId = "org.hunterislandpreservation.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 27
-        versionName = "0.2.0-preview.14"
+        versionCode = 28
+        versionName = "0.2.0-preview.15"
         ndk { abiFilters += "arm64-v8a" }
     }
     buildFeatures { buildConfig = true }

@@ -9,6 +9,7 @@ use zip::ZipArchive;
 pub(super) enum Artwork {
     Monster,
     HudSymbol,
+    TownTiles,
     Painted,
     Portrait,
     Atlas(Arc<Vec<[usize; 4]>>),
@@ -26,35 +27,87 @@ impl Artwork {
     pub(super) fn render(&self, model: &Model, src: &[u8], w: usize, h: usize) -> Vec<u8> {
         match self {
             Self::Monster => model.upscale(src, w, h),
-            Self::Atlas(frames) => {
-                // Duplicate gutter texels without filtering across two different frames.
-                let mut out = vec![0; w * h * 16];
-                for y in 0..h * 2 {
-                    for x in 0..w * 2 {
-                        let i = (y / 2 * w + x / 2) * 4;
-                        let dst = (y * w * 2 + x) * 4;
-                        out[dst..dst + 4].copy_from_slice(&src[i..i + 4]);
-                    }
-                }
-                for &[x, y, fw, fh] in frames.iter() {
-                    let mut crop = Vec::with_capacity(fw * fh * 4);
-                    for row in y..y + fh {
-                        let i = (row * w + x) * 4;
-                        crop.extend_from_slice(&src[i..i + fw * 4]);
-                    }
-                    let result = blended(model, &crop, fw, fh, 8);
-                    for (row, pixels) in result.chunks_exact(fw * 8).enumerate() {
-                        let i = ((2 * y + row) * 2 * w + 2 * x) * 4;
-                        out[i..i + pixels.len()].copy_from_slice(pixels);
-                    }
-                }
-                out
-            }
+            Self::Atlas(frames) => atlas_pixels(src, w, h, frames, |pixels, w, h| {
+                blended(model, pixels, w, h, 2)
+            }),
+            Self::TownTiles => town_tiles(src, w, h),
             Self::HudSymbol => upscale_symbol(src, w, h),
             Self::Painted => blended(model, src, w, h, 4),
-            Self::Portrait => blended(model, src, w, h, 8),
+            Self::Portrait => blended(model, src, w, h, 2),
         }
     }
+}
+
+// These assets often stay resident after their first upload. Supply a sharp
+// first frame even if the neural worker has not finished its disk cache yet.
+impl Artwork {
+    pub(super) fn immediate(&self, src: &[u8], w: usize, h: usize) -> Option<Vec<u8>> {
+        match self {
+            Self::HudSymbol | Self::Portrait => Some(upscale_symbol(src, w, h)),
+            Self::TownTiles => Some(town_tiles(src, w, h)),
+            Self::Atlas(frames) => Some(atlas_pixels(src, w, h, frames, upscale_symbol)),
+            _ => None,
+        }
+    }
+}
+
+fn write_region(
+    src: &[u8],
+    out: &mut [u8],
+    width: usize,
+    rect: [usize; 4],
+    resize: &impl Fn(&[u8], usize, usize) -> Vec<u8>,
+) {
+    let [x, y, w, h] = rect;
+    let mut crop = Vec::with_capacity(w * h * 4);
+    for row in y..y + h {
+        let start = (row * width + x) * 4;
+        crop.extend_from_slice(&src[start..start + w * 4]);
+    }
+    let result = resize(&crop, w, h);
+    for (row, pixels) in result.chunks_exact(w * 8).enumerate() {
+        let start = ((2 * y + row) * width * 2 + 2 * x) * 4;
+        out[start..start + pixels.len()].copy_from_slice(pixels);
+    }
+}
+
+fn town_tiles(src: &[u8], w: usize, h: usize) -> Vec<u8> {
+    // Retail TMX sheets have 40-pixel tiles with two extruded pixels
+    // on each side. Keep each padded cell and the partial edge cells isolated.
+    let mut out = vec![0; w * h * 16];
+    for y in (0..h).step_by(44) {
+        for x in (0..w).step_by(44) {
+            write_region(
+                src,
+                &mut out,
+                w,
+                [x, y, 44.min(w - x), 44.min(h - y)],
+                &upscale_symbol,
+            );
+        }
+    }
+    out
+}
+
+fn atlas_pixels(
+    src: &[u8],
+    w: usize,
+    h: usize,
+    frames: &[[usize; 4]],
+    resize: impl Fn(&[u8], usize, usize) -> Vec<u8>,
+) -> Vec<u8> {
+    let mut out = vec![0; w * h * 16];
+    for y in 0..2 * h {
+        for x in 0..2 * w {
+            let i = (y / 2 * w + x / 2) * 4;
+            let dst = (y * w * 2 + x) * 4;
+            out[dst..dst + 4].copy_from_slice(&src[i..i + 4]);
+        }
+    }
+    for &rect in frames {
+        write_region(src, &mut out, w, rect, &resize);
+    }
+    out
 }
 
 // HUD symbols have hard color boundaries and transparent outlines. Use the
@@ -64,9 +117,8 @@ fn upscale_symbol(src: &[u8], w: usize, h: usize) -> Vec<u8> {
         let count = src.len() / step;
         for x in 0..2 * count {
             let left = (x as isize - 1).div_euclid(2);
-            let sample = |i: isize, c| {
-                i32::from(src[i.clamp(0, count as isize - 1) as usize * step + c])
-            };
+            let sample =
+                |i: isize, c| i32::from(src[i.clamp(0, count as isize - 1) as usize * step + c]);
             for c in 0..step {
                 let a = sample(left - 1, c);
                 let b = sample(left, c);

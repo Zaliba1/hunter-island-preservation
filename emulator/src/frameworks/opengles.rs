@@ -31,6 +31,7 @@ pub const DYLIB: crate::dyld::HostDylib = crate::dyld::HostDylib {
 };
 
 pub(crate) struct TextMask {
+    pub(crate) scale: u32,
     pub(crate) width: u32,
     pub(crate) height: u32,
     pub(crate) original: Vec<u8>,

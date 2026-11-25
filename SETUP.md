@@ -14,7 +14,7 @@ The following steps use the English launcher labels.
    A short path such as C:/Games/HunterIsland is suitable.
 2. Open **Start Hunter Island.exe** from the extracted
    folder. Keep `_internal`, `launcher` and `runtime` beside it. Python and Tk are included.
-3. Select **Import your IPA…** and choose your game file.
+3. Select **Import your IPAâ€¦** and choose your game file.
 4. Choose the display mode, language and optional mods, then select **Play**.
 5. Close the game window to return to the launcher.
 
@@ -33,8 +33,8 @@ open its launcher. It uses the same local data directory.
 
 1. Download or transfer the ARM64 APK to your phone.
 2. Open the APK. If prompted, allow installation from your file/download app.
-3. Open **Hunter Island · touchHLE**.
-4. Select **Import your IPA…** and choose your file.
+3. Open **Hunter Island Â· touchHLE**.
+4. Select **Import your IPAâ€¦** and choose your file.
 5. Choose the display mode, game language and mod switches, then select
    **Play**.
 
@@ -45,13 +45,13 @@ same existing app.
 
 Android keeps the import and settings in private app storage. Saves are stored
 in the app-specific external files directory. Uninstalling the app may remove
-this data. **Export save…** writes a ZIP to a location
+this data. **Export saveâ€¦** writes a ZIP to a location
 you select.
 
 ## Game language
 
 The Windows **Language** menu defaults to English and also offers Deutsch,
-Français, Español, Italiano and 日本語, covering all six languages in the IPA.
+FranÃ§ais, EspaÃ±ol, Italiano and æ—¥æœ¬èªž, covering all six languages in the IPA.
 The launcher updates immediately. The game uses the same selection on its next
 start. **System language** uses the first supported Windows display language,
 with English as a fallback. Previously saved choices are kept.
@@ -63,13 +63,13 @@ The selected game language also applies to the in-game silver exchange.
 
 ## Display modes
 
-Windows offers landscape iPad at 1024 × 768 and iPhone at 480 × 320.
-Android also offers experimental iPhone Retina at 960 × 640.
+Windows offers landscape iPad at 1024 Ã— 768 and iPhone at 480 Ã— 320.
+Android also offers experimental iPhone Retina at 960 Ã— 640.
 On Android, select **Integer scaling** in the launcher to use it on the next
 game launch. The Mac launcher offers **Start in fullscreen** and
 **Integer scaling**. The launcher remembers these choices.
 
-The launcher opens in Easy mode. Choose your display profile and toggle **Recommended view settings** for bilinear output, local HD artwork and 2× internal resolution on Android, or Anime4K and local HD artwork on desktop. **Advanced** exposes individual filters, internal resolution, integer scaling and optional mods. Windows labels 2× GPU as recommended when the selected profile fits twice in each screen dimension.
+The launcher opens in Easy mode. Choose your display profile and toggle **Recommended view settings** for bilinear output, local HD artwork and 2Ã— internal resolution on Android, or Anime4K and local HD artwork on desktop. **Advanced** exposes individual filters, internal resolution, integer scaling and optional mods. Windows labels 2Ã— GPU as recommended when the selected profile fits twice in each screen dimension.
 
 On Windows and Mac, **F11** enters fit-to-screen fullscreen with Anime4K selected and returns to a decorated window. **F9** cycles Anime4K, FSRCNNX, bilinear, FSR 1.2 and FSR + RCAS. From windowed or integer mode, F9 first selects Anime4K in fit-to-screen fullscreen. **F10** toggles integer scaling. Neural enlargement runs when the output is sufficiently larger than the rendered image.
 
@@ -85,16 +85,16 @@ pockettrend.hunterisland: --fullscreen --integer-scaling
 For experimental supersampling, try `--fullscreen --scale-hack=2` on that
 line. It renders twice the width and height and uses four times as many pixels
 before display scaling. A smaller output can smooth edges when the frame is
-downsampled. The tested iPad title screen rendered at 2048 × 1536 with this
+downsampled. The tested iPad title screen rendered at 2048 Ã— 1536 with this
 option. Full gameplay at this setting has yet to be tested.
 
 ### Local HD artwork on Mac and Android
 
-Select **2× internal resolution** in Display mode to double the render dimensions on each axis, for example from 1024 × 768 to 2048 × 1536 on the iPad profile. At 2×, the emulator rasterizes supported system-drawn labels at twice the density. It also refines the edges of the bitmap dialog font from your own game. Font metrics, line breaks and UI positions use the original layout. This switch can be used independently of local HD artwork.
+Select **2Ã— internal resolution** in Display mode to double the render dimensions on each axis, for example from 1024 Ã— 768 to 2048 Ã— 1536 on the iPad profile. At 2Ã—, the emulator rasterizes supported system-drawn labels at twice the density. It also refines the edges of the bitmap dialog font from your own game. Font metrics, line breaks and UI positions use the original layout. This switch can be used independently of local HD artwork.
 
-Enable **Local HD artwork (monsters 4×, characters, scenes and rarity stars 2×)** in Display mode. A background CPU worker reads the artwork from your imported IPA. A completed texture appears on its next load and remains available after restarting.
+Enable **Local HD artwork (monsters 4Ã—, characters, scenes and rarity stars 2Ã—)** in Display mode. A background CPU worker reads the artwork from your imported IPA. A completed texture appears on its next load and remains available after restarting.
 
-Standalone monsters use the compact Real-ESRGAN animevideov3 model at 4×. The tavern, courtroom, stone house and all 22 battle backdrops in game version 2.02 use a 2× blend with 25% model output. The three rarity-star icons use 2× clamped cubic interpolation to preserve their transparent outlines. Dialog portraits are identified from the local Chats.plist. They, both heroes’ dialog and full-body pictures, and the individual frames of the monster portrait and hero walking sheets use a 2× blend with 12.5% model output. Speaking monsters already covered by the 4× monster profile retain it. The worker preserves source transparency and processes each packed frame in isolation. Other interface artwork and scenes use their original textures.
+Standalone monsters use the compact Real-ESRGAN animevideov3 model at 4Ã—. The tavern, courtroom, stone house and all 22 battle backdrops in game version 2.02 use a 2Ã— blend with 25% model output. The three rarity stars and the Retreat, Monsters and Skip Turn buttons use 2× clamped cubic interpolation. Town and world map tiles use the same 2× filter within each padded cell. Dialog portraits, the 24 tournament portraits, the two heroes and the individual frames of the monster portrait and hero walking sheets receive a first-use 2× replacement. Subsequent uploads can use a locally cached 50% model blend. Packed frames are processed independently. Small UIKit text labels, including battle names, use 4× vector masks with Local HD Artwork enabled. Larger text masks use 2×. Speaking monsters covered by the 4× monster profile retain it. Other interface artwork and scenes use their original textures.
 
 Generated files stay in `hd-monsters-animev3-x4-v1` under the emulator data directory. Monster cache keys remain compatible with the original option. New entries include a processing version and a digest of the image and any frame rectangles. Close the game and remove this folder to reclaim space. All processing works offline.
 
@@ -104,9 +104,9 @@ The game writes normal checkpoints at its intended save points. Reloading may
 therefore resume in a town. Emulator savestates for an ongoing battle are
 not implemented.
 
-Android accepts compatible backup ZIPs through **Import save…**. Before
+Android accepts compatible backup ZIPs through **Import saveâ€¦**. Before
 importing, the app backs up the existing save locally. Use
-**Export pre-import backup…** to copy that backup out of the app.
+**Export pre-import backupâ€¦** to copy that backup out of the app.
 
 The Windows diagnostic export can include saves when you explicitly select
 that option; it produces an Android-compatible ZIP. The portable Windows

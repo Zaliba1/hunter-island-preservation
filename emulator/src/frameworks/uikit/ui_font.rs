@@ -364,7 +364,7 @@ fn draw_string_bitmap(
     alignment: TextAlignment,
     clip_x: Option<Range<f32>>,
     clip_y: Option<Range<f32>>,
-    double: bool,
+    text_scale: u32,
 ) -> Option<crate::frameworks::opengles::TextMask> {
     let fill = drawer.rgb_fill_color();
     let draw = |target: &mut CGBitmapContextDrawer, factor: f32| {
@@ -375,13 +375,18 @@ fn draw_string_bitmap(
             draw_font_glyph(target, glyph, fill, x.clone(), y.clone())
         });
     };
-    let high = if double {
-        drawer.double_gray_text(|d| draw(d, 2.))
+    // Small battle labels benefit most from oversampling. Bound the
+    // allocation for large dialogue boxes even when local HD is enabled.
+    let scale = if text_scale == 4 && (drawer.width() > 1024 || drawer.height() > 1024
+        || drawer.bitmap_bytes().len() > 128 * 1024) { 2 } else { text_scale };
+    let high = if scale > 1 {
+        drawer.scaled_gray_text(scale, |d| draw(d, scale as f32))
     } else {
         None
     };
     draw(drawer, 1.);
     high.map(|pixels| crate::frameworks::opengles::TextMask {
+        scale,
         width: drawer.width(),
         height: drawer.height(),
         original: drawer.bitmap_bytes().to_vec(),
@@ -397,7 +402,8 @@ pub fn draw_at_point(
     point: CGPoint,
     width_and_line_break_mode: Option<(CGFloat, UILineBreakMode)>,
 ) -> CGSize {
-    let crisp_text = env.framework_state.opengles.crisp_text;
+    let state = &env.framework_state.opengles;
+    let text_scale = if state.hd_textures.is_some() { 4 } else if state.crisp_text { 2 } else { 1 };
     let context = UIGraphicsGetCurrentContext(env);
 
     let host_object = env.objc.borrow::<UIFontHostObject>(font);
@@ -425,7 +431,7 @@ pub fn draw_at_point(
         TextAlignment::Left,
         clip_x,
         None,
-        crisp_text,
+        text_scale,
     );
     CGSize { width, height }
 }
@@ -439,7 +445,8 @@ pub fn draw_in_rect(
     line_break_mode: UILineBreakMode,
     alignment: UITextAlignment,
 ) -> CGSize {
-    let crisp_text = env.framework_state.opengles.crisp_text;
+    let state = &env.framework_state.opengles;
+    let text_scale = if state.hd_textures.is_some() { 4 } else if state.crisp_text { 2 } else { 1 };
     let context = UIGraphicsGetCurrentContext(env);
 
     let text_size = size_with_font(env, font, text, Some((rect.size, line_break_mode)));
@@ -471,7 +478,7 @@ pub fn draw_in_rect(
         alignment,
         Some(rect.origin.x..(rect.origin.x + rect.size.width)),
         Some(rect.origin.y..(rect.origin.y + rect.size.height)),
-        crisp_text,
+        text_scale,
     );
     text_size
 }
