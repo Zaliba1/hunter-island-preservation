@@ -216,7 +216,28 @@ Type mismatch when sending message {} to {:?}!
                     env.cpu.set_cpsr(entry_flags);
                     hook
                 } else { None };
+                // Hunter Island 2.02 builds node outlines in a separate render texture.
+                // Its factory forces nearest-neighbour sampling, even for smooth text.
+                let hd_outline = guest_imp.addr_with_thumb_bit() == 0x4c619
+                    && env.cpu.regs()[crate::cpu::Cpu::LR] == 0x1669fd
+                    && env.framework_state.opengles.hd_textures.is_some()
+                    && env.bundle.bundle_identifier() == "pockettrend.hunterisland"
+                    && env.bundle.bundle_version() == "2.02"
+                    && selector.as_str(&env.mem) == "renderTextureWithWidth:height:";
                 guest_imp.call_without_pushing_stack_frame(env);
+                if hd_outline {
+                    let regs = *env.cpu.regs();
+                    let flags = env.cpu.cpsr();
+                    let render_texture = id::from_bits(regs[0]);
+                    if render_texture != nil {
+                        let sprite: id = msg![env; render_texture sprite];
+                        let texture: id = msg![env; sprite texture];
+                        () = msg![env; texture setAntiAliasTexParameters];
+                        log_once!("Local HD: smoothing the guest outline render texture");
+                    }
+                    *env.cpu.regs_mut() = regs;
+                    env.cpu.set_cpsr(flags);
+                }
                 if env.options.hunter_no_arena_cooldown
                     && matches!(guest_imp.addr_with_thumb_bit(), 0xdbec1 | 0xdbfe1)
                     && env.bundle.bundle_identifier() == "pockettrend.hunterisland"

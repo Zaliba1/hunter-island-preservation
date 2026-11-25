@@ -1326,7 +1326,11 @@ fn glTexImage2D(
                 data.as_ptr().cast(),
             );
             gles.PixelStorei(gles11::UNPACK_ALIGNMENT, alignment);
-            log_once!("Rendering UIKit text masks at {scale}x");
+            if scale == 4 {
+                log_once!("Rendering UIKit text masks at 4x");
+            } else {
+                log_once!("Rendering UIKit text masks at 2x");
+            }
             true
         });
         if used {
