@@ -173,6 +173,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 // a category of NSWhoseSpecifier!
 // Reference https://nshipster.com/equality
 - (bool)isEqual:(id)other {
+    #[cfg(any(target_os = "android", target_os = "windows"))]
+    if this != other && env.cpu.regs()[crate::cpu::Cpu::LR] == crate::objc::hunter_array_search::SEARCH_RETURN {
+        crate::objc::hunter_array_search::skip_misses(env, this, _cmd, other);
+    }
     this == other
 }
 

@@ -558,7 +558,7 @@ unsafe fn composite_layer_recursive(
         false
     };
 
-    let need_texture = host_obj.presented_pixels.is_some()
+    let need_texture = env.objc.borrow::<CALayerHostObject>(layer).presented_pixels.is_some()
         || host_obj.contents != nil
         || host_obj.cg_context.is_some();
     let need_update = need_texture && !host_obj.gles_texture_is_up_to_date;

@@ -41,9 +41,12 @@ impl State {
         env: &mut Environment,
         layer: id,
     ) -> CALayerHostObject {
-        // Clone given layer
-        let original = env.objc.borrow::<CALayerHostObject>(layer);
+        // Animations change layer properties. The compositor uploads pixels
+        // from the model layer, so keep its framebuffer out of this snapshot.
+        let original = env.objc.borrow_mut::<CALayerHostObject>(layer);
+        let pixels = original.presented_pixels.take();
         let mut presentation = original.clone();
+        original.presented_pixels = pixels;
 
         // Loop over all animations and set the presentation layer's values
         let named_animations: Vec<(Option<String>, id)> = presentation

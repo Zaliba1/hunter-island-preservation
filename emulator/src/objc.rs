@@ -25,6 +25,8 @@ use std::collections::HashMap;
 
 mod arc;
 mod expedition_register;
+#[cfg(any(target_os = "android", target_os = "windows"))]
+pub(crate) mod hunter_array_search;
 mod hunter_rare_dragons;
 mod hunter_silver_exchange;
 pub(crate) mod hunter_history;
