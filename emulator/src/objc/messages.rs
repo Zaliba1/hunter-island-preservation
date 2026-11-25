@@ -220,7 +220,7 @@ Type mismatch when sending message {} to {:?}!
                 // Its factory forces nearest-neighbour sampling, even for smooth text.
                 let hd_outline = guest_imp.addr_with_thumb_bit() == 0x4c619
                     && env.cpu.regs()[crate::cpu::Cpu::LR] == 0x1669fd
-                    && env.framework_state.opengles.hd_textures.is_some()
+                    && env.options.hunter_hd_textures
                     && env.bundle.bundle_identifier() == "pockettrend.hunterisland"
                     && env.bundle.bundle_version() == "2.02"
                     && selector.as_str(&env.mem) == "renderTextureWithWidth:height:";
