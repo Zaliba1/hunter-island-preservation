@@ -54,6 +54,23 @@ def terrain(raw, branches):
         raw=raw[:match.start(1)]+b64encode(zlib.compress(data))+raw[match.end(1):]
     return raw
 
+def greenpath_crossing(raw):
+    # The story overlay paints a river over the new eastbound path. At offset
+    # {244,219}, the river crossing at world (124,108) starts at local (4,20).
+    # Put the original east-west timber bridge on top of the river and banks.
+    pattern = rb'<layer name="Top"[^>]*>\s*<data encoding="base64" compression="zlib">\s*([\w+/=\s]+?)\s*</data>'
+    match = re.search(pattern, raw)
+    data = bytearray(zlib.decompress(b64decode(match[1])))
+    if len(data) != 8 * 24 * 4:
+        raise ValueError('Unsupported Greenpath overlay')
+    for y, row in enumerate(((291, 292), (314, 315)), 20):
+        for x, gid in enumerate(row, 4):
+            offset = 4 * (y * 8 + x)
+            if struct.unpack_from('<I', data, offset)[0]:
+                raise ValueError('Occupied Greenpath crossing')
+            struct.pack_into('<I', data, offset, gid)
+    return raw[:match.start(1)] + b64encode(zlib.compress(data)) + raw[match.end(1):]
+
 def build(source,destination):
     source,destination=Path(source).resolve(),Path(destination).resolve()
     if source==destination or destination.exists(): raise ValueError('Choose a new output path. The original and existing builds are protected.')
@@ -81,7 +98,8 @@ def build(source,destination):
         load(base|points)
         mod=Campaign(config,cached,CATALOGS,load)
         mod.install()
-        replacements={bundle+'overworld.tmx':terrain(original.read(bundle+'overworld.tmx'),config['branches'])}
+        replacements={bundle+'overworld.tmx':terrain(original.read(bundle+'overworld.tmx'),config['branches']),
+                      bundle+'GreenpathOverlay.tmx':greenpath_crossing(original.read(bundle+'GreenpathOverlay.tmx'))}
         resources=sorted(mod.modified)
         for i in range(0,len(resources),32):
             chunk=resources[i:i+32]; encrypted=[]

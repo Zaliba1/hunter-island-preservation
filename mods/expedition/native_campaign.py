@@ -439,6 +439,13 @@ class Campaign:
              'levelScalor':ambient_level,'types':deepcopy(ambient),
              'fixedEncounters':[{'chanceToAppear':1 if endgame else 0.3,'breeder':{'type':'Normal','arguments':{'allowCapture':True}},'monsters':[m]}]}}
         encounter = pop['arguments']['fixedEncounters'][0]
+        if site == 'Airbluedragon01':
+            # Use the field's own pool plus the native road south of Arborun.
+            nearby = self.field_population('over-123x112')['types']
+            local = {entry['type'] for entry in ambient}
+            pop['arguments']['types'].extend(deepcopy(e) for e in nearby if e['type'] not in local)
+            pop['arguments'].update(minMonstersPerPack=2, maxMonstersPerPack=4)
+            encounter['breeder']['expeditionTrack'] = 'Updraft'
         variants = []
         for level in range(low, high+1):
             fixed = deepcopy(encounter)
@@ -469,11 +476,19 @@ class Campaign:
                     menu = None
                     for site in reversed(choices):
                         prompt = deepcopy(prompts[site['species']])
-                        prompt['arguments']['conditions'] = self.gate(site['requires'])
+                        if site['species'] == 'Airbluedragon01':
+                            # add_action also installs the entry condition below.
+                            gate = conjunction([self.gate(site['requires']), {'chats':'!Expedition.UpdraftCaught'}])
+                        else:
+                            gate = self.gate(site['requires'])
+                        prompt['arguments']['conditions'] = gate
                         if menu:
                             prompt['arguments']['noEvent'] = menu
                         menu = prompt
-                    self.add_action(place, room, menu, self.gate(needs))
+                    condition = self.gate(needs)
+                    if len(choices) == 1 and choices[0]['species'] == 'Airbluedragon01':
+                        condition = menu['arguments']['conditions']
+                    self.add_action(place, room, menu, condition)
 
     def install(self):
         self.install_map()

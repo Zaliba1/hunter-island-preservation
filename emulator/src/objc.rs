@@ -103,6 +103,7 @@ pub struct ObjC {
     message_type_info: Option<(std::any::TypeId, &'static str)>,
     method_cache: dispatch_cache::MethodCache,
     hunter_exchange_save: Option<hunter_silver_exchange::SaveReceipt>,
+    updraft_encounter: bool,
     pub(crate) hunter_history: hunter_history::State,
 }
 
@@ -135,6 +136,7 @@ impl ObjC {
             message_type_info: None,
             method_cache: dispatch_cache::MethodCache::new(),
             hunter_exchange_save: None,
+            updraft_encounter: false,
             hunter_history: hunter_history::State::default(),
         }
     }

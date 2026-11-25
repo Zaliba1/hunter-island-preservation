@@ -91,6 +91,7 @@ def compile_recipe(original, expanded, output):
         changed = sorted(n[len(prefix):] for n in mod.namelist() if n.startswith(prefix)
                          and (n not in names or stock.getinfo(n).CRC != mod.getinfo(n).CRC))
         changed.remove('overworld.tmx')
+        changed.remove('GreenpathOverlay.tmx')
         assert all(n.endswith(('.plist', '.strings')) for n in changed)
         sources = sorted({n for n in changed if prefix+n in names} | {'GrayrockCave.plist','over-38x97.plist'})
         raw = {n: stock.read(prefix+n) for n in sources}
@@ -106,6 +107,12 @@ def compile_recipe(original, expanded, output):
                  for n, layer in mod_layers.items() if layer != original_layers[n]}
         hashes = {n: hashlib.sha256(v).hexdigest() for n, v in raw.items()}
         hashes['overworld.tmx'] = hashlib.sha256(terrain).hexdigest()
+        greenpath = stock.read(prefix+'GreenpathOverlay.tmx')
+        old_top = layers(greenpath)['Top']
+        new_top = layers(mod.read(prefix+'GreenpathOverlay.tmx'))['Top']
+        crossing = {'Top': [[i, gid] for i, ((gid,), old_gid) in enumerate(zip(new_top, old_top)) if (gid,) != old_gid]}
+        assert len(crossing['Top']) == 4
+        hashes['GreenpathOverlay.tmx'] = hashlib.sha256(greenpath).hexdigest()
         # A flat instruction table avoids JSON recursion limits on long quest conditions.
         edits, ids = [], {}
         def intern(expr):
@@ -121,7 +128,7 @@ def compile_recipe(original, expanded, output):
                 edits.append(expr)
             return ids[key]
         roots = {k: intern(v) for k, v in resources.items()}
-        recipe = dict(sources=hashes, resources=roots, edits=edits, cells=cells)
+        recipe = dict(sources=hashes, resources=roots, edits=edits, cells=cells, greenpath=crossing)
         output.write_bytes(gzip.compress(json.dumps(recipe, ensure_ascii=False, separators=(',', ':')).encode(), mtime=0))
         print(f'{len(resources)} resources, {sum(map(len,cells.values()))} edited cells, {output.stat().st_size} compressed bytes')
 

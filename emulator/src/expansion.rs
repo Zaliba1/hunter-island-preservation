@@ -17,6 +17,7 @@ struct Recipe {
     resources: BTreeMap<String, usize>,
     edits: Vec<Edit>,
     cells: BTreeMap<String, Vec<(usize, u32)>>,
+    greenpath: BTreeMap<String, Vec<(usize, u32)>>,
 }
 
 #[derive(Deserialize)]
@@ -78,7 +79,7 @@ fn read(mut reader: impl Read) -> Result<Vec<u8>> {
     Ok(bytes)
 }
 
-fn patch_map(bytes: Vec<u8>, cells: &BTreeMap<String, Vec<(usize, u32)>>) -> Result<Vec<u8>> {
+fn patch_map(bytes: Vec<u8>, cells: &BTreeMap<String, Vec<(usize, u32)>>, tile_count: usize) -> Result<Vec<u8>> {
     let mut map = String::from_utf8(bytes)?;
     for (name, updates) in cells {
         let layer = map.find(&format!("<layer name=\"{name}\"")).ok_or("missing map layer")?;
@@ -88,7 +89,7 @@ fn patch_map(bytes: Vec<u8>, cells: &BTreeMap<String, Vec<(usize, u32)>>) -> Res
         let encoded: Vec<u8> = map[start..end].bytes().filter(|c| !c.is_ascii_whitespace()).collect();
         let compressed = STANDARD.decode(encoded)?;
         let mut bytes = read(ZlibDecoder::new(&compressed[..]))?;
-        if bytes.len() != 300*280*4 { return Err("unsupported map dimensions".into()); }
+        if bytes.len() != tile_count*4 { return Err("unsupported map dimensions".into()); }
         for &(i, tile) in updates { bytes.get_mut(4*i..4*i+4).ok_or("invalid cell")?.copy_from_slice(&tile.to_le_bytes()); }
         let mut compressed = ZlibEncoder::new(Vec::new(), Compression::default());
         compressed.write_all(&bytes)?;
@@ -135,7 +136,11 @@ pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool) -> Result<BTreeMap
                 return Err(format!("Zalibas Expansion requires the original 2.02 resource {name}").into());
             }
             if name == "overworld.tmx" {
-                output.insert(name.clone(), patch_map(raw, &recipe.cells)?);
+                output.insert(name.clone(), patch_map(raw, &recipe.cells, 300*280)?);
+                continue;
+            }
+            if name == "GreenpathOverlay.tmx" {
+                output.insert(name.clone(), patch_map(raw, &recipe.greenpath, 8*24)?);
                 continue;
             }
             stock.insert(name.clone(), decode(raw)?);
@@ -253,7 +258,7 @@ mod tests {
         }
         for (name, bytes) in overlay {
             let expected = read(archive.by_name(&(prefix.clone()+&name))?)?;
-            if name == "overworld.tmx" {
+            if name.ends_with(".tmx") {
                 // Keep the XML structure, compare the actual tiles after inflating each layer.
                 fn contents(raw: Vec<u8>) -> Result<(String, Vec<Vec<u8>>)> {
                     let text = String::from_utf8(raw)?;

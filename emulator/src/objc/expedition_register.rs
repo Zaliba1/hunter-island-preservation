@@ -12,6 +12,13 @@ use crate::objc::{id, msg, msg_class, nil};
 use crate::Environment;
 use std::collections::HashSet;
 
+const SET_ENCOUNTER: u32 = 0x85aa1;
+const SET_BREEDER: u32 = 0x847b5;
+const ADD_BENCH_MONSTER: u32 = 0x7cb95;
+// Encounter.performWinLogic grants the retained copy of each successful capture here.
+const WON_CAPTURE_RETURN: u32 = 0x96b8b;
+const UPDRAFT_CAPTURE: &str = "Expedition.UpdraftCaught";
+const UPDRAFT_MISSES: &str = "Expedition.HabitatMisses.Airbluedragon01";
 const START_EXPEDITION_BATTLE: u32 = 0x180015;
 const COUNT_COLLECTED: u32 = 0x1af1d9;
 const PREFIX: &str = "Expedition.Formenregister/";
@@ -244,7 +251,7 @@ fn resume_map_after_decline(env: &mut Environment, prompt: id) -> Option<u32> {
 
 pub(super) fn try_handle(env: &mut Environment, receiver: id, imp: GuestFunction) -> bool {
     let address=imp.addr_with_thumb_bit();
-    if !matches!(address, HAS_SEEN_CHAT_DIALOG | POI_ENTER_EVENTS | forest::ADJUST_HP | frost::HIT | frost::DAMAGE_REPORT | lineup::SHOW_QUESTION | lineup::CONFIRM_QUESTION | 0x1c8921 | COUNT_COLLECTED | START_EXPEDITION_BATTLE | 0x18eae1 | 0x18eba9 | BATTLE_START | BATTLE_END | TURN_COMPLETE | CONFIRMED_DELAY | ALLOW_DEATH | CHECK_BATTLE_END)
+    if !matches!(address, SET_ENCOUNTER | SET_BREEDER | ADD_BENCH_MONSTER | HAS_SEEN_CHAT_DIALOG | POI_ENTER_EVENTS | forest::ADJUST_HP | frost::HIT | frost::DAMAGE_REPORT | lineup::SHOW_QUESTION | lineup::CONFIRM_QUESTION | 0x1c8921 | COUNT_COLLECTED | START_EXPEDITION_BATTLE | 0x18eae1 | 0x18eba9 | BATTLE_START | BATTLE_END | TURN_COMPLETE | CONFIRMED_DELAY | ALLOW_DEATH | CHECK_BATTLE_END)
         || env.bundle.bundle_identifier() != "pockettrend.hunterisland"
         || env.bundle.bundle_version() != "2.02"
     {
@@ -252,11 +259,40 @@ pub(super) fn try_handle(env: &mut Environment, receiver: id, imp: GuestFunction
     }
     let regs = *env.cpu.regs();
     let flags = env.cpu.cpsr();
+    if address == SET_ENCOUNTER {
+        env.objc.updraft_encounter = false;
+        return false;
+    }
+    if address == SET_BREEDER {
+        let breeder = id::from_bits(regs[2]);
+        let dictionary = env.objc.get_known_class("NSDictionary", &mut env.mem);
+        let is_dict: bool = msg![env; breeder isKindOfClass:dictionary];
+        let tag = if is_dict { field(env, breeder, "expeditionTrack") } else { nil };
+        env.objc.updraft_encounter = tag != nil && to_rust_string(env, tag) == "Updraft";
+        *env.cpu.regs_mut() = regs;
+        env.cpu.set_cpsr(flags);
+        return false;
+    }
+    if address == ADD_BENCH_MONSTER {
+        if env.objc.updraft_encounter && regs[crate::cpu::Cpu::LR] == WON_CAPTURE_RETURN
+            && super::hunter_history::monster_species(env, id::from_bits(regs[2])).as_deref() == Some("Airbluedragon01")
+        {
+            let save: id = msg_class![env; UserSavedData sharedInstance];
+            set_updraft_caught(env, save, true);
+        }
+        *env.cpu.regs_mut() = regs;
+        env.cpu.set_cpsr(flags);
+        return false;
+    }
     if address == HAS_SEEN_CHAT_DIALOG {
         let key = id::from_bits(regs[2]);
         let marker = get_static_str(env, "Expedition.HasFusedKamiwyrm");
         let matches: bool = msg![env; key isEqual:marker];
-        let result = if matches {
+        let track = get_static_str(env, UPDRAFT_CAPTURE);
+        let is_track: bool = msg![env; key isEqual:track];
+        let result = if is_track {
+            Some(u32::from(updraft_caught(env, receiver)))
+        } else if matches {
             let species = get_static_str(env, KAMIWYRM);
             let template: id = msg_class![env; MonsterpediaBookData bookTemplateMonsterWithShortTypeName:species];
             let owned: bool = template != nil && msg![env; receiver hasMonster:template];
@@ -337,6 +373,29 @@ fn draw(env: &mut Environment, choices: u32) -> u32 {
     ((random * u64::from(choices)) >> 32) as u32
 }
 
+fn set_updraft_caught(env: &mut Environment, save: id, caught: bool) {
+    let key = get_static_str(env, UPDRAFT_CAPTURE);
+    let bit = u32::from(caught);
+    let value: id = msg_class![env; NSNumber numberWithUnsignedInt:bit];
+    let _: () = msg![env; save setPropertyValue:value forKey:key];
+}
+
+fn updraft_caught(env: &mut Environment, save: id) -> bool {
+    let key = get_static_str(env, UPDRAFT_CAPTURE);
+    let receipt: id = msg![env; save propertyValueForKey:key];
+    if receipt != nil { return msg![env; receipt boolValue]; }
+    // Preview 15 recorded attempts and species, but not the capture site.
+    let misses = get_static_str(env, UPDRAFT_MISSES);
+    let attempts: id = msg![env; save propertyValueForKey:misses];
+    let caught = if attempts == nil { false } else {
+        let species = get_static_str(env, "Airbluedragon01");
+        let template: id = msg_class![env; MonsterpediaBookData bookTemplateMonsterWithShortTypeName:species];
+        template != nil && msg![env; save hasMonster:template]
+    };
+    set_updraft_caught(env, save, caught);
+    caught
+}
+
 fn prepare_habitat_encounter(env: &mut Environment, event: id) {
     let populator: id = msg![env; event monsterPopulator];
     if populator == nil { return; }
@@ -364,6 +423,11 @@ fn prepare_habitat_encounter(env: &mut Environment, event: id) {
     };
     let original_args = field(env, populator, "arguments");
     let args: id = msg_class![env; NSMutableDictionary dictionaryWithDictionary:original_args];
+    if found && to_rust_string(env, counter_key) == UPDRAFT_MISSES {
+        let one: id = msg_class![env; NSNumber numberWithUnsignedInt:1u32];
+        set_field(env, args, "minMonstersPerPack", one);
+        set_field(env, args, "maxMonstersPerPack", one);
+    }
     set_field(env, args, "fixedEncounters", selected);
     let copy: id = msg_class![env; NSMutableDictionary dictionaryWithDictionary:populator];
     set_field(env, copy, "arguments", args);

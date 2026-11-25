@@ -209,7 +209,7 @@ fn bytes(env: &mut Environment, object: id) -> Option<Vec<u8>> {
     }
     Some(ns_data::to_rust_slice(env, object).to_vec())
 }
-fn monster_species(env: &mut Environment, monster: id) -> Option<String> {
+pub(super) fn monster_species(env: &mut Environment, monster: id) -> Option<String> {
     if monster == nil
         || env
             .objc
