@@ -199,14 +199,20 @@ class Campaign:
         return population['types'], level, background
 
     def install_map(self):
-        # The grove's original town door disappears when its story ends.
-        grove = self.r['Towns']['over-123x110']
-        original = next(b for b in grove['buildings'] if b.get('class')=='ZoneChangeMenuItem'
-                        and b['arguments']['zoneChange']['arguments'].get('dungeon',{}).get('arguments')=='ArborunDungeon.plist')
-        return_door = deepcopy(original)
-        return_door.pop('enterEvents', None)
-        return_door['conditions'] = self.gate(['pflanzrinne'])
-        grove['buildings'].append(return_door)
+        # Reuse each retail door and its return destination after the story door closes.
+        for place, dungeon, milestone in (
+            ('over-123x110', 'ArborunDungeon.plist', 'pflanzrinne'),
+            ('over-87x100', 'HeorotDungeon.plist', 'Heorot.CaptureTheKing'),
+        ):
+            buildings = self.r['Towns'][place]['buildings']
+            original, = (b for b in buildings if b.get('class') == 'ZoneChangeMenuItem'
+                         and b['arguments']['zoneChange']['arguments'].get('dungeon', {}).get('arguments') == dungeon)
+            return_door = deepcopy(original)
+            return_door.pop('enterEvents', None)
+            return_door['conditions'] = self.gate([milestone])
+            if dungeon == 'HeorotDungeon.plist':
+                return_door['iconSpriteFile'] = 'eventIcon2.png'
+            buildings.append(return_door)
         links=self.r['Overworld']['contentProviderArguments'].setdefault('connections',[])
         for b in self.cfg['branches']:
             anchor,end=where(b['anchor']),where(b['end'])

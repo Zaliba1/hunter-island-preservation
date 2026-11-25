@@ -1238,19 +1238,19 @@
   "Tirare la leva al terzo colpo?  No: Tirare la leva dopo il primo colpo",
   "三度目の音でレバーを引く？  いいえ：最初の音のあとでレバーを引く"
  ],
- "Betritt in Heorot das Verlies unter der alten Mauer. · Etage 1 · Wachhof · Glocke läuten und die Routenkarte bergen": [
-  "Enter the dungeon beneath the old wall in Heorot. · Floor 1 · Guard courtyard · Ring the bell and recover the route map",
-  "À Heorot, entre dans le souterrain sous la vieille muraille. · Étage 1 · Cour de garde · Sonner la cloche et récupérer la carte du parcours",
-  "En Heorot, entra en la mazmorra bajo la muralla antigua. · Planta 1 · Patio de la guardia · Tocar la campana y recuperar el mapa de la ruta",
-  "A Heorot entra nei sotterranei sotto le vecchie mura. · Piano 1 · Cortile della guardia · Suonare la campana e recuperare la mappa del percorso",
-  "ヘオロットで古い城壁の下にある地下牢に入ろう。 · 第1層 · 衛兵の中庭 · 鐘を鳴らし、経路図を回収する"
+ "Geh in Heorot über die Brücke zum Turm rechts und steig ins Verlies hinab. · Etage 1 · Wachhof · Glocke läuten und die Routenkarte bergen": [
+  "In Heorot, cross the bridge to the tower on the right and head down into the dungeon. · Floor 1 · Guard courtyard · Ring the bell and recover the route map",
+  "À Heorot, traverse le pont jusqu’à la tour de droite et descends dans le souterrain. · Étage 1 · Cour de garde · Sonner la cloche et récupérer la carte du parcours",
+  "En Heorot, cruza el puente hasta la torre de la derecha y baja a la mazmorra. · Planta 1 · Patio de la guardia · Tocar la campana y recuperar el mapa de la ruta",
+  "A Heorot, attraversa il ponte fino alla torre sulla destra e scendi nei sotterranei. · Piano 1 · Cortile della guardia · Suonare la campana e recuperare la mappa del percorso",
+  "ヘオロットで橋を渡り、右手の塔から地下牢へ下りよう。 · 第1層 · 衛兵の中庭 · 鐘を鳴らし、経路図を回収する"
  ],
- "Betritt in Heorot das Verlies unter der alten Mauer. · Etage 3 · Gewölbe · Eingestürzten Glockengang räumen": [
-  "Enter the dungeon beneath the old wall in Heorot. · Floor 3 · Vault · Clear the collapsed bell passage",
-  "À Heorot, entre dans le souterrain sous la vieille muraille. · Étage 3 · Défaut · Déblayer le passage effondré qui mène à la cloche",
-  "En Heorot, entra en la mazmorra bajo la muralla antigua. · Planta 3 · Vault · Despejar el pasadizo derrumbado que lleva a la campana",
-  "A Heorot entra nei sotterranei sotto le vecchie mura. · Piano 3 · Vaccino · Sgombrare il passaggio crollato che porta alla campana",
-  "ヘオロットで古い城壁の下にある地下牢に入ろう。 · 第3層 · ヴォールト · 崩れた鐘の通路からがれきを取り除く"
+ "Geh in Heorot über die Brücke zum Turm rechts und steig ins Verlies hinab. · Etage 3 · Gewölbe · Eingestürzten Glockengang räumen": [
+  "In Heorot, cross the bridge to the tower on the right and head down into the dungeon. · Floor 3 · Vault · Clear the collapsed bell passage",
+  "À Heorot, traverse le pont jusqu’à la tour de droite et descends dans le souterrain. · Étage 3 · Salle voûtée · Déblayer le passage effondré qui mène à la cloche",
+  "En Heorot, cruza el puente hasta la torre de la derecha y baja a la mazmorra. · Planta 3 · Sala abovedada · Despejar el pasadizo derrumbado que lleva a la campana",
+  "A Heorot, attraversa il ponte fino alla torre sulla destra e scendi nei sotterranei. · Piano 3 · Sala a volta · Sgombrare il passaggio crollato che porta alla campana",
+  "ヘオロットで橋を渡り、右手の塔から地下牢へ下りよう。 · 第3層 · 地下広間 · 崩れた鐘の通路からがれきを取り除く"
  ],
  "Birkenlichtung": [
   "Birch clearing",
