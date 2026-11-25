@@ -87,10 +87,10 @@ public class PreservationFrameworkTest {
     }
     @Test public void launcherModsDefaultOffAndReachTheGameIndependently() {
         String[] labels = {
-            "Zalibas Expansion · Developer recommended",
+            "Zalibas Expansion · Recommended by the developer",
             "Find rare starter dragons more often (5% per wild battle)",
             "Exchange silver for gold (50:1)",
-            "Skip the 12-hour arena wait · Developer recommended",
+            "Skip the 12-hour arena wait · Recommended by the developer",
             "Full collection and resources (separate save copy)",
             "New game with all monsters at level 1",
             "New game with 3 of each monster, level 99, rank S",
@@ -162,7 +162,7 @@ public class PreservationFrameworkTest {
         Files.createDirectories(source.toPath().getParent()); Files.write(source.toPath(), new byte[]{1});
         try (ActivityController<LauncherActivity> control = Robolectric.buildActivity(LauncherActivity.class).setup()) {
             LauncherActivity activity = control.get();
-            android.widget.CheckBox expansion = (android.widget.CheckBox)button(activity.getWindow().getDecorView(), "Zalibas Expansion · Developer recommended");
+            android.widget.CheckBox expansion = (android.widget.CheckBox)button(activity.getWindow().getDecorView(), "Zalibas Expansion · Recommended by the developer");
             for (String origin : Arrays.asList("copy", "new")) {
                 context.getSharedPreferences("mods",Context.MODE_PRIVATE).edit().remove("expansionOrigin").commit();
                 expansion.performClick();

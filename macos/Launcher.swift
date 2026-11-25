@@ -53,7 +53,7 @@ final class LauncherBackground: NSView {
             device.selectItem(at: store.settings["device"] as? String == "iphone" ? 1 : 0)
             device.target = self; device.action = #selector(saveOptions); buttons.append(device)
             stack.addArrangedSubview(device)
-            preset = NSButton(checkboxWithTitle: "Recommended view settings · Anime4K + local HD artwork", target: self, action: #selector(applyPreset))
+            preset = NSButton(checkboxWithTitle: "Recommended display settings · Anime4K + local HD artwork", target: self, action: #selector(applyPreset))
             buttons.append(preset); stack.addArrangedSubview(preset)
             advancedButton = button("Advanced ▸", #selector(toggleAdvanced)); stack.addArrangedSubview(advancedButton)
             advanced.orientation = .vertical; advanced.alignment = .leading; advanced.spacing = 8
@@ -77,7 +77,7 @@ final class LauncherBackground: NSView {
             advanced.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
-                let box = NSButton(checkboxWithTitle: ["--zalibas-expansion", "--hunter-no-arena-cooldown"].contains(flag) ? text + " · Developer recommended" : text, target: self, action: #selector(saveMod(_:)))
+                let box = NSButton(checkboxWithTitle: ["--zalibas-expansion", "--hunter-no-arena-cooldown"].contains(flag) ? text + " · Recommended by the developer" : text, target: self, action: #selector(saveMod(_:)))
                 box.identifier = NSUserInterfaceItemIdentifier(flag)
                 box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); advanced.addArrangedSubview(box)
             }

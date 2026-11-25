@@ -12,6 +12,11 @@ def expedition_tables(strings):
     battle = json.loads((HERE / 'battle-locales.json').read_text('utf-8'))
     tables = {'de': dict(strings), **{lang: {} for lang in LANGUAGES}}
     for key, source in strings.items():
+        # The ending is also used as standalone narration in the quest journal.
+        # In a chat the game already displays the speaker from the &@ header.
+        quote = re.fullmatch(r'&@([^&]+)&@(?:Der |Die )?\1: „(.*)“', source)
+        if quote:
+            tables['de'][key] = f'&@{quote[1]}&@{quote[2]}'
         row = catalogue.get(source)
         if not isinstance(row, list) or len(row) != len(LANGUAGES):
             raise ValueError(f'Missing expedition translation for {key}: {source}')

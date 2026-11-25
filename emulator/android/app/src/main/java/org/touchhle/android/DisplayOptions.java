@@ -43,7 +43,7 @@ final class DisplayOptions {
         });
         root.addView(display);
         CheckBox preset = new CheckBox(context);
-        preset.setText("Recommended view settings · Bilinear + local HD artwork + 2× internal resolution");
+        preset.setText("Recommended display settings · Bilinear + local HD artwork + 2× internal resolution");
         preset.setTag("recommended-view");
         root.addView(preset);
         TextView filterLabel = new TextView(context);

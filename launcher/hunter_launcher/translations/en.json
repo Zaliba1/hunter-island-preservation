@@ -55,11 +55,11 @@
   "export_size": "The save data is too large to export.",
   "save_changed": "The save data changed during export. Try exporting again.",
   "resolution": "Resolution",
-  "preset": "Recommended view settings · Anime4K + local HD artwork",
+  "preset": "Recommended display settings · Anime4K + local HD artwork",
   "advanced": "Advanced",
   "output_filter": "Output filter",
   "integer_scaling": "Integer scaling",
   "fullscreen": "Start in fullscreen",
-  "developer_recommended": "Developer recommended",
+  "developer_recommended": "Recommended by the developer",
   "campaign_choice": "Copy your current campaign into a separate Expansion save? Choose Yes to copy, No to start fresh, or Cancel to go back."
 }

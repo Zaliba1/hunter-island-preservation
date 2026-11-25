@@ -95,7 +95,7 @@ final class ModOptions {
         for (String[] option : OPTIONS) {
             String flag = option[0];
             CheckBox checkbox = new CheckBox(context);
-            checkbox.setText(option[1] + (flag.equals("--zalibas-expansion") || flag.equals("--hunter-no-arena-cooldown") ? " · Developer recommended" : ""));
+            checkbox.setText(option[1] + (flag.equals("--zalibas-expansion") || flag.equals("--hunter-no-arena-cooldown") ? " · Recommended by the developer" : ""));
             checkbox.setChecked(preferences.getBoolean(flag, false));
             boxes.put(flag,checkbox);
             checkbox.setOnCheckedChangeListener((button, checked) -> {

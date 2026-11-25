@@ -93,7 +93,7 @@ class ModOptionsTest(unittest.TestCase):
                         self.assertEqual(choice.call_count, 2)
                     self.assertEqual(store.settings()['expansion_origin'], 'copy')
                     self.assertEqual(source.read_bytes(), b'original')
-                    self.assertTrue('Developer recommended' in expansion.cget('text'))
+                    self.assertTrue('Recommended by the developer' in expansion.cget('text'))
                 except BaseException as error:
                     errors.append(error)
                 finally:
