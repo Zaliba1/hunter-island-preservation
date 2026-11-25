@@ -23,3 +23,7 @@ The Windows, macOS and Android renderers include two upstream GLSL shader files 
 Original attribution and license texts remain in licenses/, emulator/ and the
 matching SourceDependencies asset. See LICENSES.md and ANDROID-LICENSES.md.
 General-purpose SDK/compiler/Gradle tools are separately installed build tools.
+
+Hardmode V2 embeds the [QuickJS](https://www.bellard.org/quickjs/) core
+(2025-09-13-2), copyright Fabrice Bellard and Charlie Gordon, under the MIT
+license. See `licenses/QuickJS-MIT.txt`.

@@ -194,6 +194,20 @@ Type mismatch when sending message {} to {:?}!
         }
         // Keep stack arguments in place, including on a cached guest IMP.
         IMP::Guest(guest_imp) => {
+            if env.options.hunter_hardmode_v2
+                && guest_imp.addr_with_thumb_bit() == 0x81241
+                && selector.as_str(&env.mem) == "assignAbilityToMonster:"
+            {
+                let entry_regs = *env.cpu.regs();
+                let entry_flags = env.cpu.cpsr();
+                let actor = id::from_bits(entry_regs[2]);
+                let handled = super::hunter_battle_ai::try_assign(env, receiver, actor);
+                *env.cpu.regs_mut() = entry_regs;
+                env.cpu.set_cpsr(entry_flags);
+                if handled {
+                    return;
+                }
+            }
             if env.options.zalibas_expansion && super::expedition_register::try_handle(env, receiver, guest_imp) {
                 return;
             }

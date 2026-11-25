@@ -6,6 +6,7 @@
 //! CommonCrypto and friends
 
 mod cryptor;
+pub(crate) use cryptor::transform as aes_transform;
 use crate::dyld::FunctionExports;
 use crate::mem::{ConstVoidPtr, MutPtr};
 use crate::{export_c_func, Environment};

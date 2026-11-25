@@ -77,6 +77,7 @@ pub struct Options {
     pub hunter_gravestone_codes: bool,
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
+    pub hunter_hardmode_v2: bool,
     pub hunter_no_arena_cooldown: bool,
     pub hunter_test_save: bool,
     pub hunter_level1_save: bool,
@@ -131,6 +132,7 @@ impl Default for Options {
             hunter_gravestone_codes: false,
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
+            hunter_hardmode_v2: false,
             hunter_no_arena_cooldown: false,
             hunter_test_save: false,
             hunter_level1_save: false,
@@ -317,6 +319,8 @@ impl Options {
             self.hunter_triple99_save = true;
         } else if arg == "--hunter-silver-exchange" {
             self.hunter_silver_exchange = true;
+        } else if arg == "--hunter-hardmode-v2" {
+            self.hunter_hardmode_v2 = true;
         } else if arg == "--expansion-copy-campaign" || arg == "--expansion-new-campaign" {
             self.expansion_copy_campaign = Some(arg == "--expansion-copy-campaign");
         } else if arg == "--zalibas-expansion" {

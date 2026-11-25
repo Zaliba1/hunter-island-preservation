@@ -15,6 +15,7 @@ final class ModOptions {
         {"--hunter-rare-dragons", "Find rare starter dragons more often (5% per wild battle)"},
         {"--hunter-silver-exchange", "Exchange silver for gold (50:1)"},
         {"--hunter-no-arena-cooldown", "Skip the 12-hour arena wait"},
+        {"--hunter-hardmode-v2", "Hardmode V2 for Hunter, story and arena battles"},
         {"--hunter-test-save", "Full collection and resources (separate save copy)"},
         {"--hunter-level1-save", "New game with all monsters at level 1"},
         {"--hunter-triple99-save", "New game with 3 of each monster, level 99, rank S"},

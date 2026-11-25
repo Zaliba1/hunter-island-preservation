@@ -14,6 +14,20 @@ fn rerun_if_changed(path: &Path) {
 pub fn main() {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let package_root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let quickjs = package_root.join("vendor/hunter-quickjs");
+    let mut hardmode = cc::Build::new();
+    hardmode.include(&quickjs)
+        .define("_GNU_SOURCE", None)
+        .define("CONFIG_VERSION", Some("\"2025-09-13\""))
+        .flag_if_supported("-fwrapv")
+        .warnings(false)
+        .file("src/hunter_ai_runtime.c");
+    for source in ["quickjs.c", "dtoa.c", "libregexp.c", "libunicode.c", "cutils.c"] {
+        hardmode.file(quickjs.join(source));
+    }
+    hardmode.compile("hunter_ai_runtime");
+    rerun_if_changed(&quickjs);
+    rerun_if_changed(&package_root.join("src/hunter_ai_runtime.c"));
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
         cc::Build::new().file("src/window_caption.m").compile("hunter_window_caption");
         println!("cargo:rustc-link-lib=framework=AppKit");

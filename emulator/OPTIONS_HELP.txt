@@ -354,3 +354,4 @@ Hunter Island preservation options (default off):
   --hunter-rare-dragons        Five percent per ordinary wild pack on four starter tiles.
   --hunter-silver-exchange     Add the local 50:1 silver-to-gold shop action.
   --hunter-no-arena-cooldown   Allow the next local tournament round immediately.
+  --hunter-hardmode-v2         Use the trained local AI in scripted NPC battles.

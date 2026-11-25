@@ -10,6 +10,7 @@ The modifications target Hunter Island 2.02.
 | Gravestone codes in Orlen | Enter a Monsterpedia number (1–360) at the gravestone in Orlen to receive that entry |
 | Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
 | No 12-hour colosseum cooldown | The next local arena battle can start immediately |
+| Hardmode V2 | Trained enemy AI for Hunters, story battles, arena and other scripted NPC encounters |
 | Create / use separate test save | Copies normal progress once, then uses its own expanded monster/equipment collection and resources |
 
 See [TEST_PROFILE.md](TEST_PROFILE.md) for contents, separate directories,
@@ -60,6 +61,15 @@ This option bypasses the 12-hour check between local tournament rounds.
 The game's existing routines handle results, progression and rewards.
 When you disable the option, the game again uses its recorded time of the
 last arena victory.
+
+## Hardmode V2
+
+Enable **Hardmode V2** in the Windows, macOS or Android launcher, or start the
+emulator with `--hunter-hardmode-v2`. The trained weights and tactical search
+run offline inside the emulator. Hunter Island supplies the current state
+from your 2.02 IPA and executes the selected action using its normal combat
+rules. Ordinary wild encounters keep their original AI. NPC turns that the
+policy cannot model use the original AI. The mod works with existing saves.
 
 ## Separate collections
 

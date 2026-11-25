@@ -19,6 +19,7 @@ MOD_OPTIONS = (
     ('--hunter-rare-dragons', 'rare'),
     ('--hunter-silver-exchange', 'exchange'),
     ('--hunter-no-arena-cooldown', 'arena'),
+    ('--hunter-hardmode-v2', 'hardmode_v2'),
     ('--hunter-test-save', 'full'),
     ('--hunter-level1-save', 'level1'),
     ('--hunter-triple99-save', 'triple'),
