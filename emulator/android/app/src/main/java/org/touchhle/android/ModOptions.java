@@ -18,6 +18,7 @@ final class ModOptions {
         {"--hunter-test-save", "Full collection and resources (separate save copy)"},
         {"--hunter-level1-save", "New game with all monsters at level 1"},
         {"--hunter-triple99-save", "New game with 3 of each monster, level 99, rank S"},
+        {"--hunter-gravestone-codes", "Gravestone codes in Orlen (Monsterpedia 1–360)"},
     };
 
     private static final String[][] PROFILES = {

@@ -94,6 +94,7 @@ public class PreservationFrameworkTest {
             "Full collection and resources (separate save copy)",
             "New game with all monsters at level 1",
             "New game with 3 of each monster, level 99, rank S",
+            "Gravestone codes in Orlen (Monsterpedia 1–360)",
         };
         String[] flags = {
             "--zalibas-expansion",
@@ -101,6 +102,7 @@ public class PreservationFrameworkTest {
             "--hunter-test-save",
             "--hunter-level1-save",
             "--hunter-triple99-save",
+            "--hunter-gravestone-codes",
         };
         try (ActivityController<LauncherActivity> controller =
                 Robolectric.buildActivity(LauncherActivity.class).setup()) {

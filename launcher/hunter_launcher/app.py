@@ -22,6 +22,7 @@ MOD_OPTIONS = (
     ('--hunter-test-save', 'full'),
     ('--hunter-level1-save', 'level1'),
     ('--hunter-triple99-save', 'triple'),
+    ('--hunter-gravestone-codes', 'gravestone'),
 )
 
 def mod_arguments(settings):

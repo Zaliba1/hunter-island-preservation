@@ -25,6 +25,11 @@ const ENCOUNTER: u32 = 0x9607d;
 const FACTORY: u32 = 0xbb509;
 const PICK_INGREDIENT: u32 = 0x1a0045;
 const PICK_INGREDIENT_BASE: u32 = 0xfe0e9;
+const SPIRIT_XP: u32 = 0xdfe81;
+// The native pickup methods keep their item receiver in r10 (MonsterJoin)
+// or r4 (SpiritTotem) at these exact calls in the supported 2.02 binary.
+const JOIN_BENCH_RETURN: u32 = 0xb1c07;
+const TOTEM_XP_RETURN: u32 = 0xb2c39;
 const ADD_BENCH: u32 = 0x7cb95;
 const FUSION_ADD_RETURN: u32 = 0x1a034d;
 const FUSION_BASE_ADD_RETURN: u32 = 0xfe383;
@@ -94,6 +99,7 @@ pub(crate) fn enabled(env: &Environment) -> u32 {
     u32::from(env.options.hunter_rare_dragons)
         | u32::from(env.options.hunter_silver_exchange) << 1
         | u32::from(env.options.hunter_no_arena_cooldown) << 2
+        | u32::from(env.options.hunter_gravestone_codes) << 3
 }
 fn valid_game(env: &Environment) -> bool {
     env.bundle.bundle_identifier() == "pockettrend.hunterisland"
@@ -304,6 +310,7 @@ pub(super) struct Hook {
     frame: bool,
     source: Option<String>,
     ingredients: Option<Vec<(String, Option<String>)>>,
+    code_join: bool,
 }
 
 pub(super) fn interesting(address: u32) -> bool {
@@ -323,7 +330,18 @@ pub(super) fn interesting(address: u32) -> bool {
             | PICK_INGREDIENT
             | PICK_INGREDIENT_BASE
             | ADD_BENCH
+            | SPIRIT_XP
     )
+}
+
+fn code_pickup(env: &mut Environment, register: usize, alias: &str) -> bool {
+    if !env.options.hunter_gravestone_codes { return false; }
+    let item = id::from_bits(env.cpu.regs()[register]);
+    let name: id = msg![env;item name];
+    if name == nil { return false; }
+    let name = ns_string::to_rust_string(env,name);
+    if env.options.capture_frames { log!("Gravestone pickup: {name}"); }
+    name == alias || Some(&*name) == alias.rsplit('.').next()
 }
 
 pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Option<Hook> {
@@ -338,6 +356,7 @@ pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Optio
         frame: false,
         source: None,
         ingredients: None,
+        code_join: false,
     };
     let flags = enabled(env);
     env.objc.hunter_history.tick();
@@ -409,8 +428,18 @@ pub(super) fn before(env: &mut Environment, receiver: id, address: u32) -> Optio
                 .or_default()
                 .push((receiver, address == PICK_INGREDIENT));
         }
+        SPIRIT_XP if env.cpu.regs()[crate::cpu::Cpu::LR] == TOTEM_XP_RETURN
+            && code_pickup(env, 4, crate::gravestone::TOTEM) => {
+            let short = ns_string::to_rust_string(env,id::from_bits(args[1])).into_owned();
+            if let Some(record) = env.objc.hunter_history.record.as_mut() {
+                let uid = record.code_spirits.get(&short).cloned()
+                    .unwrap_or_else(|| uuid::Uuid::new_v4().simple().to_string());
+                record.redeem(&uid, &short, true);
+            }
+        }
         ADD_BENCH => {
             let lr = env.cpu.regs()[crate::cpu::Cpu::LR];
+            hook.code_join = lr == JOIN_BENCH_RETURN && code_pickup(env, 10, crate::gravestone::JOIN);
             if let Some(&(node, hi)) = env
                 .objc
                 .hunter_history
@@ -502,6 +531,19 @@ pub(super) fn after(env: &mut Environment, hook: Hook) {
                 .get_mut(&env.current_thread)
             {
                 nodes.pop();
+            }
+        }
+        ADD_BENCH if hook.code_join => {
+            let monster = id::from_bits(hook.args[0]);
+            let bench: id = msg![env;(hook.receiver) monstersOnBench];
+            let accepted: bool = msg![env;bench containsObject:monster];
+            if let Some(short) = monster_species(env, monster).filter(|_| accepted) {
+                let s = &mut env.objc.hunter_history;
+                if let Some(record) = s.record.as_mut() {
+                    let uid = uuid::Uuid::new_v4().simple().to_string();
+                    record.redeem(&uid, &short, false);
+                    s.monsters.insert(monster, uid);
+                }
             }
         }
         ADD_BENCH => {
@@ -763,6 +805,7 @@ pub(crate) fn write_plist(env: &mut Environment, root: &mut Value) -> Result<(),
         .checked_add(1)
         .ok_or("Save sequence overflow")?;
     staged.previous_save = s.last_saved;
+    staged.tag_spirits(root);
     staged.game_hash = preservation::game_hash(root)?;
     let blob = match staged.encode() {
         Ok(blob) => blob,
@@ -953,6 +996,7 @@ mod tests {
                 frame: true,
                 source: None,
                 ingredients: None,
+                code_join: false,
             },
         );
     }

@@ -350,6 +350,7 @@ Other options:
 
 
 Hunter Island preservation options (default off):
+  --hunter-gravestone-codes    Redeem Monsterpedia numbers at the gravestone in Orlen.
   --hunter-rare-dragons        Five percent per ordinary wild pack on four starter tiles.
   --hunter-silver-exchange     Add the local 50:1 silver-to-gold shop action.
   --hunter-no-arena-cooldown   Allow the next local tournament round immediately.

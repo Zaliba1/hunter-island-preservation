@@ -97,9 +97,9 @@ fn patch_map(bytes: Vec<u8>, cells: &BTreeMap<String, Vec<(usize, u32)>>) -> Res
     Ok(map.into_bytes())
 }
 
-pub(crate) fn build(ipa: &Path) -> Result<BTreeMap<String, Vec<u8>>> {
+pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool) -> Result<BTreeMap<String, Vec<u8>>> {
     let encoded = include_bytes!("expansion.json.gz");
-    let recipe: Recipe = serde_json::from_reader(GzDecoder::new(&encoded[..]))?;
+    let recipe: Option<Recipe> = if expansion { Some(serde_json::from_reader(GzDecoder::new(&encoded[..]))?) } else { None };
     let text = crate::preservation::checked_save_key(ipa, Some("5b9572690e5dba80c3f6244c2e45d1c50479b46ed91045f6fd036780178e3b08"))?;
     let mut key = [0; 16];
     for (out, digits) in key.iter_mut().zip(text.chunks_exact(2)) {
@@ -112,22 +112,13 @@ pub(crate) fn build(ipa: &Path) -> Result<BTreeMap<String, Vec<u8>>> {
         .ok_or("missing Hunter Island map")?.trim_end_matches("overworld.tmx").to_owned();
     let mut stock = Catalog::new();
     let mut output = BTreeMap::new();
-    for (name, digest) in &recipe.sources {
-        let raw = read(archive.by_name(&format!("{prefix}{name}"))?)?;
-        if crate::preservation::hex(&crate::preservation::hash(&raw)) != *digest {
-            return Err(format!("Zalibas Expansion requires the original 2.02 resource {name}").into());
-        }
-        if name == "overworld.tmx" {
-            output.insert(name.clone(), patch_map(raw, &recipe.cells)?);
-            continue;
-        }
+    let decode = |raw: Vec<u8>| -> Result<Value> {
         let plain = if raw.starts_with(b"bplist") || raw.starts_with(b"<?xml") { raw } else {
             read(GzDecoder::new(&crypt(1, &raw)?[..]))?
         };
-        stock.insert(name.clone(), Value::from_reader(Cursor::new(plain))?);
-    }
-    for (name, edit) in recipe.resources {
-        let result = recipe.edits[edit].apply(stock.get(&name), &stock, &recipe.edits)?;
+        Ok(Value::from_reader(Cursor::new(plain))?)
+    };
+    let encode = |name: &str, result: &Value| -> Result<Vec<u8>> {
         let mut bytes = Vec::new();
         result.to_writer_binary(&mut bytes)?;
         if name != "Chats.plist" && !name.ends_with(".strings") {
@@ -135,7 +126,55 @@ pub(crate) fn build(ipa: &Path) -> Result<BTreeMap<String, Vec<u8>>> {
             compressed.write_all(&bytes)?;
             bytes = crypt(0, &compressed.finish()?)?;
         }
-        output.insert(name, bytes);
+        Ok(bytes)
+    };
+    if let Some(recipe) = recipe {
+        for (name, digest) in &recipe.sources {
+            let raw = read(archive.by_name(&format!("{prefix}{name}"))?)?;
+            if crate::preservation::hex(&crate::preservation::hash(&raw)) != *digest {
+                return Err(format!("Zalibas Expansion requires the original 2.02 resource {name}").into());
+            }
+            if name == "overworld.tmx" {
+                output.insert(name.clone(), patch_map(raw, &recipe.cells)?);
+                continue;
+            }
+            stock.insert(name.clone(), decode(raw)?);
+        }
+        for (name, edit) in recipe.resources {
+            let result = recipe.edits[edit].apply(stock.get(&name), &stock, &recipe.edits)?;
+            let bytes = encode(&name, &result)?;
+            output.insert(name, bytes);
+        }
+    }
+    if codes {
+        let mut load = |name: &str, overlay: &BTreeMap<String, Vec<u8>>| -> Result<Value> {
+            if let Some(raw) = overlay.get(name) { return decode(raw.clone()); }
+            if let Some(value) = stock.get(name) { return Ok(value.clone()); }
+            decode(read(archive.by_name(&format!("{prefix}{name}"))?)?)
+        };
+        let monsters = load("Monsters.plist", &output)?;
+        let mut towns = load("Towns.plist", &output)?;
+        crate::gravestone::towns(&mut towns, &monsters)?;
+        output.insert("Towns.plist".into(), encode("Towns.plist", &towns)?);
+        let mut items = load("Items.plist", &output)?;
+        crate::gravestone::items(&mut items)?;
+        output.insert("Items.plist".into(), encode("Items.plist", &items)?);
+        for (locale, hint) in crate::gravestone::PROMPTS {
+            let name = format!("{locale}.lproj/Localizable.strings");
+            let mut strings = load(&name, &output)?;
+            let strings_dict = strings.as_dictionary_mut().ok_or("Invalid localization")?;
+            // MonsterJoin and SpiritTotem format the species' localized name
+            // through the pickup type's own format string.
+            for (original,alias) in [("MonsterJoin","GravestoneJoin"), ("SpiritTotem","GravestoneTotem")] {
+                let format = strings_dict.get(&format!("Renderable{original}NameKey"))
+                    .ok_or("Missing localized pickup name")?.clone();
+                strings_dict.insert(format!("Renderable{alias}NameKey"), format);
+            }
+            let key = "DI.DIQuestionChatKey";
+            let prompt = strings_dict.get(key).and_then(Value::as_string).ok_or("Missing gravestone question")?;
+            strings_dict.insert(key.into(), format!("{prompt} {hint}").into());
+            output.insert(name.clone(), encode(&name, &strings)?);
+        }
     }
     Ok(output)
 }
@@ -154,10 +193,57 @@ mod tests {
     }
 
     #[test]
+    fn local_gravestone_codes_follow_book_order_before_and_after_the_riddle() -> Result<()> {
+        let Some(path) = std::env::var_os("HI_QA_ORIGINAL_IPA") else { return Ok(()) };
+        let ipa = Path::new(&path);
+        let text = crate::preservation::save_key(ipa)?;
+        let mut key = [0; 16];
+        for (byte, pair) in key.iter_mut().zip(text.chunks_exact(2)) {
+            *byte = u8::from_str_radix(std::str::from_utf8(pair)?,16)?;
+        }
+        for expansion in [false,true] {
+            let overlay = build(ipa,expansion,true)?;
+            let plain = crate::libc::crypto::transform_local(1,1,&key,&[0;16],&overlay["Towns.plist"]).unwrap();
+            let towns = Value::from_reader(Cursor::new(read(GzDecoder::new(&plain[..]))?))?;
+            let buildings = towns.as_dictionary().unwrap()["over-26x111"].as_dictionary().unwrap()["buildings"].as_array().unwrap();
+            let mut states = Vec::new();
+            for b in buildings.iter().filter_map(Value::as_dictionary) {
+                let Some(args) = b.get("arguments").and_then(Value::as_dictionary) else { continue };
+                if args.get("promptEvent").and_then(Value::as_string)!=Some("chat:DI.DIQuestion") { continue; }
+                let answers = args["answerEvents"].as_dictionary().unwrap();
+                let mut species = std::collections::BTreeSet::new();
+                for n in 1..=360 {
+                    let event = &answers[&n.to_string()];
+                    assert_eq!(event, &answers[&format!("{n:03}")]);
+                    let grant = event.as_dictionary().unwrap()["arguments"].as_dictionary().unwrap();
+                    assert_eq!(grant["forceNotUnique"].as_boolean(), Some(true));
+                    let loot = grant["treasureData"].as_dictionary().unwrap()["items"].as_array().unwrap();
+                    let item = loot[0].as_dictionary().unwrap()["data"].as_dictionary().unwrap();
+                    assert_eq!(item["type"].as_string(), Some(if n<=353 {crate::gravestone::JOIN} else {crate::gravestone::TOTEM}));
+                    let short = item["arguments"].as_dictionary().unwrap()["shortType"].as_string().unwrap();
+                    assert!(species.insert(short));
+                    if n==1 {assert_eq!(short,"Electricgorilla01");}
+                    if n==360 {assert_eq!(short,"Tiamat");}
+                }
+                let condition = b["conditions"].as_dictionary().unwrap()["chats"].as_string().unwrap();
+                assert_eq!(answers.contains_key("DIQuestionAnswer"),condition.starts_with('!'));
+                assert!(!answers.contains_key("0") && !answers.contains_key("361"));
+                states.push(condition);
+            }
+            assert_eq!(states, ["!DI.DIRightAnswer","DI.DIRightAnswer"]);
+            for (locale,hint) in crate::gravestone::PROMPTS {
+                let strings = Value::from_reader(Cursor::new(&overlay[&format!("{locale}.lproj/Localizable.strings")]))?;
+                assert!(strings.as_dictionary().unwrap()["DI.DIQuestionChatKey"].as_string().unwrap().contains(hint));
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
     fn local_original_matches_authored_expansion() -> Result<()> {
         let Some(original) = std::env::var_os("HI_QA_ORIGINAL_IPA") else { return Ok(()) };
         let reference = std::env::var_os("HI_QA_EXPANSION_IPA").ok_or("missing private QA reference")?;
-        let overlay = build(Path::new(&original))?;
+        let overlay = build(Path::new(&original), true, false)?;
         let mut archive = zip::ZipArchive::new(std::fs::File::open(reference)?)?;
         let prefix = archive.file_names().find(|n| n.ends_with(".app/overworld.tmx")).unwrap().trim_end_matches("overworld.tmx").to_owned();
         let text = crate::preservation::save_key(Path::new(&original))?;

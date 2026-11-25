@@ -13,7 +13,7 @@ archive matching the particular application build.
   when the file is loaded with the option disabled. Artificial additions are
   not reported as captures, exchanges or legitimate progression events.
 
-- Persistent "ever enabled" bits for the three existing mods, set only for a
+- Persistent "ever enabled" bits for the optional gameplay rules, set only for a
   loaded/created game profile. Launcher checkbox changes without loading a
   game do not affect an unrelated save.
 - Generated eligible starter-dragon packs, selected hatchlings and species totals.
@@ -22,6 +22,12 @@ archive matching the particular application build.
 - Successful hatchling captures while the mod was enabled, separately from
   captures originating in an affected encounter. These are not claims that
   a given monster could never have appeared naturally.
+- Each collected gravestone-code monster receives its own binary lineage ID
+  in the same save field as the starter dragons. The inspector reports the
+  redemption event and `contains_gravestone_reward` through evolution and
+  fusion. A summon has one ID in its saved spirit entry, including after
+  subsequent totems. The total counts collected code rewards. The ordinary
+  gravestone answer and wild capture counters keep their original meanings.
 - Successful silver exchanges, total silver spent and gold obtained. Failed
   saves roll back the balances and corresponding history change together.
 - Positive cooldown overrides in `beginTournamentBattle`, separately from

@@ -215,7 +215,7 @@ let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français")
 func gameLanguage(_ selection: String?) -> String {
     languageChoices.first(where: { $0.0 == selection })?.0 ?? "en"
 }
-let modChoices = [("--zalibas-expansion", "Zalibas Expansion"), ("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank")]
+let modChoices = [("--zalibas-expansion", "Zalibas Expansion"), ("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank"), ("--hunter-gravestone-codes", "Gravestone codes in Orlen (Monsterpedia 1–360)")]
 let collectionProfiles = [("--hunter-test-save", "pockettrend.hunterisland-test-v1"), ("--hunter-level1-save", "pockettrend.hunterisland-level1-v1"), ("--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1")]
 func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     let selected = collectionProfiles.filter { mods[$0.0] == true }

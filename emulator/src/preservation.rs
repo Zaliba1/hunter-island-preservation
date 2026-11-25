@@ -12,6 +12,8 @@ pub const MONSTER_FIELD: &str = "_r8";
 pub const RARE: u32 = 1;
 pub const EXCHANGE: u32 = 2;
 pub const ARENA: u32 = 4;
+pub const GRAVESTONE: u32 = 8;
+const CODE_LINEAGE: u32 = 4;
 const MAGIC: &[u8] = &[0x91, 0xc7, 0x36, 1];
 const LIMIT: usize = 2 * 1024 * 1024;
 const JOURNAL: usize = 256;
@@ -45,6 +47,8 @@ pub struct Lineage {
     pub ingredients: Vec<(String, Option<String>)>,
     #[serde(default, rename = "8")]
     pub fused_at_event: u64,
+    #[serde(default, rename = "9", skip_serializing_if = "is_zero")]
+    pub redeemed_at_event: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -113,8 +117,14 @@ pub struct Record {
     pub test_profile: bool,
     #[serde(default, rename = "23")]
     pub test_profile_modes: u32,
+    #[serde(default, rename = "24", skip_serializing_if = "is_zero")]
+    pub code_rewards: u64,
+    // Spirits have one saved entry per species instead of individual bench objects.
+    #[serde(default, rename = "25", skip_serializing_if = "BTreeMap::is_empty")]
+    pub code_spirits: BTreeMap<String,String>,
 }
 
+fn is_zero(n: &u64) -> bool { *n == 0 }
 fn add(n: &mut u64, amount: u64) {
     *n = n.saturating_add(amount);
 }
@@ -149,6 +159,8 @@ impl Record {
             marked_fusions: 0,
             test_profile: false,
             test_profile_modes: 0,
+            code_rewards: 0,
+            code_spirits: BTreeMap::new(),
         }
     }
     fn event(&mut self, kind: u8, details: serde_json::Value) {
@@ -215,9 +227,35 @@ impl Record {
                 parents: Vec::new(),
                 ingredients: Vec::new(),
                 fused_at_event: 0,
+                redeemed_at_event: 0,
             },
         );
     }
+    pub fn redeem(&mut self, id: &str, species: &str, spirit: bool) {
+        self.activate(GRAVESTONE);
+        self.event(9, serde_json::json!([id, species, spirit]));
+        add(&mut self.code_rewards, 1);
+        if spirit { self.code_spirits.insert(species.into(), id.into()); }
+        self.lineages.entry(id.into()).or_insert_with(|| Lineage {
+            origin_species: species.into(), current_species: species.into(), flags: CODE_LINEAGE,
+            encounter: 0, captured_at_event: 0, evolutions: 0, parents: Vec::new(),
+            ingredients: Vec::new(), fused_at_event: 0, redeemed_at_event: self.event_sequence,
+        });
+    }
+
+    pub fn tag_spirits(&self, root: &mut plist::Value) {
+        let spirits = root.as_dictionary_mut().and_then(|r| r.get_mut("props"))
+            .and_then(plist::Value::as_dictionary_mut).and_then(|p| p.get_mut("spiritsData"))
+            .and_then(plist::Value::as_dictionary_mut);
+        if let Some(spirits) = spirits {
+            for (name, uid) in &self.code_spirits {
+                if let Some(entry) = spirits.get_mut(name).and_then(plist::Value::as_dictionary_mut) {
+                    entry.insert(MONSTER_FIELD.into(), plist::Value::Data(uid.as_bytes().to_vec()));
+                }
+            }
+        }
+    }
+
     pub fn enter(&mut self, number: u64, selected: bool) {
         add(&mut self.entered_encounters, 1);
         if selected {
@@ -263,6 +301,7 @@ impl Record {
                 parents,
                 ingredients: ingredients.to_vec(),
                 fused_at_event: self.event_sequence,
+                redeemed_at_event: 0,
             },
         );
         true
@@ -313,7 +352,8 @@ impl Record {
     pub fn verify(&self) -> Result<(), String> {
         if !matches!(self.version, 1 | 2)
             || self.origin > 2
-            || self.ever_enabled & !7 != 0
+            || self.ever_enabled & !(RARE | EXCHANGE | ARENA | GRAVESTONE) != 0
+            || self.code_spirits.len() > 7
             || self.test_profile_modes & !7 != 0
             || (self.test_profile_modes != 0 && !self.test_profile)
             || self.events.len() > JOURNAL
@@ -333,7 +373,7 @@ impl Record {
                     return Err("Invalid fusion ancestry".into());
                 }
                 if let Some(p) = self.lineages.get(parent) {
-                    if p.captured_at_event.max(p.fused_at_event) >= l.fused_at_event {
+                    if p.captured_at_event.max(p.fused_at_event).max(p.redeemed_at_event) >= l.fused_at_event {
                         return Err("Fusion ancestry is not chronological".into());
                     }
                 } else if !self.incomplete {
@@ -418,9 +458,9 @@ impl Record {
             "observed_from_fresh_slot_no_mod_activation"
         };
         serde_json::json!({"status":status,"history_schema":self.version,"profile_id":hex(&self.id),"origin":self.origin,"save_sequence":self.save_sequence,
-            "ever_enabled":{"rare_dragons":self.ever_enabled&RARE!=0,"silver_exchange":self.ever_enabled&EXCHANGE!=0,"no_arena_cooldown":self.ever_enabled&ARENA!=0},
-            "counts":{"generated_encounters":self.counts[0],"hatchlings_selected_in_generated_packs":self.counts[1],"entered_affected_encounters":self.entered_encounters,"hatchlings_seen":self.hatchlings_seen,"hatchlings_captured_while_enabled":self.counts[2],"hatchlings_captured_from_affected_encounters":self.counts[3],"successful_exchanges":self.counts[4],"silver_exchanged":self.counts[5],"gold_received":self.counts[6],"arena_begin_overrides":self.counts[7],"skipped_arena_milliseconds":self.counts[8],"marked_fusions":self.marked_fusions},
-            "spawned_species":self.spawned_species,"captured_species":self.captured_species,"lineages":self.lineages.iter().map(|(id,l)|serde_json::json!({"id":id,"original_species":l.origin_species,"current_species":l.current_species,"captured_while_enabled":l.captured_at_event!=0 && l.flags&1!=0,"inherited_rare_provenance_flags":l.flags,"contains_mod_enabled_capture":l.flags&1!=0,"contains_affected_encounter_capture":l.flags&2!=0,"affected_encounter":l.encounter,"evolutions":l.evolutions,"fusion_event":l.fused_at_event,"parents":l.parents,"ingredients":l.ingredients,"ancestor_lineage_ids":self.ancestors(id)})).collect::<Vec<_>>(),
+            "ever_enabled":{"gravestone_codes":self.ever_enabled&GRAVESTONE!=0,"rare_dragons":self.ever_enabled&RARE!=0,"silver_exchange":self.ever_enabled&EXCHANGE!=0,"no_arena_cooldown":self.ever_enabled&ARENA!=0},
+            "counts":{"gravestone_rewards":self.code_rewards,"generated_encounters":self.counts[0],"hatchlings_selected_in_generated_packs":self.counts[1],"entered_affected_encounters":self.entered_encounters,"hatchlings_seen":self.hatchlings_seen,"hatchlings_captured_while_enabled":self.counts[2],"hatchlings_captured_from_affected_encounters":self.counts[3],"successful_exchanges":self.counts[4],"silver_exchanged":self.counts[5],"gold_received":self.counts[6],"arena_begin_overrides":self.counts[7],"skipped_arena_milliseconds":self.counts[8],"marked_fusions":self.marked_fusions},
+            "spawned_species":self.spawned_species,"captured_species":self.captured_species,"lineages":self.lineages.iter().map(|(id,l)|serde_json::json!({"id":id,"original_species":l.origin_species,"current_species":l.current_species,"captured_while_enabled":l.captured_at_event!=0 && l.flags&1!=0,"inherited_rare_provenance_flags":l.flags&3,"gravestone_reward_event":l.redeemed_at_event,"contains_gravestone_reward":l.flags&CODE_LINEAGE!=0,"contains_mod_enabled_capture":l.flags&1!=0,"contains_affected_encounter_capture":l.flags&2!=0,"affected_encounter":l.encounter,"evolutions":l.evolutions,"fusion_event":l.fused_at_event,"parents":l.parents,"ingredients":l.ingredients,"ancestor_lineage_ids":self.ancestors(id)})).collect::<Vec<_>>(),
             "event_count":self.event_sequence,"retained_events":self.events.len(),"observed_loaded_runtime_ms":self.observed_milliseconds,
             "test_profile":self.test_profile,"test_profile_modes":{"all_inclusive":self.test_profile_modes&1!=0,"level_one":self.test_profile_modes&2!=0,"triple_level99":self.test_profile_modes&4!=0},"source_version":self.source_version,"local_history_is_not_authenticated":true})
     }
@@ -769,6 +809,30 @@ mod tests {
             "inconsistent_or_incomplete"
         );
     }
+    #[test]
+    fn gravestone_lineage_survives_reload_evolution_and_fusion_without_counting_a_capture() {
+        let mut history = Record::new([1; 16], 1);
+        history.redeem("first", "Starter", false);
+        history.redeem("second", "Starter", false);
+        history.observe_form("first", "Evolved");
+        history.fuse("child", "Fusion", &[("Evolved".into(), Some("first".into()))]);
+        history.redeem("summon", "Spirit", true);
+        history.redeem("summon", "Spirit", true);
+        let restored = Record::decode(&history.encode().unwrap()).unwrap();
+        assert_eq!(restored.code_rewards, 4);
+        assert_eq!(restored.ever_enabled, GRAVESTONE);
+        assert_eq!(restored.counts, [0; 9]);
+        assert_eq!(restored.lineages.len(), 4);
+        assert_eq!(restored.lineages["first"].current_species, "Evolved");
+        assert_eq!(restored.lineages["child"].flags, CODE_LINEAGE);
+        assert_eq!(restored.ancestors("child"), vec!["first"]);
+        let mut save: plist::Value = plist::from_bytes(br#"<?xml version="1.0"?><plist version="1.0"><dict><key>props</key><dict><key>spiritsData</key><dict><key>Spirit</key><dict><key>xp</key><integer>101</integer></dict><key>Other</key><dict/></dict></dict></dict></plist>"#).unwrap();
+        restored.tag_spirits(&mut save);
+        let spirits = &save.as_dictionary().unwrap()["props"].as_dictionary().unwrap()["spiritsData"].as_dictionary().unwrap();
+        assert_eq!(spirits["Spirit"].as_dictionary().unwrap()[MONSTER_FIELD].as_data(), Some(&b"summon"[..]));
+        assert!(!spirits["Other"].as_dictionary().unwrap().contains_key(MONSTER_FIELD));
+    }
+
     #[test]
     fn legacy_v1_history_migrates_without_losing_capture_or_exchange_totals() {
         let mut r = Record::new([8; 16], 0);

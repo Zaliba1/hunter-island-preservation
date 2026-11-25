@@ -7,6 +7,7 @@ The modifications target Hunter Island 2.02.
 | Option | Effect |
 | --- | --- |
 | More frequent starter dragons | 5% chance per ordinary wild encounter on the four original encounter tiles |
+| Gravestone codes in Orlen | Enter a Monsterpedia number (1–360) at the gravestone in Orlen to receive that entry |
 | Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
 | No 12-hour colosseum cooldown | The next local arena battle can start immediately |
 | Create / use separate test save | Copies normal progress once, then uses its own expanded monster/equipment collection and resources |
@@ -27,6 +28,20 @@ For the first monster in an ordinary wild encounter group, the mod selects
 the corresponding dragon with a 5% probability. Remaining group slots are
 filled from the three normal companions. The probability applies per wild
 encounter, including encounters with different group sizes.
+
+## Gravestone codes in Orlen
+
+Enable **Gravestone codes in Orlen** in the launcher, start your campaign and
+tap the gravestone in the southwest corner of Orlen. Enter the number shown
+in the Monsterpedia, press Return and collect the reward. For example, both
+`1` and `001` give Spark. Each redemption from 1 to 353 grants one level-one
+monster. Codes 354 to 360 use the game's spirit totems. A first totem unlocks
+the summon and further totems give it experience.
+
+The original riddle still gives its own one-time reward. Its gravestone
+continues to accept numbers once solved. The option works in both the
+original campaign and Zalibas Expansion. Turning it off disables new codes.
+Previously granted monsters and their individual save-history tags persist.
 
 ## Silver exchange
 

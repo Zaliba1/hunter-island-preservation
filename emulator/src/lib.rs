@@ -55,6 +55,7 @@ mod options;
 mod paths;
 pub mod preservation;
 mod expansion;
+mod gravestone;
 mod test_profile;
 mod stack;
 mod window;
@@ -266,8 +267,9 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     };
     let mut bundle_data = fs::BundleData::open_any(&bundle_path)
         .map_err(|e| format!("Could not open app bundle: {e}"))?;
-    if expansion {
-        let overlay = expansion::build(&bundle_path).map_err(|e| format!("Zalibas Expansion: {e}"))?;
+    if expansion || options.hunter_gravestone_codes {
+        let overlay = expansion::build(&bundle_path, expansion, options.hunter_gravestone_codes)
+            .map_err(|e| format!("Hunter Island mod resources: {e}"))?;
         bundle_data.set_overlay(overlay)?;
     }
     let (bundle, fs) = match bundle::Bundle::new_with_sandbox(
