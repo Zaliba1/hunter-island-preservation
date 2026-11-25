@@ -11,7 +11,8 @@ use std::ffi::{c_char, c_int, c_void, CStr};
 use std::io::{Cursor, Read};
 use std::ptr::NonNull;
 
-const SCRIPT: &str = include_str!("../hunter_ai_model.js");
+// JS_Eval reads a final NUL at input[length].
+const SCRIPT: &str = concat!(include_str!("../hunter_ai_model.js"), "\0");
 const INFINITE_DURATION: i32 = i32::MAX;
 const CATALOG_LIMIT: u64 = 16 * 1024 * 1024;
 
@@ -29,7 +30,7 @@ struct Runtime(NonNull<c_void>);
 
 impl Runtime {
     fn new() -> Result<Self, String> {
-        NonNull::new(unsafe { hunter_ai_new(SCRIPT.as_ptr().cast(), SCRIPT.len()) })
+        NonNull::new(unsafe { hunter_ai_new(SCRIPT.as_ptr().cast(), SCRIPT.len() - 1) })
             .map(Self)
             .ok_or_else(|| "could not load the embedded policy".into())
     }
@@ -470,5 +471,15 @@ pub(super) fn try_assign(env: &mut Environment, ai: id, actor: id) -> bool {
             }
             false
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Runtime;
+
+    #[test]
+    fn embedded_hardmode_loads_in_the_native_runtime() {
+        assert!(Runtime::new().is_ok());
     }
 }

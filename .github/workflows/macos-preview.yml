@@ -63,7 +63,8 @@ jobs:
         with:
           name: HunterIsland-macOS-arm64-preview
           path: |
-            dist/macos/*.zip
+            dist/macos/HunterIsland-macOS-arm64-*.zip
+            dist/macos/HunterIsland-Source-test-*.zip
             dist/macos/*.json
             dist/macos/*.txt
             dist/macos/README.md
