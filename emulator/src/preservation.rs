@@ -528,6 +528,10 @@ pub fn inspect_plist(value: &plist::Value) -> serde_json::Value {
             if let Some(player) = value.as_dictionary().and_then(|d| d.get("playerData")) {
                 owned(player, &mut ids);
             }
+            if let Some(spirits) = value.as_dictionary().and_then(|d| d.get("props"))
+                .and_then(plist::Value::as_dictionary).and_then(|p| p.get("spiritsData")) {
+                owned(spirits, &mut ids);
+            }
             report["owned_lineage_ids"] = serde_json::json!(ids);
             report
         }
@@ -816,9 +820,10 @@ mod tests {
         history.redeem("second", "Starter", false);
         history.observe_form("first", "Evolved");
         history.fuse("child", "Fusion", &[("Evolved".into(), Some("first".into()))]);
-        history.redeem("summon", "Spirit", true);
-        history.redeem("summon", "Spirit", true);
-        let restored = Record::decode(&history.encode().unwrap()).unwrap();
+        let spirit_id = "0123456789abcdef0123456789abcdef";
+        history.redeem(spirit_id, "Spirit", true);
+        history.redeem(spirit_id, "Spirit", true);
+        let mut restored = Record::decode(&history.encode().unwrap()).unwrap();
         assert_eq!(restored.code_rewards, 4);
         assert_eq!(restored.ever_enabled, GRAVESTONE);
         assert_eq!(restored.counts, [0; 9]);
@@ -829,8 +834,11 @@ mod tests {
         let mut save: plist::Value = plist::from_bytes(br#"<?xml version="1.0"?><plist version="1.0"><dict><key>props</key><dict><key>spiritsData</key><dict><key>Spirit</key><dict><key>xp</key><integer>101</integer></dict><key>Other</key><dict/></dict></dict></dict></plist>"#).unwrap();
         restored.tag_spirits(&mut save);
         let spirits = &save.as_dictionary().unwrap()["props"].as_dictionary().unwrap()["spiritsData"].as_dictionary().unwrap();
-        assert_eq!(spirits["Spirit"].as_dictionary().unwrap()[MONSTER_FIELD].as_data(), Some(&b"summon"[..]));
+        assert_eq!(spirits["Spirit"].as_dictionary().unwrap()[MONSTER_FIELD].as_data(), Some(spirit_id.as_bytes()));
         assert!(!spirits["Other"].as_dictionary().unwrap().contains_key(MONSTER_FIELD));
+        restored.game_hash = game_hash(&save).unwrap();
+        save.as_dictionary_mut().unwrap().insert(FIELD.into(), plist::Value::Data(restored.encode().unwrap()));
+        assert_eq!(inspect_plist(&save)["owned_lineage_ids"],serde_json::json!([spirit_id]));
     }
 
     #[test]
