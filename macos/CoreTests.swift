@@ -115,6 +115,11 @@ import Darwin
         }
         store.settings["language"] = "ja"; try store.save()
         try require(try selectedProfileDirectory([:]) == "pockettrend.hunterisland", "Wrong normal profile.")
+        try require(try selectedProfileDirectory([roguelikeFlag: true]) == "pockettrend.hunterisland-roguelike-v1", "Wrong Roguelike profile.")
+        let rogueExpansion = [roguelikeFlag: true, "--zalibas-expansion": true, "--hunter-no-arena-cooldown": true]
+        try require(try selectedProfileDirectory(rogueExpansion) == "pockettrend.hunterisland-roguelike-v1-expansion", "Wrong Roguelike Expansion profile.")
+        try require(gameArguments(language: "en", device: "ipad", mods: rogueExpansion, campaign: "copy").contains(roguelikeFlag), "Roguelike argument is missing.")
+        try require(!gameArguments(language: "en", device: "ipad", mods: rogueExpansion, campaign: "copy").contains("--expansion-copy-campaign"), "Roguelike must start its own campaign.")
         try require(try selectedProfileDirectory(["--zalibas-expansion": true]) == "pockettrend.hunterisland-expansion", "Wrong expansion profile.")
         try require(try selectedProfileDirectory(["--zalibas-expansion": true, "--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1-expansion", "Wrong expansion testing profile.")
         try require(try selectedProfileDirectory(["--hunter-level1-save": true]) == "pockettrend.hunterisland-level1-v1", "Wrong level-one profile.")

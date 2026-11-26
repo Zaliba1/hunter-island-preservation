@@ -355,3 +355,4 @@ Hunter Island preservation options (default off):
   --hunter-silver-exchange     Add the local 50:1 silver-to-gold shop action.
   --hunter-no-arena-cooldown   Allow the next local tournament round immediately.
   --hunter-hardmode-v2         Use the trained local AI in scripted NPC battles.
+  --hunter-roguelike           Use the Roguelike rules and a separate fresh campaign.

@@ -1,3 +1,15 @@
+# 0.2.0-preview.18 — Roguelike mode
+
+Enable **Roguelike** in the launcher to start a separate Hunter Island 2.02 campaign. Zalibas Expansion and the Colosseum cooldown skip work with it.
+
+- Wild battles give no XP or silver. Story and side-quest battles double both rewards.
+- Scripted opponents gain +1, +3, +5, +7, +9, +11 or +13 levels by region, up to the game's level cap.
+- Hardmode V3 handles enemy decisions in wild, story and arena battles.
+- Gold eggs award one of the three prizes visible on the right when the wheel stops.
+- Every fusion recipe in the selected campaign is available from the start.
+
+Roguelike disables silver exchange, gravestone codes, the rare starter dragon boost and the three testing collections. Starting a run uses a dedicated save folder for either the base game or Zalibas Expansion.
+
 # 0.2.0-preview.10 — Zalibas Expansion and graphics filters
 
 Select **Zalibas Expansion** in the launcher to play the optional campaign

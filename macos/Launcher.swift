@@ -146,6 +146,7 @@ final class LauncherBackground: NSView {
     }
     func refresh() {
         buttons.forEach { $0.isEnabled = !busy }
+        syncRoguelikeControls()
         playButton?.isEnabled = !busy && store.settings["gameHash"] is String
         if !busy { status?.stringValue = store.settings["gameHash"] is String ? "Hunter Island 2.02 imported. Ready to play." : "Import your compatible IPA to begin." }
     }
@@ -163,6 +164,7 @@ final class LauncherBackground: NSView {
         saveOptions()
     }
     func chooseCampaign() -> Bool {
+        if mods.contains(where: { $0.identifier?.rawValue == roguelikeFlag && $0.state == .on }) { return true }
         guard store.needsCampaignChoice() else { return true }
         let alert = NSAlert(); alert.messageText = "Start Zalibas Expansion"
         alert.informativeText = "Copy your original campaign into a separate Expansion save, or start a new campaign?"
@@ -182,8 +184,16 @@ final class LauncherBackground: NSView {
         }
         saveOptions()
     }
+    func syncRoguelikeControls() {
+        let enabled = mods.contains { $0.identifier?.rawValue == roguelikeFlag && $0.state == .on }
+        for box in mods where roguelikeConflicts.contains(box.identifier?.rawValue ?? "") {
+            if enabled { box.state = .off }
+            box.isEnabled = !busy && !enabled
+        }
+    }
     @objc func saveOptions() {
         syncDisplay()
+        syncRoguelikeControls()
         store.settings["outputFilter"] = outputFilters[filter.indexOfSelectedItem]
         let selectedLanguage = languageChoices[language.indexOfSelectedItem].0
         store.settings["language"] = selectedLanguage

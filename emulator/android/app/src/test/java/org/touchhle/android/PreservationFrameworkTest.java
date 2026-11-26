@@ -85,6 +85,34 @@ public class PreservationFrameworkTest {
         if(view instanceof ViewGroup)for(int i=0;i<((ViewGroup)view).getChildCount();i++){Button b=button(((ViewGroup)view).getChildAt(i),label);if(b!=null)return b;}
         return null;
     }
+    @Test public void roguelikeDisablesResourceModsAndKeepsCampaignOptions() {
+        try (ActivityController<LauncherActivity> controller =
+                Robolectric.buildActivity(LauncherActivity.class).setup()) {
+            LauncherActivity activity = controller.get();
+            View root = activity.getWindow().getDecorView();
+            android.widget.CheckBox roguelike = (android.widget.CheckBox) button(root, "Roguelike (separate campaign, Hardmode V3)");
+            android.widget.CheckBox exchange = (android.widget.CheckBox) button(root, "Exchange silver for gold (50:1)");
+            android.widget.CheckBox cooldown = (android.widget.CheckBox) button(root, "Skip the 12-hour arena wait · Recommended by the developer");
+            android.widget.CheckBox expansion = (android.widget.CheckBox) button(root, "Zalibas Expansion · Recommended by the developer");
+            assertNotNull(roguelike);
+            assertFalse(roguelike.isChecked());
+            exchange.setChecked(true);
+            cooldown.setChecked(true);
+            roguelike.setChecked(true);
+            expansion.setChecked(true);
+            assertFalse(exchange.isEnabled());
+            assertFalse(exchange.isChecked());
+            assertTrue(cooldown.isChecked());
+            assertTrue(expansion.isChecked());
+            List<String> arguments = new ArrayList<>();
+            ModOptions.appendArguments(activity, arguments);
+            assertEquals(java.util.Arrays.asList("--zalibas-expansion", "--hunter-roguelike", "--hunter-no-arena-cooldown"), arguments);
+            assertEquals("pockettrend.hunterisland-roguelike-v1-expansion", ModOptions.selectedProfile(activity));
+            roguelike.setChecked(false);
+            assertTrue(exchange.isEnabled());
+        }
+    }
+
     @Test public void launcherModsDefaultOffAndReachTheGameIndependently() {
         String[] labels = {
             "Zalibas Expansion · Recommended by the developer",

@@ -78,6 +78,7 @@ pub struct Options {
     pub hunter_rare_dragons: bool,
     pub hunter_silver_exchange: bool,
     pub hunter_hardmode_v2: bool,
+    pub hunter_roguelike: bool,
     pub hunter_additional_arena: bool,
     pub hunter_no_arena_cooldown: bool,
     pub hunter_test_save: bool,
@@ -134,6 +135,7 @@ impl Default for Options {
             hunter_rare_dragons: false,
             hunter_silver_exchange: false,
             hunter_hardmode_v2: false,
+            hunter_roguelike: false,
             hunter_additional_arena: false,
             hunter_no_arena_cooldown: false,
             hunter_test_save: false,
@@ -323,6 +325,8 @@ impl Options {
             self.hunter_silver_exchange = true;
         } else if arg == "--hunter-hardmode-v2" {
             self.hunter_hardmode_v2 = true;
+        } else if arg == "--hunter-roguelike" {
+            self.hunter_roguelike = true;
         } else if arg == "--hunter-additional-arena-fights" {
             self.hunter_additional_arena = true;
         } else if arg == "--expansion-copy-campaign" || arg == "--expansion-new-campaign" {

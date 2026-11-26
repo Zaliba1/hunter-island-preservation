@@ -7,6 +7,7 @@ The modifications target Hunter Island 2.02.
 | Option | Effect |
 | --- | --- |
 | More frequent starter dragons | 5% chance per ordinary wild encounter on the four original encounter tiles |
+| Roguelike | New campaign with Hardmode V3, tougher scripted enemies and rebalanced rewards |
 | Gravestone codes in Orlen | Enter a Monsterpedia number (1–360) at the gravestone in Orlen to receive that entry |
 | Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
 | No 12-hour colosseum cooldown | The next local arena battle can start immediately |
@@ -16,6 +17,21 @@ The modifications target Hunter Island 2.02.
 
 See [TEST_PROFILE.md](TEST_PROFILE.md) for contents, separate directories,
 switching back to normal saves and the persistent testing marker.
+
+## Roguelike
+
+Choose **Roguelike** under **Advanced** and start a new game. The base campaign
+and Zalibas Expansion each have a dedicated Roguelike save folder. Zalibas
+Expansion, skipping the arena wait and Additional Arena Fights can be enabled
+alongside it. The launcher disables silver exchange, gravestone codes, more
+frequent starter dragons and the three testing collections while Roguelike is on.
+
+- Ordinary wild battles award zero experience and silver. Captures and other loot follow the encounter's rules.
+- Scripted story and side battles award twice the experience and silver specified by the game's battle reward logic.
+- Scripted enemy levels increase by **+1, +3, +5, +7, +9, +11, +13** across the seven regions, up to the game's level cap. Towns and dungeon entrances follow nearby overworld areas.
+- The enemy AI uses the same Hardmode V3 policy as Additional Arena Fights in wild, story and arena battles. The game handles turns that the policy cannot model.
+- Golden egg spins land on one of the rare rewards shown on the right. The game generates those rewards for each spin.
+- All authored fusion recipes in the selected campaign are available from the beginning. Ingredients are still consumed by the native fusion system.
 
 ## Starter dragons
 

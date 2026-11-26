@@ -148,11 +148,11 @@ fn load_policy(env: &Environment) -> Result<Runtime, String> {
     Ok(policy)
 }
 
-fn class_name(env: &Environment, object: id) -> Option<&str> {
+pub(super) fn class_name(env: &Environment, object: id) -> Option<&str> {
     (object != nil).then(|| env.objc.try_get_class_name(ObjC::read_isa(object, &env.mem))).flatten()
 }
 
-fn scripted_encounter(env: &mut Environment, battle: id, encounter: id) -> bool {
+pub(super) fn scripted_encounter(env: &mut Environment, battle: id, encounter: id) -> bool {
     match class_name(env, encounter) {
         Some("ArenaEncounter" | "TownEncounter" | "TournamentEncounter") => return true,
         None | Some("MultiplayerEncounter") => return false,
@@ -456,15 +456,16 @@ pub(super) fn try_assign(env: &mut Environment, ai: id, actor: id) -> bool {
         return false;
     }
     let arena = super::hunter_additional_arena::is_current(env, encounter);
-    let eligible = arena || (env.options.hunter_hardmode_v2 && scripted_encounter(env, battle, encounter));
-    let version = if arena { "V3" } else { "V2" };
+    let v3 = arena || (env.options.hunter_roguelike && encounter != nil);
+    let eligible = v3 || (env.options.hunter_hardmode_v2 && scripted_encounter(env, battle, encounter));
+    let version = if v3 { "V3" } else { "V2" };
     if env.options.capture_frames {
         log!("Hardmode {version} encounter: {:?}, enabled={eligible}", class_name(env, encounter));
     }
     if !eligible {
         return false;
     }
-    match take_turn(env, ai, actor, battle, arena) {
+    match take_turn(env, ai, actor, battle, v3) {
         Ok(true) => true,
         result => {
             if !env.objc.hunter_battle_ai.fallback_logged || env.options.capture_frames {

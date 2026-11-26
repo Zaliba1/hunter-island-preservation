@@ -131,6 +131,15 @@ Special options:
         Write, then reopen/check/delete a separate app-local storage fixture.
 ";
 
+fn check_roguelike_options(options: &options::Options) -> Result<(), String> {
+    if options.hunter_roguelike && (options.hunter_test_save || options.hunter_level1_save
+        || options.hunter_triple99_save || options.hunter_rare_dragons
+        || options.hunter_silver_exchange || options.hunter_gravestone_codes) {
+        return Err("Roguelike cannot be combined with resource or collection mods.".into());
+    }
+    Ok(())
+}
+
 pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     echo!(
         "touchHLE {}{}{} â€” https://touchhle.org/",
@@ -254,21 +263,32 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
 
     let test_mode = test_profile::Mode::from_options(&options)?;
     let expansion = options.zalibas_expansion;
+    let roguelike = options.hunter_roguelike;
+    check_roguelike_options(&options)?;
     let root = paths::user_data_base_path();
-    if expansion && !just_info {
+    if expansion && !just_info && !roguelike {
         if let Some(copy) = options.expansion_copy_campaign {
             test_profile::initialize_expansion(&root.join(paths::SANDBOX_DIR), copy)?;
         }
     }
-    let test_sandbox = match (just_info, test_mode, expansion) {
-        (false, Some(mode), _) => Some(test_profile::prepare(&bundle_path, &root, mode, expansion)?),
-        (false, None, true) => Some(root.join(paths::SANDBOX_DIR).join("pockettrend.hunterisland-expansion")),
-        _ => None,
+    let test_sandbox = if roguelike && !just_info {
+        let name = if expansion {
+            "pockettrend.hunterisland-roguelike-v1-expansion"
+        } else {
+            "pockettrend.hunterisland-roguelike-v1"
+        };
+        Some(root.join(paths::SANDBOX_DIR).join(name))
+    } else {
+        match (just_info, test_mode, expansion) {
+            (false, Some(mode), _) => Some(test_profile::prepare(&bundle_path, &root, mode, expansion)?),
+            (false, None, true) => Some(root.join(paths::SANDBOX_DIR).join("pockettrend.hunterisland-expansion")),
+            _ => None,
+        }
     };
     let mut bundle_data = fs::BundleData::open_any(&bundle_path)
         .map_err(|e| format!("Could not open app bundle: {e}"))?;
-    if expansion || options.hunter_gravestone_codes {
-        let overlay = expansion::build(&bundle_path, expansion, options.hunter_gravestone_codes)
+    if expansion || options.hunter_gravestone_codes || roguelike {
+        let overlay = expansion::build(&bundle_path, expansion, options.hunter_gravestone_codes, roguelike)
             .map_err(|e| format!("Hunter Island mod resources: {e}"))?;
         bundle_data.set_overlay(overlay)?;
     }
@@ -400,6 +420,10 @@ pub fn main<T: Iterator<Item = String>>(mut args: T) -> Result<(), String> {
     if options.zalibas_expansion != expansion {
         return Err("Select Zalibas Expansion in the launcher or command line.".into());
     }
+    if options.hunter_roguelike != roguelike {
+        return Err("Select Roguelike in the launcher or command line; options files cannot change its save directory.".into());
+    }
+    check_roguelike_options(&options)?;
     if test_profile::Mode::from_options(&options)? != test_mode {
         return Err("Select the testing collection in the launcher or command line; options files cannot change its save directory.".into());
     }

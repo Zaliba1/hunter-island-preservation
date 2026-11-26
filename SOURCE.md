@@ -4,6 +4,11 @@ Matching sources accompany locally supplied Windows and Android binaries.
 Published builds provide them in
 [Releases](https://github.com/Zaliba1/hunter-island-preservation/releases).
 
+Preview 18 includes Windows x64, Android ARM64 and Apple Silicon macOS builds.
+Its release provides the matching `HunterIsland-Source-0.2.0-preview.18.zip`,
+`HunterIsland-SourceDependencies-0.2.0-preview.18.zip` and
+`HunterIsland-WindowsRuntimeSources-0.2.0-preview.18.zip`.
+
 For the Windows FSR release:
 
 - HunterIsland-Source-0.2.0-preview.9-fsr.1.zip

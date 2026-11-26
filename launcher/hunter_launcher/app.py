@@ -10,10 +10,11 @@ from . import VERSION, ipa
 from .storage import Store, atomic_json
 from .language import (LANGUAGES, LANGUAGE_CODES, active_language, issue_message,
                        language_arguments, message, selected_language)
-from .profiles import TEST_PROFILES, selected_test_directory
+from .profiles import ROGUELIKE, ROGUELIKE_CONFLICTS, TEST_PROFILES, selected_test_directory
 
 MOD_OPTIONS = (
     ('--zalibas-expansion', 'expansion'),
+    (ROGUELIKE, 'roguelike'),
     ('--hunter-hd-textures', 'hd_textures'),
     ('--scale-hack=2', 'render_2x'),
     ('--hunter-rare-dragons', 'rare'),
@@ -75,7 +76,7 @@ def play(store, release, timeout=None, test_taps=(), capture=False):
             if settings.get('integer_scaling'): args.append('--integer-scaling')
             if settings.get('fullscreen'): args.append('--fullscreen')
             origin = settings.get('expansion_origin')
-            if '--zalibas-expansion' in args and origin in ('copy', 'new'):
+            if '--zalibas-expansion' in args and ROGUELIKE not in args and origin in ('copy', 'new'):
                 args.append('--expansion-' + origin + '-campaign')
             if capture:
                 args.append('--capture-frames')
@@ -218,6 +219,14 @@ def gui(store, release):
                     mod_values[other].set(False)
     for flag in TEST_PROFILES:
         mod_values[flag].trace_add('write',lambda *_args, flag=flag:choose_test(flag))
+    def update_roguelike_controls():
+        enabled = mod_values[ROGUELIKE].get()
+        for flag, key in MOD_OPTIONS:
+            if flag in ROGUELIKE_CONFLICTS:
+                if enabled:
+                    mod_values[flag].set(False)
+                advanced.nametowidget(key).configure(state='disabled' if enabled else 'normal')
+    update_roguelike_controls()
     translate(ttk.Label(advanced, wraplength=650, font=('Segoe UI',9)), 'collection_hint').pack(anchor='w',pady=(6,0))
     ttk.Separator(advanced).pack(fill='x',pady=18)
     export_button = translate(ttk.Button(advanced), 'export')
@@ -238,7 +247,7 @@ def gui(store, release):
             widget.configure(text=text(key) + (' · ' + text('developer_recommended') if recommended else ''))
 
     def choose_campaign(config):
-        if not mod_values['--zalibas-expansion'].get() or not store.needs_expansion_choice(config):
+        if mod_values[ROGUELIKE].get() or not mod_values['--zalibas-expansion'].get() or not store.needs_expansion_choice(config):
             return True
         answer = messagebox.askyesnocancel(text('expansion'), text('campaign_choice'), parent=root)
         if answer is None:
@@ -267,6 +276,8 @@ def gui(store, release):
             error_dialog('start_error',error)
             return False
     def change_mod(flag):
+        if flag == ROGUELIKE:
+            update_roguelike_controls()
         if flag in ('--zalibas-expansion', '--hunter-hd-textures', '--scale-hack=2'):
             save_controls(expansion_changed=flag == '--zalibas-expansion')
     def apply_preset():
@@ -303,6 +314,7 @@ def gui(store, release):
             busy = False
             for widget in (import_button,start_button,export_button,save_check,*mod_controls):
                 widget.configure(state='normal')
+            update_roguelike_controls()
             filters.configure(state='readonly')
             devices.configure(state='readonly')
             languages.configure(state='readonly')

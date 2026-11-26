@@ -10,8 +10,10 @@ import java.util.List;
 
 /** Optional rules for the locally imported Hunter Island game. */
 final class ModOptions {
+    private static final String ROGUELIKE = "--hunter-roguelike";
     private static final String[][] OPTIONS = {
         {"--zalibas-expansion", "Zalibas Expansion"},
+        {ROGUELIKE, "Roguelike (separate campaign, Hardmode V3)"},
         {"--hunter-rare-dragons", "Find rare starter dragons more often (5% per wild battle)"},
         {"--hunter-silver-exchange", "Exchange silver for gold (50:1)"},
         {"--hunter-no-arena-cooldown", "Skip the 12-hour arena wait"},
@@ -31,8 +33,30 @@ final class ModOptions {
 
     private ModOptions() {}
 
+    private static boolean conflictsWithRoguelike(String flag) {
+        switch (flag) {
+            case "--hunter-rare-dragons":
+            case "--hunter-silver-exchange":
+            case "--hunter-gravestone-codes":
+            case "--hunter-test-save":
+            case "--hunter-level1-save":
+            case "--hunter-triple99-save":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     static String selectedProfile(Context context) {
         SharedPreferences p=preferences(context);
+        if (p.getBoolean(ROGUELIKE, false)) {
+            for (String[] option : OPTIONS) {
+                if (conflictsWithRoguelike(option[0]) && p.getBoolean(option[0], false)) {
+                    throw new IllegalStateException("Roguelike cannot be combined with resource or collection mods.");
+                }
+            }
+            return campaignProfile(context);
+        }
         String selected=IpaInspector.BUNDLE;
         for (String[] profile : PROFILES) if(p.getBoolean(profile[0],false)) {
             if(!selected.equals(IpaInspector.BUNDLE))throw new IllegalStateException("Choose only one testing collection");
@@ -42,7 +66,9 @@ final class ModOptions {
     }
 
     static String campaignProfile(Context context) {
-        return IpaInspector.BUNDLE + (preferences(context).getBoolean("--zalibas-expansion", false) ? "-expansion" : "");
+        SharedPreferences prefs = preferences(context);
+        return IpaInspector.BUNDLE + (prefs.getBoolean(ROGUELIKE, false) ? "-roguelike-v1" : "")
+            + (prefs.getBoolean("--zalibas-expansion", false) ? "-expansion" : "");
     }
 
     static void requireTestingSeed(Context context) throws java.io.IOException {
@@ -73,6 +99,7 @@ final class ModOptions {
         return false;
     }
     static void chooseCampaign(Context context, Runnable accept, Runnable cancel) {
+        if (preferences(context).getBoolean(ROGUELIKE, false)) { accept.run(); return; }
         java.io.File external = context.getExternalFilesDir(null);
         if (external == null) { cancel.run(); return; }
         java.io.File parent = new java.io.File(external, "touchHLE_sandbox");
@@ -117,19 +144,31 @@ final class ModOptions {
                     }
                 }
                 preferences.edit().putBoolean(flag,checked).apply();
+                if (flag.equals(ROGUELIKE)) syncRoguelikeControls(boxes, preferences);
             });
             root.addView(checkbox);
         }
+        syncRoguelikeControls(boxes, preferences);
         TextView explanation = new TextView(context);
         explanation.setText("Each collection has its own saves. Leave all three unchecked to use your normal saves. Level 1 and level 99 starts have no bonus resources.");
         root.addView(explanation);
+    }
+
+    private static void syncRoguelikeControls(java.util.Map<String,CheckBox> boxes, SharedPreferences preferences) {
+        boolean enabled = preferences.getBoolean(ROGUELIKE, false);
+        for (java.util.Map.Entry<String,CheckBox> entry : boxes.entrySet()) {
+            if (!conflictsWithRoguelike(entry.getKey())) continue;
+            if (enabled) entry.getValue().setChecked(false);
+            entry.getValue().setEnabled(!enabled);
+        }
     }
 
     static void appendArguments(Context context, List<String> arguments) {
         selectedProfile(context);
         SharedPreferences preferences = preferences(context);
         String origin = preferences.getString("expansionOrigin", "");
-        if (preferences.getBoolean("--zalibas-expansion", false) && ("copy".equals(origin) || "new".equals(origin))) {
+        if (!preferences.getBoolean(ROGUELIKE, false) && preferences.getBoolean("--zalibas-expansion", false)
+                && ("copy".equals(origin) || "new".equals(origin))) {
             arguments.add("--expansion-" + origin + "-campaign");
         }
         for (String[] option : OPTIONS) {

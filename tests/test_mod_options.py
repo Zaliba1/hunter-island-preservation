@@ -5,7 +5,7 @@ from itertools import product
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "launcher"))
 from hunter_launcher.app import MOD_OPTIONS, mod_arguments
-from hunter_launcher.profiles import TEST_PROFILES
+from hunter_launcher.profiles import ROGUELIKE, ROGUELIKE_CONFLICTS, TEST_PROFILES, selected_test_directory
 from hunter_launcher.storage import Store, atomic_json
 import tempfile
 from unittest.mock import patch
@@ -147,11 +147,63 @@ class ModOptionsTest(unittest.TestCase):
         for states in product((False, True), repeat=len(MOD_OPTIONS)):
             config = dict(zip((flag for flag, _ in MOD_OPTIONS), states))
             config["--unapproved-flag"] = True
-            if sum(config[flag] for flag in TEST_PROFILES) > 1:
+            if sum(config[flag] for flag in TEST_PROFILES) > 1 or config[ROGUELIKE] and any(config[flag] for flag in ROGUELIKE_CONFLICTS):
                 with self.assertRaises(ValueError): mod_arguments({'mods': config})
                 continue
             self.assertEqual(mod_arguments({"mods": config}),
                              [flag for (flag, _), enabled in zip(MOD_OPTIONS, states) if enabled])
+
+    def test_roguelike_combines_with_expansion_and_cooldown_in_its_own_campaign(self):
+        self.assertEqual(selected_test_directory({'mods': {ROGUELIKE: True}}),
+                         'pockettrend.hunterisland-roguelike-v1')
+        settings = {'mods': {ROGUELIKE: True, '--zalibas-expansion': True, '--hunter-no-arena-cooldown': True}}
+        self.assertEqual(mod_arguments(settings), ['--zalibas-expansion', ROGUELIKE, '--hunter-no-arena-cooldown'])
+        self.assertEqual(selected_test_directory(settings), 'pockettrend.hunterisland-roguelike-v1-expansion')
+
+    def test_roguelike_switch_clears_only_conflicting_controls(self):
+        import tkinter as tk
+        from hunter_launcher.app import gui
+
+        def controls(widget):
+            yield widget
+            for child in widget.winfo_children():
+                yield from controls(child)
+
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(directory)
+            atomic_json(store.config, {'game': {'version': '2.02'}, 'mods': {
+                flag: True for flag in ('--hunter-rare-dragons', '--hunter-silver-exchange',
+                                        '--hunter-gravestone-codes', '--hunter-no-arena-cooldown',
+                                        '--zalibas-expansion', '--hunter-level1-save')
+            }})
+            root = tk.Tk()
+            errors = []
+
+            def exercise():
+                try:
+                    widgets = {w.winfo_name(): w for w in controls(root)}
+                    widgets['roguelike'].invoke()
+                    for flag, key in MOD_OPTIONS:
+                        if flag in ROGUELIKE_CONFLICTS:
+                            self.assertTrue(widgets[key].instate(['disabled']))
+                            self.assertFalse(root.getboolean(root.getvar(widgets[key]['variable'])))
+                    for key in ('expansion', 'arena'):
+                        self.assertFalse(widgets[key].instate(['disabled']))
+                        self.assertTrue(root.getboolean(root.getvar(widgets[key]['variable'])))
+                    widgets['roguelike'].invoke()
+                    self.assertFalse(widgets['exchange'].instate(['disabled']))
+                except BaseException as error:
+                    errors.append(error)
+                finally:
+                    for callback in root.tk.splitlist(root.tk.call('after', 'info')):
+                        root.after_cancel(callback)
+                    root.destroy()
+
+            root.after(100, exercise)
+            with patch('tkinter.Tk', return_value=root):
+                gui(store, Path(directory))
+            if errors:
+                raise errors[0]
 
     def test_level_one_starts_fresh_without_a_normal_seed(self):
         with tempfile.TemporaryDirectory() as directory:

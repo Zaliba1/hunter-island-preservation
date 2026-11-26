@@ -98,7 +98,37 @@ fn patch_map(bytes: Vec<u8>, cells: &BTreeMap<String, Vec<(usize, u32)>>, tile_c
     Ok(map.into_bytes())
 }
 
-pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool) -> Result<BTreeMap<String, Vec<u8>>> {
+pub(crate) const ROGUELIKE_REGIONS: &str = "HunterRoguelikeRegions.json";
+
+fn region_bonus(area: u32) -> Option<u8> {
+    Some(match area {
+        1..=18 => 1, 19..=29 => 3, 30..=47 => 5, 48..=58 => 7,
+        59..=69 => 9, 70..=88 => 11, 89..=97 => 13,
+        _ => return None,
+    })
+}
+
+fn coords(point: &str) -> Option<(i32, i32)> {
+    let (x, y) = point.strip_prefix("over-")?.split_once('x')?;
+    let (x, y) = (x.parse::<i32>().ok()?, y.parse::<i32>().ok()?);
+    ((0..150).contains(&x) && (0..140).contains(&y)).then_some((x, y))
+}
+
+pub(crate) fn roguelike_bonus(regions: &BTreeMap<String, u8>, point: &str) -> Option<u8> {
+    if let Some(&bonus) = regions.get(point) { return Some(bonus); }
+    let (x, y) = coords(point)?;
+    regions.iter().filter_map(|(name, &bonus)| {
+        let (px, py) = coords(name)?;
+        Some(((px - x).pow(2) + (py - y).pow(2), bonus))
+    }).min().map(|(_, bonus)| bonus)
+}
+
+fn outdoor_dungeon_file(point: &Value) -> Option<&str> {
+    ["arguments", "zoneChange", "arguments", "dungeon", "arguments"].iter()
+        .try_fold(point, |value, key| value.as_dictionary()?.get(*key))?.as_string()
+}
+
+pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool, roguelike: bool) -> Result<BTreeMap<String, Vec<u8>>> {
     let encoded = include_bytes!("expansion.json.gz");
     let recipe: Option<Recipe> = if expansion { Some(serde_json::from_reader(GzDecoder::new(&encoded[..]))?) } else { None };
     let text = crate::preservation::checked_save_key(ipa, Some("5b9572690e5dba80c3f6244c2e45d1c50479b46ed91045f6fd036780178e3b08"))?;
@@ -151,12 +181,12 @@ pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool) -> Result<BTreeMap
             output.insert(name, bytes);
         }
     }
+    let mut load = |name: &str, overlay: &BTreeMap<String, Vec<u8>>| -> Result<Value> {
+        if let Some(raw) = overlay.get(name) { return decode(raw.clone()); }
+        if let Some(value) = stock.get(name) { return Ok(value.clone()); }
+        decode(read(archive.by_name(&format!("{prefix}{name}"))?)?)
+    };
     if codes {
-        let mut load = |name: &str, overlay: &BTreeMap<String, Vec<u8>>| -> Result<Value> {
-            if let Some(raw) = overlay.get(name) { return decode(raw.clone()); }
-            if let Some(value) = stock.get(name) { return Ok(value.clone()); }
-            decode(read(archive.by_name(&format!("{prefix}{name}"))?)?)
-        };
         let monsters = load("Monsters.plist", &output)?;
         let mut towns = load("Towns.plist", &output)?;
         crate::gravestone::towns(&mut towns, &monsters)?;
@@ -181,6 +211,57 @@ pub(crate) fn build(ipa: &Path, expansion: bool, codes: bool) -> Result<BTreeMap
             output.insert(name.clone(), encode(&name, &strings)?);
         }
     }
+    if roguelike {
+        let combines = load("Combines.plist", &output)?;
+        let recipes = combines.as_dictionary().ok_or("Invalid fusion catalog")?;
+        let mut settings = load("GameSettings.plist", &output)?;
+        let hidden = settings.as_dictionary_mut().and_then(|d| d.get_mut("hiddenRecipes"))
+            .and_then(Value::as_array_mut).ok_or("Invalid hidden recipe list")?;
+        hidden.retain(|entry| !entry.as_string().is_some_and(|name| recipes.contains_key(name)));
+        output.insert("GameSettings.plist".into(), encode("GameSettings.plist", &settings)?);
+
+        // The six outdoor catalogs contain 97 numbered areas. Towns, dungeon
+        // entrances and the expansion spurs use the nearest outdoor area.
+        let world = load("Overworld.plist", &output)?;
+        let files = world.as_dictionary().and_then(|w| w.get("poiFiles"))
+            .and_then(Value::as_array).ok_or("Invalid overworld catalog")?;
+        let mut regions = BTreeMap::new();
+        let mut dungeon_files = Vec::new();
+        for file in files.iter().filter_map(Value::as_string).filter(|name| name.starts_with('A')) {
+            let areas = load(file, &output)?;
+            for (name, area) in areas.as_dictionary().ok_or("Invalid overworld areas")? {
+                let Some(bonus) = name.trim_start_matches('A').parse().ok().and_then(region_bonus) else { continue; };
+                for (point, definition) in area.as_dictionary().ok_or("Invalid overworld area")?.iter().filter(|(name, _)| name.starts_with("over-")) {
+                    regions.insert(point.clone(), bonus);
+                    if let Some(file) = outdoor_dungeon_file(definition) {
+                        dungeon_files.push((file.to_owned(), bonus));
+                    }
+                }
+            }
+        }
+        if regions.values().copied().collect::<std::collections::BTreeSet<_>>().len() != 7 {
+            return Err("Missing Roguelike regions".into());
+        }
+        let cities = load("DungeonAndCity.plist", &output)?;
+        let dungeons = cities.as_dictionary().and_then(|d| d.get("Dungeons"))
+            .and_then(Value::as_dictionary).ok_or("Invalid dungeon entrances")?;
+        for (point, definition) in dungeons {
+            if let (Some(file), Some(bonus)) = (outdoor_dungeon_file(definition), roguelike_bonus(&regions, point)) {
+                dungeon_files.push((file.to_owned(), bonus));
+            }
+        }
+        for (file, bonus) in dungeon_files {
+            if let Some(name) = file.strip_suffix(".plist") {
+                regions.insert(name.to_owned(), bonus);
+            }
+            if let Ok(definition) = load(&file, &output) {
+                if let Some(name) = definition.as_dictionary().and_then(|d| d.get("instanceName")).and_then(Value::as_string) {
+                    regions.insert(name.to_owned(), bonus);
+                }
+            }
+        }
+        output.insert(ROGUELIKE_REGIONS.into(), serde_json::to_vec(&regions)?);
+    }
     Ok(output)
 }
 
@@ -198,6 +279,22 @@ mod tests {
     }
 
     #[test]
+    fn roguelike_builds_all_seven_regions_with_or_without_the_expansion() -> Result<()> {
+        let Some(original) = std::env::var_os("HI_QA_ORIGINAL_IPA") else { return Ok(()); };
+        for expansion in [false, true] {
+            let output = build(Path::new(&original), expansion, false, true)?;
+            let regions: BTreeMap<String, u8> = serde_json::from_slice(&output[ROGUELIKE_REGIONS])?;
+            assert!(regions.len() > 900);
+            assert_eq!(regions["over-28x105"], 1);
+            assert_eq!(regions["over-115x47"], 9);
+            assert_eq!(regions["over-26x16"], 11);
+            assert_eq!(regions["over-16x49"], 13);
+            assert!(output.contains_key("GameSettings.plist"));
+        }
+        Ok(())
+    }
+
+    #[test]
     fn local_gravestone_codes_follow_book_order_before_and_after_the_riddle() -> Result<()> {
         let Some(path) = std::env::var_os("HI_QA_ORIGINAL_IPA") else { return Ok(()) };
         let ipa = Path::new(&path);
@@ -207,7 +304,7 @@ mod tests {
             *byte = u8::from_str_radix(std::str::from_utf8(pair)?,16)?;
         }
         for expansion in [false,true] {
-            let overlay = build(ipa,expansion,true)?;
+            let overlay = build(ipa,expansion,true,false)?;
             let plain = crate::libc::crypto::transform_local(1,1,&key,&[0;16],&overlay["Towns.plist"]).unwrap();
             let towns = Value::from_reader(Cursor::new(read(GzDecoder::new(&plain[..]))?))?;
             let buildings = towns.as_dictionary().unwrap()["over-26x111"].as_dictionary().unwrap()["buildings"].as_array().unwrap();
@@ -248,7 +345,7 @@ mod tests {
     fn local_original_matches_authored_expansion() -> Result<()> {
         let Some(original) = std::env::var_os("HI_QA_ORIGINAL_IPA") else { return Ok(()) };
         let reference = std::env::var_os("HI_QA_EXPANSION_IPA").ok_or("missing private QA reference")?;
-        let overlay = build(Path::new(&original), true, false)?;
+        let overlay = build(Path::new(&original), true, false, false)?;
         let mut archive = zip::ZipArchive::new(std::fs::File::open(reference)?)?;
         let prefix = archive.file_names().find(|n| n.ends_with(".app/overworld.tmx")).unwrap().trim_end_matches("overworld.tmx").to_owned();
         let text = crate::preservation::save_key(Path::new(&original))?;

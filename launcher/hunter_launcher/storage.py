@@ -176,8 +176,9 @@ class Store:
         if len(files) > 10000 or sum(p.stat().st_size for p in files) > 512 * 1024**2:
             raise LauncherInputError('export_size')
         backups = self.backups
-        if self.bundle.name.endswith('-expansion'):
-            backups = backups / self.bundle.name
+        profile = self.bundle.name
+        if profile.endswith('-expansion') or profile == 'pockettrend.hunterisland-roguelike-v1':
+            backups = backups / profile
         backups.mkdir(parents=True, exist_ok=True)
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S')
         path = backups / (stamp + '-' + uuid.uuid4().hex[:8] + '.zip')

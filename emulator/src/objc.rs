@@ -30,6 +30,7 @@ pub(crate) mod hunter_array_search;
 mod hunter_rare_dragons;
 mod hunter_silver_exchange;
 mod hunter_battle_ai;
+mod hunter_roguelike;
 mod hunter_additional_arena;
 pub(crate) mod hunter_history;
 mod classes;
@@ -106,6 +107,7 @@ pub struct ObjC {
     method_cache: dispatch_cache::MethodCache,
     hunter_exchange_save: Option<hunter_silver_exchange::SaveReceipt>,
     hunter_battle_ai: hunter_battle_ai::State,
+    hunter_roguelike: hunter_roguelike::State,
     hunter_additional_arena: hunter_additional_arena::State,
     updraft_encounter: bool,
     pub(crate) hunter_history: hunter_history::State,
@@ -141,6 +143,7 @@ impl ObjC {
             method_cache: dispatch_cache::MethodCache::new(),
             hunter_exchange_save: None,
             hunter_battle_ai: hunter_battle_ai::State::default(),
+            hunter_roguelike: hunter_roguelike::State::default(),
             hunter_additional_arena: hunter_additional_arena::State::default(),
             updraft_encounter: false,
             hunter_history: hunter_history::State::default(),
