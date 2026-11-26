@@ -3,13 +3,13 @@
 `v2-entry.mjs` adapts a live Hunter Island 2.02 encounter to the trained
 team battle policy from the Hunter Island browser simulator. The game still
 validates and queues each proposed action. The Windows, macOS and Android
-launchers use the same switch, `--hunter-hardmode-v2`.
+launchers use `--hunter-hardmode-v2` for scripted encounters and
+`--hunter-additional-arena-fights` for the separate V3 arena matches.
 
 The checked-in `emulator/src/hunter_ai_model.js` is the build input for all three
-targets. To regenerate it from the companion browser workspace, run
-`node mods/hardmode/bundle-v2.mjs PATH_TO_BROWSER_WORKSPACE/demo/dist` from the
-emulator repository. The bundle contains policy and simulator code. It obtains
-the combat catalog locally from the installed 2.02 IPA at runtime.
+targets. Run `node mods/hardmode/bundle-v2.mjs mods/hardmode/browser-engine` from
+the emulator repository to regenerate it from the included source modules.
+It obtains the combat catalog locally from the installed 2.02 IPA at runtime.
 
 The QuickJS core is vendored under `emulator/vendor/hunter-quickjs` from
 [QuickJS 2025-09-13-2](https://bellard.org/quickjs/quickjs-2025-09-13-2.tar.xz).

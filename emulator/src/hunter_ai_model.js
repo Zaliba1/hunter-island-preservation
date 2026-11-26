@@ -205,7 +205,21 @@ function originalHit({ amount, damageElement, defenderElement, sourceStat,
 
 return {STAT_ORDER,RULE_PROVENANCE,roundAway,storedStars,starAdjustedBase,levelBonus,unbuffedStat,unbuffedStats,captureBaseChance,capturePercent,activationScale,divideForTargets,originalDice,ELEMENT_ORDER,weaknessOf,weaknessFactor,originalHit};
 })();
-const _module5 = (() => {
+const _module4 = (() => {
+// Living.rollDoubleAction (Hunter Island 2.02 ARMv7, 0x000b89f0).
+const probabilities = Object.freeze({ E: .01, D: .02, C: .04, B: .07, A: .11, S: .20 });
+const f = Math.fround;
+
+function bonusActionHits(rank, randomUint32, consecutive = 0, tierBonus = 0) {
+  if (!Object.hasOwn(probabilities, rank) || !Number.isInteger(randomUint32) || randomUint32 < 0 || randomUint32 > 0xffffffff) {
+    throw new Error('Ungültiger Bonusaktionswurf.');
+  }
+  return consecutive < 2 && f(f(randomUint32) * 2 ** -32) < f(f(probabilities[rank]) + f(f(tierBonus) * f(.01)));
+}
+
+return {bonusActionHits};
+})();
+const _module6 = (() => {
 // Hunter 2.02: Living.initialBattleDelay, clearAbilityAndGetTimeUsed, TimedQue.
 const f = Math.fround;
 function integer(value, name) {
@@ -269,8 +283,8 @@ function advanceQueue(queue) {
 
 return {adjustByModifier,initialBattleDelay,actionTimeCost,setQueueTime,addQueueTime,removeFromQueue,advanceQueue};
 })();
-const _module4 = (() => {
-const { addQueueTime } = _module5;
+const _module5 = (() => {
+const { addQueueTime } = _module6;
 
 const missions = {
   'blockade:1':'convoy', 'abnahme:2':'workshop', 'wurzel:0':'poison', 'wurzel:1':'displace',
@@ -332,7 +346,7 @@ function advanceTactic(state,actor,victim) {
 
 return {tacticFor,startTactic,mayGuard,tacticHint,questStrength,questDamage,advanceTactic};
 })();
-const _module6 = (() => {
+const _module7 = (() => {
 const { unbuffedStats, originalDice, originalHit } = _module3;
 
 // One explicit unbuffed test attack. This is a composition of verified original
@@ -355,7 +369,7 @@ function referenceAttack(attacker, defender, {
 
 return {referenceAttack};
 })();
-const _module9 = (() => {
+const _module10 = (() => {
 // Original UsableAbility activation initializer, 0xa0d34..0xa0ef0 (ARMv7 2.02).
 // The native brace parser reads exactly ONE UTF-16 character, not the whole tier.
 const ACTIVATION_TIERS = Object.freeze([50, 70, 100, 130, 160, 200, 250]);
@@ -426,14 +440,14 @@ function abilityCoverage(monsters, catalog) {
 
 return {ACTIVATION_TIERS,abilityActivation,inspectAbility,abilityCoverage};
 })();
-const _module10 = (() => {
+const _module11 = (() => {
 const ORIGINAL_ACTIVE_SIZE = 3;
 const SIMULATOR_MAX_RESERVE = 50;
 
 return {ORIGINAL_ACTIVE_SIZE,SIMULATOR_MAX_RESERVE};
 })();
-const _module12 = (() => {
-const { initialBattleDelay, removeFromQueue, setQueueTime } = _module5;
+const _module13 = (() => {
+const { initialBattleDelay, removeFromQueue, setQueueTime } = _module6;
 
 // Normal-monster path of Team.replaceMonster/addReplacementMonster.
 function replaceCombatant({ activeIds, reserveIds, deadIds, queue, removedId, speed, randomUint32, extra = 0, returnToReserve = false }) {
@@ -492,8 +506,8 @@ class EntryRandomRequired extends Error {
 
 return {replaceCombatant,onField,livingOnField,sacrificeMagnification,compileReserveSacrifice,sacrificeLastReserve,EntryRandomRequired,replaceFallen: replaceCombatant};
 })();
-const _module11 = (() => {
-const { livingOnField } = _module12;
+const _module12 = (() => {
+const { livingOnField } = _module13;
 
 // Hunter 2.02 MagnifyAbilityComponent.applyMagnifications, in addition order.
 const counters = {
@@ -559,14 +573,14 @@ function groupMagnification(rules, state, source, targets, monsters, before = 0)
 
 return {compileMagnification,damageMagnification,groupMagnification};
 })();
-const _module8 = (() => {
+const _module9 = (() => {
 // Deliberately narrow: one damage component, 1-3 enemies, unbuffed source/target.
 // A supported entry is not a claim about its actor's passives or full game parity.
-const { abilityActivation } = _module9;
-const { referenceAttack } = _module6;
-const { ORIGINAL_ACTIVE_SIZE } = _module10;
-const { compileMagnification } = _module11;
-const { compileReserveSacrifice } = _module12;
+const { abilityActivation } = _module10;
+const { referenceAttack } = _module7;
+const { ORIGINAL_ACTIVE_SIZE } = _module11;
+const { compileMagnification } = _module12;
+const { compileReserveSacrifice } = _module13;
 
 const definitionKeys = new Set(['class', 'parent', 'abstract', 'activationLength', 'components',
   'targetPicker', 'eventData', 'soundTable', 'buttonType', 'aiChance', 'enemyBuffs', 'friendlyBuffs', 'selfBuffs', 'passiveBuffs']);
@@ -669,7 +683,7 @@ function damageSkillAttack(source, target, slot, catalog, params) {
 
 return {compileDamageSkill,damageSkillOptions,compileRosterDamageSkill,damageSkillAttack};
 })();
-const _module14 = (() => {
+const _module15 = (() => {
 const { ELEMENT_ORDER, roundAway } = _module3;
 const f = Math.fround;
 
@@ -696,10 +710,10 @@ function barrierModifier(barriers = []) {
 
 return {hitCount,afterHurt,preventDamage,barrierModifier};
 })();
-const _module13 = (() => {
-const { abilityActivation } = _module9;
+const _module14 = (() => {
+const { abilityActivation } = _module10;
 const { ELEMENT_ORDER } = _module3;
-const { hitCount } = _module14;
+const { hitCount } = _module15;
 
 const only = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).every(key => keys.includes(key));
 function compileBarrierSkill(skill, catalog, { teams = false } = {}) {
@@ -743,14 +757,14 @@ function compileBarrierSkill(skill, catalog, { teams = false } = {}) {
 
 return {compileBarrierSkill};
 })();
-const _module15 = (() => {
+const _module16 = (() => {
 // Narrow healing component: single ally, self or all other living allies.
 // Self-sacrifice chance follows healing; narrow Devour consumes the last reserve first.
 // No resurrection, passive reactions or magnification modifiers.
-const { abilityActivation } = _module9;
+const { abilityActivation } = _module10;
 const { originalDice, unbuffedStats } = _module3;
-const { adjustByModifier } = _module5;
-const { ORIGINAL_ACTIVE_SIZE } = _module10;
+const { adjustByModifier } = _module6;
+const { ORIGINAL_ACTIVE_SIZE } = _module11;
 
 const definitionKeys = new Set(['class', 'parent', 'abstract', 'activationLength', 'components',
   'targetPicker', 'eventData', 'soundTable', 'buttonType', 'aiChance', 'SPECIAL NOTE',
@@ -832,12 +846,12 @@ function healWithSkill(source, plan, { level, hp, maxHP, randomUint32, targets =
 
 return {compileHealingSkill,healedHP,healingRoll,healWithSkill};
 })();
-const _module16 = (() => {
-const { abilityActivation } = _module9;
-const { actionTimeCost } = _module5;
+const _module17 = (() => {
+const { abilityActivation } = _module10;
+const { actionTimeCost } = _module6;
 const { divideForTargets, ELEMENT_ORDER, roundAway } = _module3;
-const { compileBarrierSkill } = _module13;
-const { compileReserveSacrifice } = _module12;
+const { compileBarrierSkill } = _module14;
+const { compileReserveSacrifice } = _module13;
 
 const STUN_TYPES = new Set(['Offensive.Stun.Stun', 'Offensive.Stun.StunAll',
   'Offensive.Stun.StunMagicAttack', 'Offensive.Stun.StunMagicAttackAll',
@@ -1097,11 +1111,11 @@ function compileStatusSkill(skill, catalog) {
 
 return {statusHits,statusProbability,hasteAt,teamActionCost,sleepLength,poisonTick,poisonPressure,statModifierAmount,compileStatusSkill};
 })();
-const _module7 = (() => {
-const { compileDamageSkill, compileRosterDamageSkill } = _module8;
-const { compileBarrierSkill } = _module13;
-const { compileHealingSkill } = _module15;
-const { compileStatusSkill } = _module16;
+const _module8 = (() => {
+const { compileDamageSkill, compileRosterDamageSkill } = _module9;
+const { compileBarrierSkill } = _module14;
+const { compileHealingSkill } = _module16;
+const { compileStatusSkill } = _module17;
 function compileCombatSkill(skill, catalog, { statuses = false } = {}) {
   const damage = compileDamageSkill(skill, catalog);
   if (damage.supported) return { ...damage, effect: 'damage', target: damage.targetCount === 1 ? 'enemy' : 'enemies' };
@@ -1118,7 +1132,7 @@ function combatSkillOptions(monster, catalog, options) {
 
 return {compileCombatSkill,combatSkillOptions};
 })();
-const _module17 = (() => {
+const _module18 = (() => {
 // Original Battle.advanceQueWithCounter cleanup decision, without callbacks,
 // reserves, death reactions or original RNG generation. Inputs are explicit.
 function finishAbility({ hp, chance, randomUint32, timeCost, dead = false, belongsToTeam = true }) {
@@ -1134,7 +1148,7 @@ function finishAbility({ hp, chance, randomUint32, timeCost, dead = false, belon
 
 return {finishAbility};
 })();
-const _module18 = (() => {
+const _module19 = (() => {
 const ROLL_RANGE = 2 ** 32;
 
 function randomTeamTarget(field, source, [teamRoll, targetRoll]) {
@@ -1208,7 +1222,7 @@ function redirectedTargetChances(pool, intended) {
 
 return {randomTeamTarget,matchingEnemyTargets,redirectionPool,redirectRollCount,redirectTargets,redirectedTargetChances};
 })();
-const _module19 = (() => {
+const _module20 = (() => {
 function reflectionPassive(skill, catalog) {
   if (!['Passive.Thorns', 'Passive.PercentThorns'].includes(skill.type)) return null;
   const def = catalog?.abilities?.[skill.type];
@@ -1306,21 +1320,22 @@ return {reflectionPassive,targetPriorityPassive,charismaPassive,statReflectionPa
 })();
 const _module2 = (() => {
 // Serializable team simulator with a separately bounded quest setup.
-const { unbuffedStat, unbuffedStats, originalDice, originalHit, storedStars } = _module3;
-const { startTactic, mayGuard, questDamage, questStrength, advanceTactic } = _module4;
-const { referenceAttack } = _module6;
-const { compileCombatSkill } = _module7;
-const { healWithSkill } = _module15;
-const { finishAbility } = _module17;
-const { barrierModifier, afterHurt } = _module14;
-const { replaceCombatant, onField, livingOnField, EntryRandomRequired, sacrificeLastReserve, sacrificeMagnification } = _module12;
-const { initialBattleDelay, setQueueTime, addQueueTime, removeFromQueue, advanceQueue, adjustByModifier } = _module5;
-const { poisonTick, statModifierAmount, statusHits, teamActionCost } = _module16;
-const { matchingEnemyTargets, randomTeamTarget, redirectionPool, redirectRollCount, redirectTargets } = _module18;
-const { ORIGINAL_ACTIVE_SIZE, SIMULATOR_MAX_RESERVE } = _module10;
-const { damageMagnification, groupMagnification } = _module11;
+const { unbuffedStat, unbuffedStats, originalDice, originalHit, storedStars, STAT_ORDER } = _module3;
+const { bonusActionHits } = _module4;
+const { startTactic, mayGuard, questDamage, questStrength, advanceTactic } = _module5;
+const { referenceAttack } = _module7;
+const { compileCombatSkill } = _module8;
+const { healWithSkill } = _module16;
+const { finishAbility } = _module18;
+const { barrierModifier, afterHurt } = _module15;
+const { replaceCombatant, onField, livingOnField, EntryRandomRequired, sacrificeLastReserve, sacrificeMagnification } = _module13;
+const { initialBattleDelay, setQueueTime, addQueueTime, removeFromQueue, advanceQueue, adjustByModifier } = _module6;
+const { poisonTick, statModifierAmount, statusHits, teamActionCost } = _module17;
+const { matchingEnemyTargets, randomTeamTarget, redirectionPool, redirectRollCount, redirectTargets } = _module19;
+const { ORIGINAL_ACTIVE_SIZE, SIMULATOR_MAX_RESERVE } = _module11;
+const { damageMagnification, groupMagnification } = _module12;
 const { berserkPassive, charismaPassive, PassiveRandomRequired, reflectionPassive, revengePassive, statReflectionPassive,
-  survivalPassive, targetPriorityPassive } = _module19;
+  survivalPassive, targetPriorityPassive } = _module20;
 
 function randomValue(value) {
   if (!Number.isInteger(value) || value < 0 || value > 0xffffffff) throw new Error('Ungültiger Testzufall.');
@@ -1329,6 +1344,11 @@ function definition(monsters, id) {
   const result = monsters.get(id);
   if (!result) throw new Error('Unbekanntes Kampfmonster: ' + id);
   return result;
+}
+
+function equippedStat(state, monster, level, stat) {
+  const bonus = state.ocarina?.statBonuses[stat];
+  return unbuffedStat(monster, stat, level, bonus ? [bonus] : []);
 }
 
 function passiveState(monster, catalog) {
@@ -1348,6 +1368,7 @@ function teamStats(state, member, monsters) {
   const monster = definition(monsters, member.monsterId);
   const stats = unbuffedStats(monster, member.level);
   const adjustments = {};
+  for (const [stat, amount] of Object.entries(state.ocarina?.statBonuses ?? {})) adjustments[stat] = [amount];
   for (const ally of state.combatants) {
     if (!ally.charisma || ally.side !== member.side || ally.hp <= 0 || !onField(state, ally)) continue;
     for (const modifier of ally.charisma) (adjustments[modifier.stat] ??= []).push(statModifierAmount(modifier, ally.level));
@@ -1368,6 +1389,7 @@ function teamStats(state, member, monsters) {
 
 function teamHit(state, source, target, monsters, { plan, stat, activation, randomUint32, legacy, reserveMagnification,
   modifiersApplied, sharedMagnification, targetIds, statsFor = teamStats }) {
+  const attacker = definition(monsters, source.monsterId);
   const defender = definition(monsters, target.monsterId);
   let magnification;
   if (plan?.magnification) {
@@ -1395,14 +1417,16 @@ function teamHit(state, source, target, monsters, { plan, stat, activation, rand
       ...modifier, amount: statModifierAmount(modifier, source.level), until: state.queue.clock + modifier.duration,
     });
   }
-  const hit = referenceAttack(definition(monsters, source.monsterId), defender, {
+  const hit = referenceAttack(attacker, defender, {
     attackerLevel: source.level, defenderLevel: target.level, hp: target.hp,
     kind: plan?.kind ?? stat, activation: plan?.activation ?? activation, targets: plan?.diceTargets ?? 1,
     abilityScale: plan?.abilityScale ?? 1,
     attackerStats: statsFor(state, source, monsters), defenderStats: statsFor(state, defenderForStats, monsters),
     randomUint32, legacy, modifyDamage: barrierModifier(target.buffs),
     modifyStrength: amount => {
-      const adjusted = magnification === undefined ? amount : Math.trunc(adjustByModifier(amount, magnification));
+      const boost = state.ocarina?.elementBoosts[attacker.element];
+      const base = boost ? Math.trunc(Math.fround(amount * Math.fround(1 + boost))) : amount;
+      const adjusted = magnification === undefined ? base : Math.trunc(adjustByModifier(base, magnification));
       noHit = adjusted < 1;
       return questStrength(state.objective, source, target, adjusted);
     },
@@ -1493,7 +1517,7 @@ function addSummon(state, source, plan, command, monsters, catalog) {
     if (!pool.length) throw new Error('Kein passendes Monster für die Beschwörung.');
     id = pool[command.summonRoll % pool.length].id;
   }
-  const monster = definition(monsters, id), maxHP = unbuffedStats(monster, level).MaxHP;
+  const monster = definition(monsters, id), maxHP = equippedStat(state, monster, level, 'MaxHP');
   const actor = state.combatants.find(member => member.id === source.id);
   const hp = copy === 'one' ? 1 : copy === 'split' ? Math.min(maxHP, Math.floor(actor.hp / 2)) : maxHP;
   if (hp < 1) return;
@@ -1514,7 +1538,7 @@ function addSummon(state, source, plan, command, monsters, catalog) {
   if (!Object.hasOwn(command.entryRolls ?? {}, incomingId)) throw new EntryRandomRequired(incomingId);
   const incoming = state.combatants.find(member => member.id === incomingId);
   const roll = command.entryRolls[incomingId]; randomValue(roll);
-  const speed = unbuffedStats(definition(monsters, incoming.monsterId), incoming.level).Speed;
+  const speed = equippedStat(state, definition(monsters, incoming.monsterId), incoming.level, 'Speed');
   const delay = initialBattleDelay({ speed, randomUint32: roll, extra: incoming.extraEntryDelay ?? 0 });
   state.activeIds[side].push(incomingId);
   incoming.enteredAt = state.queue.clock;
@@ -1601,6 +1625,7 @@ function selectNext(state, monsters, command = {}, legacy = false) {
       state.queue = addQueueTime(state.queue, actor.id, cost);
       delete actor.stunGifts;
       delete actor.venomGifts;
+      if (state.bonusActionRank) delete actor.bonusActionChain;
       event(state, 'turnSkipped', { actorId: actor.id, cost, status: 'Sleep' });
       continue;
     }
@@ -1609,7 +1634,8 @@ function selectNext(state, monsters, command = {}, legacy = false) {
     return;
   }
 }
-function createTeamBattle({ player, enemy, playerReserve = [], enemyReserve = [], initialRolls, eventLimit, questBattle = false, tactic = '', catalog }, monsters) {
+function createTeamBattle({ player, enemy, playerReserve = [], enemyReserve = [], initialRolls, eventLimit,
+  questBattle = false, tactic = '', catalog, bonusActionRank, ocarina }, monsters) {
   if (eventLimit !== undefined && (!Number.isInteger(eventLimit) || eventLimit < 16 || eventLimit > 4096)) throw new Error('Ungültige Protokollgrenze.');
   const activeLimit = ORIGINAL_ACTIVE_SIZE;
   if ([player, enemy].some(team => !Array.isArray(team) || team.length < 1 || team.length > activeLimit)) {
@@ -1629,6 +1655,19 @@ function createTeamBattle({ player, enemy, playerReserve = [], enemyReserve = []
     ...(questBattle ? { allowRetreat: false } : {}),
     ...(catalog && !questBattle ? { runtimeEffects: true } : {}),
     ...(eventLimit === undefined ? {} : { eventLimit, eventSequence: 0 }) };
+  if (bonusActionRank) state.bonusActionRank = bonusActionRank;
+  if (ocarina) {
+    // Original Gem.applyBuffsToMonsters adds the Ocarina's stats as a permanent buff.
+    const stats = Object.entries(ocarina.stats), level = ocarina.level;
+    state.ocarina = {
+      id: ocarina.id,
+      statBonuses: Object.fromEntries(stats.filter(([key, value]) => STAT_ORDER.includes(key) && value !== 0)
+        .map(([key, value]) => [key, Math.fround(value * level * (key === 'Defense' || key === 'Resist' ? 1.5 : 1))])),
+      elementBoosts: Object.fromEntries(stats.filter(([key]) => key.endsWith('Boost'))
+        .map(([key, value]) => [key.slice(0, -5), Math.fround(value * level * .01)])),
+      tierBonus: (ocarina.stats.TierBonus ?? 0) * level,
+    };
+  }
   if (questBattle && tactic) state.objective = startTactic(tactic);
   if (playerReserve.length || enemyReserve.length) {
     state.activeIds = { player: player.map(c => c.id), enemy: enemy.map(c => c.id) };
@@ -1640,15 +1679,14 @@ function createTeamBattle({ player, enemy, playerReserve = [], enemyReserve = []
     if (!Number.isInteger(entry.level) || entry.level < 1 || entry.level > 150) throw new Error('Ungültiges Testlevel.');
     ids.add(entry.id); if (!entry.reserve) randomValue(initialRolls[index]);
     const monster = definition(monsters, entry.monsterId);
-    const stats = unbuffedStats(monster, entry.level);
     const vitality = questBattle && entry.side === 'enemy' ? entry.vitality ?? 1 : 1;
     const force = questBattle && entry.side === 'enemy' ? entry.force ?? 1 : 1;
     if (![vitality,force].every(n => Number.isFinite(n) && n >= 1)) throw new Error('Ungültige Queststärke.');
-    const maxHP = Math.max(1, Math.ceil(stats.MaxHP * vitality));
+    const maxHP = Math.max(1, Math.ceil(equippedStat(state, monster, entry.level, 'MaxHP') * vitality));
     state.combatants.push({ id: entry.id, side: entry.side, monsterId: entry.monsterId, level: entry.level, hp: maxHP, maxHP,
       ...(force === 1 ? {} : { force }), ...passiveState(monster, questBattle ? null : catalog) });
     if (entry.reserve) continue;
-    const delay = initialBattleDelay({ speed: stats.Speed, randomUint32: initialRolls[index] }).queueTime;
+    const delay = initialBattleDelay({ speed: equippedStat(state, monster, entry.level, 'Speed'), randomUint32: initialRolls[index] }).queueTime;
     state.queue = setQueueTime(state.queue, entry.id, delay);
     event(state, 'entered', { actorId: entry.id, initialDelay: delay });
   }
@@ -1673,7 +1711,7 @@ function leaveField(state, victim, command, monsters, cause, killer = null) {
       if (roll === undefined) throw new EntryRandomRequired(incomingId);
       randomValue(roll);
       const incoming = state.combatants.find(c => c.id === incomingId);
-      speed = unbuffedStats(definition(monsters, incoming.monsterId), incoming.level).Speed;
+      speed = equippedStat(state, definition(monsters, incoming.monsterId), incoming.level, 'Speed');
       extra = incoming.extraEntryDelay;
     }
     const displaced = cause === 'landslide' || cause === 'rotation';
@@ -1724,6 +1762,7 @@ function commandTeamBattle(previous, command, monsters, { legacy = false, catalo
     const waiting = state.combatants.find(member => member.id === actor.id);
     if (waiting.stunGifts) delete waiting.stunGifts;
     if (waiting.venomGifts) delete waiting.venomGifts;
+    if (state.bonusActionRank) delete waiting.bonusActionChain;
     state.queue = addQueueTime(state.queue, actor.id, cost);
     if (aiDecision) event(state, 'aiDecision', { actorId: actor.id, ...aiDecision });
     event(state, 'cost', { actorId: actor.id, cost });
@@ -2051,7 +2090,17 @@ function commandTeamBattle(previous, command, monsters, { legacy = false, catalo
       leaveField(state, actor, command, monsters, 'self-sacrifice');
     }
   }
-  if (actor.hp > 0 && onField(state, actor)) state.queue = addQueueTime(state.queue, source.id, cost);
+  if (actor.hp > 0 && onField(state, actor)) {
+    if (state.bonusActionRank && command.bonusRandomUint32 !== undefined) {
+      if (!legacy && plan && plan.sacrificeChance !== 1 && !actor.sleepEffects?.length &&
+          bonusActionHits(state.bonusActionRank, command.bonusRandomUint32, actor.bonusActionChain, state.ocarina?.tierBonus)) {
+        actor.bonusActionChain = (actor.bonusActionChain ?? 0) + 1;
+        cost = 0;
+        event(state, 'bonusAction', { actorId: actor.id });
+      } else delete actor.bonusActionChain;
+    }
+    state.queue = addQueueTime(state.queue, source.id, cost);
+  }
   event(state, 'cost', { actorId: source.id, cost });
   const displaced = advanceTactic(state,source,survivingHitTarget);
   if (displaced) leaveField(state,displaced,command,monsters,'landslide');
@@ -2066,14 +2115,14 @@ function hasElementReserve(state, side, element, monsters) {
 
 return {teamStats,teamHit,createTeamBattle,commandTeamBattle,hasElementReserve};
 })();
-const _module20 = (() => {
+const _module21 = (() => {
 const { teamHit, teamStats } = _module2;
-const { combatSkillOptions } = _module7;
-const { healWithSkill } = _module15;
-const { livingOnField } = _module12;
-const { addQueueTime } = _module5;
-const { poisonPressure, statusProbability, teamActionCost } = _module16;
-const { matchingEnemyTargets, randomTeamTarget, redirectionPool, redirectedTargetChances, redirectRollCount } = _module18;
+const { combatSkillOptions } = _module8;
+const { healWithSkill } = _module16;
+const { livingOnField } = _module13;
+const { addQueueTime } = _module6;
+const { poisonPressure, statusProbability, teamActionCost } = _module17;
+const { matchingEnemyTargets, randomTeamTarget, redirectionPool, redirectedTargetChances, redirectRollCount } = _module19;
 
 const FALLBACK = { name: 'Prüfangriff', effect: 'damage', target: 'enemy', kind: 'Attack', activation: 200 };
 const ROLL_RANGE = 2 ** 32;
@@ -2534,12 +2583,12 @@ function chooseHardmodeTeamAction(state, monsters, options = {}) {
 
 return {SAMPLE_ROLLS,teamAiActions,chooseStandardTeamAction,teamActionCommand,koProbability,HARDMODE_WEIGHTS,rankHardmodeTeamActions,chooseHardmodeTeamAction};
 })();
-const _module21 = (() => {
+const _module22 = (() => {
 const { commandTeamBattle } = _module2;
-const { chooseHardmodeTeamAction, chooseStandardTeamAction, rankHardmodeTeamActions, teamActionCommand } = _module20;
-const { EntryRandomRequired, livingOnField } = _module12;
-const { PassiveRandomRequired } = _module19;
-const { hasteAt, poisonPressure } = _module16;
+const { chooseHardmodeTeamAction, chooseStandardTeamAction, rankHardmodeTeamActions, teamActionCommand } = _module21;
+const { EntryRandomRequired, livingOnField } = _module13;
+const { PassiveRandomRequired } = _module20;
+const { hasteAt, poisonPressure } = _module17;
 
 const SEARCH_DEFAULTS = Object.freeze({ weight: .65, width: 3, margin: 42, replies: 2, samples: 2,
   material: 48, health: 85, initiative: 24, status: 0, variety: 0, independentRolls: 0 });
@@ -2567,8 +2616,12 @@ function forecastCommand(state, action, roll, monsters, options, independentRoll
 function positionValue(state, side, model) {
   if (state.phase === 'finished') return state.winner === side ? 1400 : state.winner === 'draw' ? 0 : -1400;
   let value = 0;
+  const reserves = model.reserveRelative === undefined ? null : new Set(Object.values(state.reserveIds ?? {}).flat());
   for (const member of state.combatants) {
-    if (member.hp) value += (member.side === side ? 1 : -1) * (model.material + model.health * member.hp / member.maxHP);
+    if (member.hp) {
+      const hpWeight = reserves?.has(member.id) ? model.reserveRelative : 1;
+      value += (member.side === side ? 1 : -1) * (model.material + hpWeight * model.health * member.hp / member.maxHP);
+    }
   }
   for (const member of livingOnField(state)) {
     const now = state.queue.clock;
@@ -2601,18 +2654,23 @@ function chooseSearchTeamAction(state, monsters, options, search = SEARCH_DEFAUL
   const continuationOptions = { ...options, explain: false };
   let selected = best, bestScore = -Infinity;
   for (const contender of contenders) {
-    let forecast = 0;
+    let forecast = 0, worst = Infinity;
     if (contenders.length > 1) for (let sample = 0; sample < model.samples; sample++) {
       const roll = Math.floor(2 ** 32 * (sample + .5) / model.samples);
       let next = forecastCommand(initial, contender.action, roll, monsters, options, model.independentRolls);
+      const immediate = model.immediate ? positionValue(next, actor.side, model) : 0;
       for (let ply = 0; ply < model.replies && next.phase !== 'finished'; ply++) {
         const replying = next.combatants.find(member => member.id === next.actorId);
         const response = replying.berserk ? chooseStandardTeamAction(next, monsters, options.catalog)
           : chooseHardmodeTeamAction(next, monsters, continuationOptions);
         next = forecastCommand(next, response, 0x80000000, monsters, options, model.independentRolls);
       }
-      forecast += (positionValue(next, actor.side, model) - startValue) / model.samples;
+      const value = positionValue(next, actor.side, model);
+      const outcome = (model.immediate ? value + model.immediate * (immediate - value) : value) - startValue;
+      forecast += outcome / model.samples;
+      worst = Math.min(worst, outcome);
     }
+    if (model.risk && worst !== Infinity) forecast += model.risk * (worst - forecast);
     const score = contender.score + model.weight * Math.max(-300, Math.min(300, forecast));
     if (score > bestScore) { selected = contender; bestScore = score; }
   }
@@ -2623,7 +2681,7 @@ function chooseSearchTeamAction(state, monsters, options, search = SEARCH_DEFAUL
 
 return {SEARCH_DEFAULTS,chooseSearchTeamAction};
 })();
-const _module22 = (() => {
+const _module23 = (() => {
 // Selected by the 423991 training run against the original Hardmode weights.
 const EVOLVED_HARDMODE_WEIGHTS = Object.freeze({
   knockout: .25, prevention: .626, followUp: .424, haste: .25, guardian: .382, control: .898,
@@ -2638,16 +2696,30 @@ const EVOLVED_HARDMODE_V2_SEARCH = Object.freeze({
   material: 48, health: 85, initiative: 24, status: .7, variety: 0, independentRolls: 0,
 });
 
-return {EVOLVED_HARDMODE_WEIGHTS,EVOLVED_HARDMODE_SEARCH,EVOLVED_HARDMODE_V2_SEARCH};
+// Finalist from the 26111026 round robin against V2 (64 teams and two seeds).
+const EVOLVED_HARDMODE_V3 = Object.freeze({
+  weights: Object.freeze({
+    knockout: .16, prevention: .626, followUp: .424, haste: .148, guardian: .714,
+    control: 1.069, support: .867, tempo: 1.482, exposure: 1.451, sacrifice: 1.386,
+    reserve: 1.497, sleepTactics: 1.6, retaliation: .112,
+  }),
+  search: Object.freeze({
+    weight: .974, width: 4, margin: 77.523, replies: 4, samples: 2,
+    material: 36.465, health: 104.414, initiative: 34.591, status: 2.937,
+    variety: 0, independentRolls: 0, immediate: .084, risk: 0, reserveRelative: .637,
+  }),
+});
+
+return {EVOLVED_HARDMODE_WEIGHTS,EVOLVED_HARDMODE_SEARCH,EVOLVED_HARDMODE_V2_SEARCH,EVOLVED_HARDMODE_V3};
 })();
 const _module0 = (() => {
 // SPDX-License-Identifier: MPL-2.0
 const { buildBattleContent } = _module1;
 const { createTeamBattle, teamStats } = _module2;
-const { rankHardmodeTeamActions } = _module20;
-const { chooseSearchTeamAction } = _module21;
-const { EVOLVED_HARDMODE_WEIGHTS, EVOLVED_HARDMODE_V2_SEARCH } = _module22;
-const { combatSkillOptions } = _module7;
+const { rankHardmodeTeamActions } = _module21;
+const { chooseSearchTeamAction } = _module22;
+const { EVOLVED_HARDMODE_WEIGHTS, EVOLVED_HARDMODE_V2_SEARCH, EVOLVED_HARDMODE_V3 } = _module23;
+const { combatSkillOptions } = _module8;
 
 let model;
 globalThis.hunterAiLoad = text => {
@@ -2694,8 +2766,9 @@ globalThis.hunterAiChoose = text => {
   const snapshot = JSON.parse(text);
   const state = assemble(snapshot);
   const { monsters, skillPlans, catalog, legacy } = model;
-  const rules = { catalog, legacy, statuses: true, weights: EVOLVED_HARDMODE_WEIGHTS, skillPlans, explain: false };
-  const selected = chooseSearchTeamAction(state, monsters, rules, EVOLVED_HARDMODE_V2_SEARCH);
+  const profile = snapshot.arena ? EVOLVED_HARDMODE_V3 : { weights: EVOLVED_HARDMODE_WEIGHTS, search: EVOLVED_HARDMODE_V2_SEARCH };
+  const rules = { catalog, legacy, statuses: true, weights: profile.weights, skillPlans, explain: false };
+  const selected = chooseSearchTeamAction(state, monsters, rules, profile.search);
   const alternatives = rankHardmodeTeamActions(state, monsters, rules).map(row => row.action);
   const moves = [], seen = new Set();
   for (const { plan, targetIds } of [selected, ...alternatives]) {

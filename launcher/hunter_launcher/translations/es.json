@@ -63,5 +63,6 @@
   "integer_scaling": "Escala entera",
   "fullscreen": "Iniciar en pantalla completa",
   "developer_recommended": "Recomendado por el desarrollador",
-  "campaign_choice": "¿Copiar tu partida a una partida independiente de la expansión? Sí para copiar, No para empezar de cero o Cancelar para volver."
+  "campaign_choice": "¿Copiar tu partida a una partida independiente de la expansión? Sí para copiar, No para empezar de cero o Cancelar para volver.",
+  "additional_arena_fights": "Combates de arena adicionales"
 }

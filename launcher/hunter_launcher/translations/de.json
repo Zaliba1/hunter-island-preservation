@@ -63,5 +63,6 @@
   "integer_scaling": "Ganzzahlige Skalierung",
   "fullscreen": "Im Vollbild starten",
   "developer_recommended": "Vom Entwickler empfohlen",
-  "campaign_choice": "Deinen bisherigen Spielstand als eigene Kopie für die Expansion übernehmen? Ja kopiert ihn, Nein beginnt neu, Abbrechen kehrt zurück."
+  "campaign_choice": "Deinen bisherigen Spielstand als eigene Kopie für die Expansion übernehmen? Ja kopiert ihn, Nein beginnt neu, Abbrechen kehrt zurück.",
+  "additional_arena_fights": "Zusätzliche Arenakämpfe"
 }

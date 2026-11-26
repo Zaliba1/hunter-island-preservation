@@ -77,7 +77,8 @@ final class LauncherBackground: NSView {
             advanced.addArrangedSubview(label("Optional mods · disabled on first launch"))
             let values = store.settings["mods"] as? [String: Bool] ?? [:]
             for (flag, text) in modChoices {
-                let box = NSButton(checkboxWithTitle: ["--zalibas-expansion", "--hunter-no-arena-cooldown"].contains(flag) ? text + " · Recommended by the developer" : text, target: self, action: #selector(saveMod(_:)))
+                let title = flag == "--hunter-additional-arena-fights" ? additionalArenaLabel(savedLanguage) : text
+                let box = NSButton(checkboxWithTitle: ["--zalibas-expansion", "--hunter-no-arena-cooldown"].contains(flag) ? title + " · Recommended by the developer" : title, target: self, action: #selector(saveMod(_:)))
                 box.identifier = NSUserInterfaceItemIdentifier(flag)
                 box.state = values[flag] == true ? .on : .off; mods.append(box); buttons.append(box); advanced.addArrangedSubview(box)
             }
@@ -184,7 +185,11 @@ final class LauncherBackground: NSView {
     @objc func saveOptions() {
         syncDisplay()
         store.settings["outputFilter"] = outputFilters[filter.indexOfSelectedItem]
-        store.settings["language"] = languageChoices[language.indexOfSelectedItem].0
+        let selectedLanguage = languageChoices[language.indexOfSelectedItem].0
+        store.settings["language"] = selectedLanguage
+        if let index = modChoices.firstIndex(where: { $0.0 == "--hunter-additional-arena-fights" }), index < mods.count {
+            mods[index].title = additionalArenaLabel(selectedLanguage)
+        }
         store.settings["device"] = device.indexOfSelectedItem == 0 ? "ipad" : "iphone"
         store.settings["fullscreen"] = fullscreen.state == .on
         store.settings["integerScaling"] = integerScaling.state == .on

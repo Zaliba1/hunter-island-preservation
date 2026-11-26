@@ -63,5 +63,6 @@
   "integer_scaling": "整数倍スケーリング",
   "fullscreen": "全画面で開始",
   "developer_recommended": "開発者のおすすめ",
-  "campaign_choice": "現在のセーブデータを拡張版用にコピーしますか？「はい」でコピー、「いいえ」で新規開始、「キャンセル」で戻ります。"
+  "campaign_choice": "現在のセーブデータを拡張版用にコピーしますか？「はい」でコピー、「いいえ」で新規開始、「キャンセル」で戻ります。",
+  "additional_arena_fights": "闘技場の追加バトル"
 }

@@ -215,7 +215,7 @@ let languageChoices = [("en", "English"), ("de", "Deutsch"), ("fr", "Français")
 func gameLanguage(_ selection: String?) -> String {
     languageChoices.first(where: { $0.0 == selection })?.0 ?? "en"
 }
-let modChoices = [("--zalibas-expansion", "Zalibas Expansion"), ("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-hardmode-v2", "Hardmode V2 for Hunter, story and arena battles"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank"), ("--hunter-gravestone-codes", "Gravestone codes in Orlen (Monsterpedia 1–360)")]
+let modChoices = [("--zalibas-expansion", "Zalibas Expansion"), ("--hunter-rare-dragons", "More frequent starter dragons (5%)"), ("--hunter-silver-exchange", "Exchange silver for gold (50:1)"), ("--hunter-no-arena-cooldown", "No 12-hour colosseum cooldown"), ("--hunter-hardmode-v2", "Hardmode V2 for Hunter, story and arena battles"), ("--hunter-additional-arena-fights", "Additional Arena Fights"), ("--hunter-test-save", "Create / use separate full test save"), ("--hunter-level1-save", "New game: all monsters at level 1, no bonus resources"), ("--hunter-triple99-save", "New game: 3 of each monster, level 99, S rank"), ("--hunter-gravestone-codes", "Gravestone codes in Orlen (Monsterpedia 1–360)")]
 let collectionProfiles = [("--hunter-test-save", "pockettrend.hunterisland-test-v1"), ("--hunter-level1-save", "pockettrend.hunterisland-level1-v1"), ("--hunter-triple99-save", "pockettrend.hunterisland-triple99-v1")]
 func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     let selected = collectionProfiles.filter { mods[$0.0] == true }
@@ -223,6 +223,22 @@ func selectedProfileDirectory(_ mods: [String: Bool]) throws -> String {
     return (selected.first?.1 ?? "pockettrend.hunterisland") + (mods["--zalibas-expansion"] == true ? "-expansion" : "")
 }
 let outputFilters = ["bilinear", "fsr", "fsr-sharpened", "anime4k", "fsrcnnx"]
+func additionalArenaLabel(_ selectedLanguage: String?) -> String {
+    let labels = [
+        "en": "Additional Arena Fights",
+        "de": "Zusätzliche Arenakämpfe",
+        "fr": "Combats d’arène supplémentaires",
+        "es": "Combates de arena adicionales",
+        "it": "Combattimenti extra nell’arena",
+        "ja": "闘技場の追加バトル",
+    ]
+    let selection = gameLanguage(selectedLanguage)
+    if let label = labels[selection] { return label }
+    for language in Locale.preferredLanguages {
+        if let code = language.split(separator: "-").first, let label = labels[String(code)] { return label }
+    }
+    return "Additional Arena Fights"
+}
 func gameArguments(language: String?, device: String, mods: [String: Bool], fullscreen: Bool = false, integerScaling: Bool = false, hdTextures: Bool = false, internal2x: Bool = false, filter: String = "bilinear", campaign: String? = nil) -> [String] {
     var args = ["--no-error-popup", "--experimental-gles2", "--legacy-string-unsigned-int", "--legacy-deferred-texture-deletes", "--landscape-left", "--device-family=" + (device == "ipad" ? "ipad" : "iphone")]
     if filter != "bilinear" && outputFilters.contains(filter) { args.append("--upscale=" + filter) }

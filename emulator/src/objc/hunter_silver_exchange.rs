@@ -34,6 +34,10 @@ pub(super) struct SaveReceipt {
 }
 
 pub(super) fn register_menu_touch(env: &mut Environment, menu: id, imp: GuestFunction) -> bool {
+    register_tagged_menu_touch(env, menu, imp, MENU_TAG)
+}
+
+pub(super) fn register_tagged_menu_touch(env: &mut Environment, menu: id, imp: GuestFunction, expected_tag: i32) -> bool {
     if imp.addr_with_thumb_bit() != CC_MENU_REGISTER_TOUCH {
         return false;
     }
@@ -42,7 +46,7 @@ pub(super) fn register_menu_touch(env: &mut Environment, menu: id, imp: GuestFun
     let tag: i32 = msg![env; menu tag];
     *env.cpu.regs_mut() = regs;
     env.cpu.set_cpsr(flags);
-    if tag != MENU_TAG {
+    if tag != expected_tag {
         return false;
     }
     let director: id = msg_class![env; CCDirector sharedDirector];
@@ -125,7 +129,7 @@ fn install_menu(env: &mut Environment, store: id) {
     () = msg![env; store addChild:menu z:20i32 tag:MENU_TAG];
 }
 
-fn register_action(
+pub(super) fn register_action(
     env: &mut Environment,
     class: id,
     name: &str,

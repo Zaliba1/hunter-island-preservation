@@ -63,5 +63,6 @@
   "integer_scaling": "Integer scaling",
   "fullscreen": "Start in fullscreen",
   "developer_recommended": "Recommended by the developer",
-  "campaign_choice": "Copy your current campaign into a separate Expansion save? Choose Yes to copy, No to start fresh, or Cancel to go back."
+  "campaign_choice": "Copy your current campaign into a separate Expansion save? Choose Yes to copy, No to start fresh, or Cancel to go back.",
+  "additional_arena_fights": "Additional Arena Fights"
 }

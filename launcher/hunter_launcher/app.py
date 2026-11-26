@@ -20,6 +20,7 @@ MOD_OPTIONS = (
     ('--hunter-silver-exchange', 'exchange'),
     ('--hunter-no-arena-cooldown', 'arena'),
     ('--hunter-hardmode-v2', 'hardmode_v2'),
+    ('--hunter-additional-arena-fights', 'additional_arena_fights'),
     ('--hunter-test-save', 'full'),
     ('--hunter-level1-save', 'level1'),
     ('--hunter-triple99-save', 'triple'),

@@ -1,0 +1,332 @@
+{
+  "teams": [
+    {
+      "id": "legendary-arkwin",
+      "roster": [
+        "Mechared01",
+        "Crab01",
+        "Thunderbeast01",
+        "Thunderstego03",
+        "Firecaracal02",
+        "Divinedragon01",
+        "Metalwall01",
+        "Armoredkangaroo02",
+        "Robospider01",
+        "Icetriceratops03",
+        "Armoredcreature01",
+        "Earthtiger03",
+        "Metalslime02",
+        "Holycat02",
+        "Mafiapenguin02"
+      ]
+    },
+    {
+      "id": "1356",
+      "roster": [
+        "Arcanedragon02",
+        "Windladybug01",
+        "Metalslime02",
+        "Earthfiredragon01",
+        "Firesnake02",
+        "Lightknight01",
+        "Metalwall01",
+        "Chubbyarcana01",
+        "Liquiddragon01",
+        "Windwaterdragon01",
+        "Holycat02",
+        "Ultimatedragon01",
+        "Thundercreature01",
+        "Divinedragon01",
+        "Mafiapenguin02"
+      ]
+    },
+    {
+      "id": "1348",
+      "roster": [
+        "Ghostcheetah02",
+        "Windladybug01",
+        "Armoredcreature01",
+        "Seakillercow01",
+        "Pegasus02",
+        "Bushgolem02",
+        "Earthtiger03",
+        "Arcanedragon02",
+        "Metalwall01",
+        "Robospider01",
+        "Mechared01",
+        "Ultimatedragon01",
+        "Thundercreature01",
+        "Divinedragon01",
+        "Mafiapenguin02"
+      ]
+    },
+    {
+      "id": "you1",
+      "roster": [
+        "Tornadomonster02",
+        "Fireelasmotherium03",
+        "Roboscorpion02",
+        "Mummydragon02",
+        "Thundercreature01",
+        "Thunderstego03",
+        "Securityrobot02",
+        "Holywizard02",
+        "Rockdragon02",
+        "Holycat02",
+        "Windwaterdragon01",
+        "Earthfiredragon01",
+        "Earthtiger03",
+        "Robospider01",
+        "Ultimatedragon01"
+      ]
+    },
+    {
+      "id": "1443",
+      "roster": [
+        "Ghostcheetah02",
+        "Armoredcreature01",
+        "Windladybug01",
+        "Robospider01",
+        "Icesamurai02",
+        "Bushgolem02",
+        "Armoredkangaroo02",
+        "Earthtiger03",
+        "Firedragoon02",
+        "Dilophosaur02",
+        "Earthfiredragon01",
+        "Mechared01",
+        "Ultimatedragon01",
+        "Divinedragon01",
+        "Mafiapenguin02"
+      ]
+    },
+    {
+      "id": "saberreturn",
+      "roster": [
+        "Tornadomonster02",
+        "Securityrobot01",
+        "Windbee02",
+        "Thundercreature01",
+        "Thunderfox03",
+        "Thunderbeast01",
+        "Armoredcreature01",
+        "Thunderstego03",
+        "Securityrobot02",
+        "Robospider01",
+        "Earthtiger03",
+        "Pirateoctopus02",
+        "Earthfiredragon01",
+        "Windwaterdragon01",
+        "Ultimatedragon01"
+      ]
+    },
+    {
+      "id": "bjorhyn-opening",
+      "roster": [
+        "Ghostcheetah02",
+        "Windladybug01",
+        "Armoredcreature01",
+        "Tornadomonster02",
+        "Thunderhydra02",
+        "Pirateoctopus02",
+        "Icedargon01",
+        "Icegoddess02",
+        "Rockdragon02",
+        "Mechadragon02",
+        "Divinedragon01",
+        "Fireelasmotherium03",
+        "Ultimatedragon01",
+        "Holycat02",
+        "Earthtiger03"
+      ]
+    },
+    {
+      "id": "2176",
+      "roster": [
+        "Ghostcheetah02",
+        "Earthfiredragon01",
+        "Windladybug01",
+        "Thundercreature01",
+        "Fireelasmotherium03",
+        "Robospider01",
+        "Thunderhydra02",
+        "Robotwolf02",
+        "Bushgolem02",
+        "Holycat02",
+        "Ultimatedragon01",
+        "Earthtiger03",
+        "Mechared01",
+        "Firered02",
+        "Mafiapenguin02"
+      ]
+    },
+    {
+      "id": "byebye",
+      "roster": [
+        "Mechared01",
+        "Earthfiredragon01",
+        "Windladybug01",
+        "Earthtiger03",
+        "Pirateoctopus02",
+        "Mummydragon02",
+        "Mechadragon02",
+        "Armoredcreature01",
+        "Thunderstego03",
+        "Tornadomonster02",
+        "Thundercreature01",
+        "Robospider01",
+        "Holycat02",
+        "Ultimatedragon01",
+        "Rockdragon02"
+      ]
+    },
+    {
+      "id": "bjorhyn-leaderboard",
+      "roster": [
+        "Ghostcheetah02",
+        "Thundercreature01",
+        "Tornadomonster02",
+        "Windladybug01",
+        "Robospider01",
+        "Icegoddess02",
+        "Icedargon01",
+        "Crystaldragon02",
+        "Pirateoctopus02",
+        "Mechadragon02",
+        "Roboscorpion02",
+        "Crystalgolem02",
+        "Earthtiger03",
+        "Thunderhydra02",
+        "Ultimatedragon01"
+      ]
+    }
+  ],
+  "locales": {
+    "en": {
+      "title": "Additional Arena Fights",
+      "choose": "Choose an opponent. Level 75 · Rank S · Same ocarina",
+      "previous": "Previous",
+      "next": "Next",
+      "close": "Close",
+      "empty": "Your party is empty.",
+      "failed": "The arena fight could not start.",
+      "teams": [
+        "Stegospike’s Fire Chain",
+        "Strength Is Not Exclusive",
+        "The Shadowy Lightmare",
+        "Stegospike’s Doubles",
+        "Tib’s Favorites",
+        "Thunder Relay",
+        "Chopperbug’s Trap",
+        "Tib’s Birthday Guard",
+        "Omega Minefield",
+        "Stasis Elite"
+      ]
+    },
+    "de": {
+      "title": "Zusätzliche Arenakämpfe",
+      "choose": "Wähle einen Gegner. Level 75 · S-Rang · Gleiche Okarina",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "close": "Schließen",
+      "empty": "Deine Kampfgruppe ist leer.",
+      "failed": "Der Arenakampf konnte nicht starten.",
+      "teams": [
+        "Stegospikes Feuerkette",
+        "Stärke kennt keine Grenzen",
+        "Schattenalb",
+        "Stegospikes Doppelgänger",
+        "Tibs Favoriten",
+        "Donnerstaffel",
+        "Chopperbugs Falle",
+        "Tibs Geburtstagsgarde",
+        "Minenfeld Omega",
+        "Stasis-Elite"
+      ]
+    },
+    "fr": {
+      "title": "Combats d’arène supplémentaires",
+      "choose": "Choisis un adversaire. Niveau 75 · Rang S · Même ocarina",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "close": "Fermer",
+      "empty": "Ton équipe est vide.",
+      "failed": "Le combat d’arène n’a pas pu commencer.",
+      "teams": [
+        "La chaîne de feu de Stegospike",
+        "La force pour tous",
+        "Le cauchemar des ombres",
+        "Les doubles de Stegospike",
+        "Les favoris de Tib",
+        "Le relais du tonnerre",
+        "Le piège de Chopperbug",
+        "La garde d’anniversaire de Tib",
+        "Le champ de mines Oméga",
+        "L’élite de la stase"
+      ]
+    },
+    "es": {
+      "title": "Combates de arena adicionales",
+      "choose": "Elige un rival. Nivel 75 · Rango S · Misma ocarina",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "close": "Cerrar",
+      "empty": "Tu equipo está vacío.",
+      "failed": "No se pudo iniciar el combate de arena.",
+      "teams": [
+        "La cadena de fuego de Stegospike",
+        "La fuerza es para todos",
+        "La pesadilla de las sombras",
+        "Los dobles de Stegospike",
+        "Los favoritos de Tib",
+        "El relevo del trueno",
+        "La trampa de Chopperbug",
+        "La guardia de cumpleaños de Tib",
+        "Campo minado Omega",
+        "Élite de la estasis"
+      ]
+    },
+    "it": {
+      "title": "Combattimenti extra nell’arena",
+      "choose": "Scegli un avversario. Livello 75 · Rango S · Stessa ocarina",
+      "previous": "Indietro",
+      "next": "Avanti",
+      "close": "Chiudi",
+      "empty": "La tua squadra è vuota.",
+      "failed": "Impossibile avviare il combattimento nell’arena.",
+      "teams": [
+        "La catena di fuoco di Stegospike",
+        "La forza è per tutti",
+        "L’incubo delle ombre",
+        "I sosia di Stegospike",
+        "I preferiti di Tib",
+        "La staffetta del tuono",
+        "La trappola di Chopperbug",
+        "La guardia di compleanno di Tib",
+        "Campo minato Omega",
+        "Élite della stasi"
+      ]
+    },
+    "ja": {
+      "title": "闘技場の追加バトル",
+      "choose": "対戦相手を選んでください。レベル75・Sランク・同じオカリナ",
+      "previous": "前へ",
+      "next": "次へ",
+      "close": "閉じる",
+      "empty": "パーティーにモンスターがいません。",
+      "failed": "闘技場のバトルを開始できませんでした。",
+      "teams": [
+        "ステゴスパイクの炎の連鎖",
+        "強さはみんなのもの",
+        "影の悪夢",
+        "ステゴスパイクの分身",
+        "ティブのお気に入り",
+        "雷鳴のリレー",
+        "チョッパーバグの罠",
+        "ティブの誕生日親衛隊",
+        "オメガ地雷原",
+        "ステイシス精鋭隊"
+      ]
+    }
+  }
+}

@@ -75,7 +75,7 @@ fn ivar(env: &Environment, object: id, offset: u32) -> u32 {
     word(env, object.to_bits() + offset).unwrap_or(0)
 }
 
-fn compatible(env: &mut Environment) -> bool {
+pub(super) fn compatible(env: &mut Environment) -> bool {
     if let Some(result) = env.objc.hunter_battle_ai.compatible {
         return result;
     }
@@ -276,7 +276,7 @@ struct Move {
     target_ids: Vec<String>,
 }
 
-fn take_turn(env: &mut Environment, ai: id, actor: id, battle: id) -> Result<bool, String> {
+fn take_turn(env: &mut Environment, ai: id, actor: id, battle: id, arena: bool) -> Result<bool, String> {
     if env.objc.hunter_battle_ai.policy.is_none() {
         let policy = load_policy(env);
         env.objc.hunter_battle_ai.policy = Some(policy);
@@ -326,7 +326,7 @@ fn take_turn(env: &mut Environment, ai: id, actor: id, battle: id) -> Result<boo
     let allow_retreat: bool = msg![env; battle allowRetreat];
     let snapshot = json!({
         "actorId": actor_id, "order": order, "allowRetreat": allow_retreat, "teams": snapshot_teams,
-        "slots": abilities.keys().collect::<Vec<_>>(),
+        "slots": abilities.keys().collect::<Vec<_>>(), "arena": arena,
     });
     let runtime = env.objc.hunter_battle_ai.policy.as_ref().unwrap().as_ref().map_err(Clone::clone)?;
     let output = runtime.call(CStr::from_bytes_with_nul(b"hunterAiChoose\0").unwrap(), &snapshot.to_string())?;
@@ -337,7 +337,8 @@ fn take_turn(env: &mut Environment, ai: id, actor: id, battle: id) -> Result<boo
         if let Some(selected) = selected {
             if use_ability(env, ai, actor, battle, ability, &selected) {
                 if env.options.capture_frames {
-                    log!("Hardmode V2 native turn: slot {} targets {:?}", choice.slot, choice.target_ids);
+                    let version = if arena { "V3" } else { "V2" };
+                    log!("Hardmode {version} native turn: slot {} targets {:?}", choice.slot, choice.target_ids);
                 }
                 return Ok(true);
             }
@@ -454,19 +455,21 @@ pub(super) fn try_assign(env: &mut Environment, ai: id, actor: id) -> bool {
     if side != 1 {
         return false;
     }
-    let eligible = scripted_encounter(env, battle, encounter);
+    let arena = super::hunter_additional_arena::is_current(env, encounter);
+    let eligible = arena || (env.options.hunter_hardmode_v2 && scripted_encounter(env, battle, encounter));
+    let version = if arena { "V3" } else { "V2" };
     if env.options.capture_frames {
-        log!("Hardmode V2 encounter: {:?}, enabled={eligible}", class_name(env, encounter));
+        log!("Hardmode {version} encounter: {:?}, enabled={eligible}", class_name(env, encounter));
     }
     if !eligible {
         return false;
     }
-    match take_turn(env, ai, actor, battle) {
+    match take_turn(env, ai, actor, battle, arena) {
         Ok(true) => true,
         result => {
             if !env.objc.hunter_battle_ai.fallback_logged || env.options.capture_frames {
                 let reason = result.err().unwrap_or_else(|| "no legal policy move".into());
-                log!("Hardmode V2 native fallback: {reason}");
+                log!("Hardmode {version} native fallback: {reason}");
                 env.objc.hunter_battle_ai.fallback_logged = true;
             }
             false

@@ -63,5 +63,6 @@
   "integer_scaling": "Scala intera",
   "fullscreen": "Avvia a schermo intero",
   "developer_recommended": "Consigliato dallo sviluppatore",
-  "campaign_choice": "Copiare la partita in un salvataggio separato per l’espansione? Sì per copiare, No per ricominciare o Annulla per tornare indietro."
+  "campaign_choice": "Copiare la partita in un salvataggio separato per l’espansione? Sì per copiare, No per ricominciare o Annulla per tornare indietro.",
+  "additional_arena_fights": "Combattimenti extra nell’arena"
 }

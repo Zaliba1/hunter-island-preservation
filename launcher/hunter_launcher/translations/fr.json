@@ -63,5 +63,6 @@
   "integer_scaling": "Échelle entière",
   "fullscreen": "Démarrer en plein écran",
   "developer_recommended": "Recommandé par le développeur",
-  "campaign_choice": "Copier la partie actuelle dans une sauvegarde distincte pour l’extension ? Oui pour copier, Non pour recommencer, Annuler pour revenir."
+  "campaign_choice": "Copier la partie actuelle dans une sauvegarde distincte pour l’extension ? Oui pour copier, Non pour recommencer, Annuler pour revenir.",
+  "additional_arena_fights": "Combats d’arène supplémentaires"
 }

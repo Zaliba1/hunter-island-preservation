@@ -16,6 +16,7 @@ final class ModOptions {
         {"--hunter-silver-exchange", "Exchange silver for gold (50:1)"},
         {"--hunter-no-arena-cooldown", "Skip the 12-hour arena wait"},
         {"--hunter-hardmode-v2", "Hardmode V2 for Hunter, story and arena battles"},
+        {"--hunter-additional-arena-fights", "Additional Arena Fights"},
         {"--hunter-test-save", "Full collection and resources (separate save copy)"},
         {"--hunter-level1-save", "New game with all monsters at level 1"},
         {"--hunter-triple99-save", "New game with 3 of each monster, level 99, rank S"},
@@ -97,7 +98,11 @@ final class ModOptions {
         for (String[] option : OPTIONS) {
             String flag = option[0];
             CheckBox checkbox = new CheckBox(context);
-            checkbox.setText(option[1] + (flag.equals("--zalibas-expansion") || flag.equals("--hunter-no-arena-cooldown") ? " · Recommended by the developer" : ""));
+            if (flag.equals("--hunter-additional-arena-fights")) {
+                checkbox.setText(R.string.additional_arena_fights);
+            } else {
+                checkbox.setText(option[1] + (flag.equals("--zalibas-expansion") || flag.equals("--hunter-no-arena-cooldown") ? " · Recommended by the developer" : ""));
+            }
             checkbox.setChecked(preferences.getBoolean(flag, false));
             boxes.put(flag,checkbox);
             checkbox.setOnCheckedChangeListener((button, checked) -> {

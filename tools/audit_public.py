@@ -35,6 +35,8 @@ def audit(root,release=False):
             # Match both neighboring fragments, never a bare account name.
             packed_flags = b"libas-expansion" + b"--zalibas-expansion"[:-3] + b"exchange"
             data=data.replace(packed_flags, b"<packed option comparisons>")
+            packed_arena_flags = b"riple9alibas-expansion--zalibas-expanson-copy-campaign--expansion-copy"
+            data=data.replace(packed_arena_flags, b"<packed option comparisons>")
         if any(marker in data or marker.decode(errors='ignore').encode('utf-16-le') in data for marker in markers):
             errors.append(label+': local identity/path marker')
         if re.search(rb'-----begin (?:[a-z0-9]+ )?private key-----',data) or re.search(rb'gh[pousr]_[a-z0-9]{30,}',data):

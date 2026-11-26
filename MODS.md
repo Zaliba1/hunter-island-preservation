@@ -10,6 +10,7 @@ The modifications target Hunter Island 2.02.
 | Gravestone codes in Orlen | Enter a Monsterpedia number (1–360) at the gravestone in Orlen to receive that entry |
 | Exchange silver for gold | Shop action exchanging 50 silver for 1 gold |
 | No 12-hour colosseum cooldown | The next local arena battle can start immediately |
+| Additional Arena Fights | Ten historical PvP lineups in the native Colosseum menu |
 | Hardmode V2 | Trained enemy AI for Hunters, story battles, arena and other scripted NPC encounters |
 | Create / use separate test save | Copies normal progress once, then uses its own expanded monster/equipment collection and resources |
 
@@ -61,6 +62,18 @@ This option bypasses the 12-hour check between local tournament rounds.
 The game's existing routines handle results, progression and rewards.
 When you disable the option, the game again uses its recorded time of the
 last arena victory.
+
+## Additional Arena Fights
+
+Enable **Additional Arena Fights** in the launcher and enter a Colosseum in
+Hunter Island. Select **Additional Arena Fights** on the tournament screen.
+The ten teams are ordered by their level-75, rank-S results in a V3 round robin.
+Each fight uses a battle-only copy of your current party. Both sides fight
+at level 75 and rank S with the Ocarina in your first license slot. The CPU
+uses Hardmode V3 for these fights. The menu and team names follow the game's
+English, German, French, Spanish, Italian or Japanese language selection.
+
+The command-line flag is `--hunter-additional-arena-fights`.
 
 ## Hardmode V2
 

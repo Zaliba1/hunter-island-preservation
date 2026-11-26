@@ -194,7 +194,7 @@ Type mismatch when sending message {} to {:?}!
         }
         // Keep stack arguments in place, including on a cached guest IMP.
         IMP::Guest(guest_imp) => {
-            if env.options.hunter_hardmode_v2
+            if (env.options.hunter_hardmode_v2 || super::hunter_additional_arena::active(env))
                 && guest_imp.addr_with_thumb_bit() == 0x81241
                 && selector.as_str(&env.mem) == "assignAbilityToMonster:"
             {
@@ -221,6 +221,12 @@ Type mismatch when sending message {} to {:?}!
             {
                 return;
             }
+            if env.options.hunter_additional_arena
+                && (super::hunter_additional_arena::register_menu_touch(env, receiver, guest_imp)
+                    || super::hunter_additional_arena::before_guest_call(env, receiver, guest_imp))
+            {
+                return;
+            }
             if !super::leaf_getter::try_call(env, guest_imp) {
                 let history_hook = if super::hunter_history::interesting(guest_imp.addr_with_thumb_bit()) {
                     let entry_regs = *env.cpu.regs();
@@ -239,6 +245,13 @@ Type mismatch when sending message {} to {:?}!
                     && env.bundle.bundle_version() == "2.02"
                     && selector.as_str(&env.mem) == "renderTextureWithWidth:height:";
                 guest_imp.call_without_pushing_stack_frame(env);
+                if env.options.hunter_additional_arena && guest_imp.addr_with_thumb_bit() == 0x12885d {
+                    let regs = *env.cpu.regs();
+                    let flags = env.cpu.cpsr();
+                    super::hunter_additional_arena::after_guest_call(env, receiver, guest_imp);
+                    *env.cpu.regs_mut() = regs;
+                    env.cpu.set_cpsr(flags);
+                }
                 if hd_outline {
                     let regs = *env.cpu.regs();
                     let flags = env.cpu.cpsr();

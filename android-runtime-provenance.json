@@ -3,13 +3,13 @@
   "libraries": [
     {
       "file": "libtouchHLE.so",
-      "sha256": "b605f32731b81cb4f15f0bc65bb267fa3b117905dc55a2585fb3a0147d4f218a",
-      "bytes": 22292352
+      "sha256": "9b6529f4e9f856bec76c1f34592a45e739838120280b9afa1a3a9ea4352cb859",
+      "bytes": 23607696
     },
     {
       "file": "libSDL2.so",
-      "sha256": "17d8bf5c89fb6e023612f6381970627aa135c042759ddcbee3c90f354a346b96",
-      "bytes": 1228352
+      "sha256": "034413aed52662b0958616482e2cb4cb33603fc738222d1475d44d30ad06054e",
+      "bytes": 1228320
     },
     {
       "file": "libc++_shared.so",

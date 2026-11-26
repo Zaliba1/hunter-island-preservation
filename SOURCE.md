@@ -31,3 +31,11 @@ Historical Apple guest binaries have not been independently reproduced byte for
 byte. Published source releases and original build files accompany them.
 Rebuilding requires a suitable historical platform/compiler environment.
 No Apple SDK or game is included.
+
+## Additional Arena Fights preview
+
+The release's source ZIP includes the native engine, all six localizations,
+the launcher integration and the authored inputs to the bundled AI policy.
+Use the pinned [native and Rust dependency sources](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.15/HunterIsland-SourceDependencies-0.2.0-preview.15.zip)
+and the matching [Windows launcher runtime sources](https://github.com/Zaliba1/hunter-island-preservation/releases/download/v0.2.0-preview.13/HunterIsland-WindowsRuntimeSources-0.2.0-preview.13.zip).
+The QuickJS files used in the build are in `emulator/vendor/hunter-quickjs`.

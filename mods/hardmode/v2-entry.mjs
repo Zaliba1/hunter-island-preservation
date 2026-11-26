@@ -3,7 +3,7 @@ import { buildBattleContent } from '@browser/import/battle-content.mjs';
 import { createTeamBattle, teamStats } from '@browser/engine/team-battle.mjs';
 import { rankHardmodeTeamActions } from '@browser/engine/team-ai.mjs';
 import { chooseSearchTeamAction } from '@browser/engine/team-search.mjs';
-import { EVOLVED_HARDMODE_WEIGHTS, EVOLVED_HARDMODE_V2_SEARCH } from '@browser/engine/evolved-hardmode.mjs';
+import { EVOLVED_HARDMODE_WEIGHTS, EVOLVED_HARDMODE_V2_SEARCH, EVOLVED_HARDMODE_V3 } from '@browser/engine/evolved-hardmode.mjs';
 import { combatSkillOptions } from '@browser/engine/combat-skills.mjs';
 
 let model;
@@ -51,8 +51,9 @@ globalThis.hunterAiChoose = text => {
   const snapshot = JSON.parse(text);
   const state = assemble(snapshot);
   const { monsters, skillPlans, catalog, legacy } = model;
-  const rules = { catalog, legacy, statuses: true, weights: EVOLVED_HARDMODE_WEIGHTS, skillPlans, explain: false };
-  const selected = chooseSearchTeamAction(state, monsters, rules, EVOLVED_HARDMODE_V2_SEARCH);
+  const profile = snapshot.arena ? EVOLVED_HARDMODE_V3 : { weights: EVOLVED_HARDMODE_WEIGHTS, search: EVOLVED_HARDMODE_V2_SEARCH };
+  const rules = { catalog, legacy, statuses: true, weights: profile.weights, skillPlans, explain: false };
+  const selected = chooseSearchTeamAction(state, monsters, rules, profile.search);
   const alternatives = rankHardmodeTeamActions(state, monsters, rules).map(row => row.action);
   const moves = [], seen = new Set();
   for (const { plan, targetIds } of [selected, ...alternatives]) {
