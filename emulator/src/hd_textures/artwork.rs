@@ -43,7 +43,7 @@ impl Artwork {
 impl Artwork {
     pub(super) fn immediate(&self, src: &[u8], w: usize, h: usize) -> Option<Vec<u8>> {
         match self {
-            Self::HudSymbol | Self::Portrait => Some(upscale_symbol(src, w, h)),
+            Self::HudSymbol | Self::Portrait | Self::Painted => Some(upscale_symbol(src, w, h)),
             Self::TownTiles => Some(town_tiles(src, w, h)),
             Self::Atlas(frames) => Some(atlas_pixels(src, w, h, frames, upscale_symbol)),
             _ => None,

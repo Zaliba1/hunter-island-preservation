@@ -14,11 +14,42 @@ pub fn CGPointFromString(env: &mut Environment, string: id) -> CGPoint {
     if string == nil {
         return CGPoint::default();
     }
-    // TODO: avoid copy
-    ns_string::to_rust_string(env, string)
-        .parse()
-        .unwrap_or_default()
+    let text = ns_string::to_rust_string(env, string);
+    if let Some(point) = hunter_warp_position(&text) {
+        if env.bundle.bundle_identifier() == "pockettrend.hunterisland"
+            && env.bundle.bundle_version() == "2.02"
+        {
+            return point;
+        }
+    }
+    text.parse().unwrap_or_default()
 }
+
+// TownCommonNode passes these two malformed retail warp positions to UIKit.
+fn hunter_warp_position(text: &str) -> Option<CGPoint> {
+    let y = match text {
+        "[12.5,6}" => 6.0,
+        "[12.5,10}" => 10.0,
+        _ => return None,
+    };
+    Some(CGPoint { x: 12.5, y })
+}
+
+#[cfg(test)]
+#[test]
+fn recognizes_only_the_two_malformed_hunter_warps() {
+    assert_eq!(
+        hunter_warp_position("[12.5,6}"),
+        Some(CGPoint { x: 12.5, y: 6.0 })
+    );
+    assert_eq!(
+        hunter_warp_position("[12.5,10}"),
+        Some(CGPoint { x: 12.5, y: 10.0 })
+    );
+    assert_eq!(hunter_warp_position("[3,7}"), None);
+    assert_eq!(hunter_warp_position("{12.5,6}"), None);
+}
+
 pub fn CGSizeFromString(env: &mut Environment, string: id) -> CGSize {
     if string == nil {
         return CGSize::default();

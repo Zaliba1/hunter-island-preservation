@@ -222,3 +222,95 @@ fn retail_first_upload_covers_combat_orlen_and_harold() {
     for _ in cache.done.iter() {}
     fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn retail_battle_background_uploads() {
+    let Some(ipa) = std::env::var_os("HI_QA_ORIGINAL_IPA") else {
+        return;
+    };
+    let dir = std::env::temp_dir().join(format!("hi-backdrops-{}", uuid::Uuid::new_v4()));
+    let mut cache = Cache::open(Path::new(&ipa), dir.clone()).unwrap();
+    // Exercise a cold cache without starting a neural job per retail background.
+    let (offline, _) = mpsc::channel();
+    cache.jobs = offline;
+    let paths: Vec<_> = cache
+        .archive
+        .file_names()
+        .filter(|p| {
+            matches!(
+                p.rsplit('/').next(),
+                Some(
+                    "Bazaar.jpg"
+                        | "Cathedral.jpg"
+                        | "CommandCenter.jpg"
+                        | "EngineRoom.jpg"
+                        | "SandHouse.jpg"
+                        | "ShopScreen.jpg"
+                        | "StoneHouse.jpg"
+                        | "Tavern.jpg"
+                )
+            ) || p.ends_with("Combat.jpg")
+        })
+        .map(str::to_owned)
+        .collect();
+    assert_eq!(paths.len(), 30);
+    for path in paths {
+        let mut bytes = Vec::new();
+        cache
+            .archive
+            .by_name(&path)
+            .unwrap()
+            .read_to_end(&mut bytes)
+            .unwrap();
+        let image = Image::from_bytes(&bytes).unwrap();
+        let (w, h) = image.dimensions();
+        let (w, h) = (w as usize, h as usize);
+        let (factor, hd) = cache
+            .replacement((w, h), image.pixels(), w * 4, 0x1908, 0x1401, 4096)
+            .unwrap_or_else(|| panic!("Missing first upload: {path}"));
+        assert_eq!((factor, hd.len()), (2, w * h * 16));
+        if path.ends_with("/FieldCombat.jpg") {
+            let (bw, bh) = (w.next_power_of_two(), h.next_power_of_two());
+            let border = [23, 43, 61, 255];
+            for top in [0, bh - h] {
+                let mut raw = border.repeat(bw * bh);
+                for (y, row) in image.pixels().chunks_exact(w * 4).enumerate() {
+                    let dst = (y + top) * bw * 4;
+                    raw[dst..dst + w * 4].copy_from_slice(row);
+                }
+                let args = (bw, bh);
+                // A warm cache stores the visible image, not its backing texture.
+                let warm = top > 0;
+                let mut expected = hd.clone();
+                if warm {
+                    expected[0] ^= 1;
+                    let digest = Sha256::digest(&bytes);
+                    write_cache(&dir.join(format!("art2-v1-{digest:x}")), &expected).unwrap();
+                }
+                assert!(cache
+                    .replacement(args, &raw, bw * 4, 0x1908, 0x1401, 2048)
+                    .is_none());
+                let (_, backed) = cache
+                    .replacement(args, &raw, bw * 4, 0x1908, 0x1401, 4096)
+                    .unwrap();
+                assert_eq!(backed.len(), bw * bh * 16);
+                for (y, row) in backed.chunks_exact(bw * 8).enumerate() {
+                    if (2 * top..2 * (top + h)).contains(&y) {
+                        let start = (y - 2 * top) * w * 8;
+                        assert_eq!(&row[..w * 8], &expected[start..start + w * 8]);
+                        assert!(row[w * 8..].chunks_exact(4).all(|p| p == border));
+                    } else {
+                        assert!(row.chunks_exact(4).all(|p| p == border));
+                    }
+                }
+                // A different full image with the same dimensions and probes must not match.
+                raw[((top + h - 1) * bw + w - 1) * 4 + 3] = 0;
+                assert!(cache
+                    .replacement(args, &raw, bw * 4, 0x1908, 0x1401, 4096)
+                    .is_none());
+            }
+        }
+    }
+    drop(cache);
+    fs::remove_dir_all(dir).unwrap();
+}

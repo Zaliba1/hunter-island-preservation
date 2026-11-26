@@ -21,7 +21,9 @@ const MAX_SIDE: usize = 2048;
 const MAX_PIXELS: usize = 1024 * 1024;
 const MAX_MEMBER: u64 = 6 * 1024 * 1024;
 
+#[derive(Clone)]
 struct Sprite {
+    size: (usize, usize),
     artwork: Artwork,
     index: usize,
     key: String,
@@ -229,6 +231,12 @@ impl Cache {
                 "Tavern.jpg"
                 | "CourtRoom.jpg"
                 | "StoneHouse.jpg"
+                | "Bazaar.jpg"
+                | "Cathedral.jpg"
+                | "CommandCenter.jpg"
+                | "EngineRoom.jpg"
+                | "SandHouse.jpg"
+                | "ShopScreen.jpg"
                 | "ArenaCombat.jpg"
                 | "BeachCombat.jpg"
                 | "BridgeCombat.jpg"
@@ -309,15 +317,20 @@ impl Cache {
                 continue;
             }
             let (w, h) = img.dimensions();
-            sprites
-                .entry((w as usize, h as usize))
-                .or_default()
-                .push(Sprite {
-                    index,
-                    key,
-                    artwork: kind,
-                    probes,
-                });
+            let size = (w as usize, h as usize);
+            let sprite = Sprite {
+                size,
+                index,
+                key,
+                artwork: kind,
+                probes,
+            };
+            // Cocos can allocate a power-of-two backing texture for a JPEG.
+            let backing = (size.0.next_power_of_two(), size.1.next_power_of_two());
+            if backing != size && matches!(sprite.artwork, Artwork::Painted) {
+                sprites.entry(backing).or_default().push(sprite.clone());
+            }
+            sprites.entry(size).or_default().push(sprite);
         }
         fs::create_dir_all(&directory)?;
         if fs::symlink_metadata(&directory)?.file_type().is_symlink() {
@@ -368,7 +381,10 @@ impl Cache {
             })?;
         log!(
             "Local Real-ESRGAN: indexed {} artwork textures",
-            sprites.values().map(Vec::len).sum::<usize>()
+            sprites
+                .iter()
+                .map(|(size, list)| list.iter().filter(|s| s.size == *size).count())
+                .sum::<usize>()
         );
         Ok(Self {
             archive,
@@ -429,39 +445,91 @@ impl Cache {
         };
         // Samples cheaply reject unrelated UI and atlas uploads. Verify the
         // full silhouette and color before substituting any texture.
-        let (sprite, image) = candidates.iter().find_map(|s| {
+        let (sprite, image, top) = candidates.iter().find_map(|s| {
             if w * s.artwork.scale() > maximum || h * s.artwork.scale() > maximum {
                 return None;
             }
-            if !s.probes.iter().all(|(i, rgb)| {
-                let p = pixel(*i);
-                p[3] >= 240 && (0..3).all(|c| p[c].abs_diff(rgb[c]) <= 17)
-            }) {
-                return None;
+            let (sw, sh) = s.size;
+            let offsets = [0, h - sh];
+            for &top in &offsets[..if sh == h { 1 } else { 2 }] {
+                let source_pixel = |i: usize| {
+                    if sw == w {
+                        pixel(top * w + i)
+                    } else {
+                        pixel((top + i / sw) * w + i % sw)
+                    }
+                };
+                if !s.probes.iter().all(|(i, rgb)| {
+                    let p = source_pixel(*i);
+                    p[3] >= 240 && (0..3).all(|c| p[c].abs_diff(rgb[c]) <= 17)
+                }) {
+                    continue;
+                }
+                let data = image_data(&mut self.archive, s.index).ok()?;
+                let img = Image::from_bytes(&data).ok()?;
+                if img
+                    .pixels()
+                    .chunks_exact(4)
+                    .enumerate()
+                    .all(|(i, original)| {
+                        let p = source_pixel(i);
+                        original[3].abs_diff(p[3]) <= 17
+                            && (0..3).all(|c| {
+                                let premult =
+                                    ((u16::from(p[c]) * u16::from(p[3]) + 127) / 255) as u8;
+                                original[c].abs_diff(p[c]) <= 17
+                                    || original[c].abs_diff(premult) <= 17
+                            })
+                    })
+                {
+                    return Some((s, img, top));
+                }
             }
-            let data = image_data(&mut self.archive, s.index).ok()?;
-            let img = Image::from_bytes(&data).ok()?;
-            let same = img
-                .pixels()
-                .chunks_exact(4)
-                .enumerate()
-                .all(|(i, original)| {
-                    let p = pixel(i);
-                    original[3].abs_diff(p[3]) <= 17
-                        && (0..3).all(|c| {
-                            let premult = ((u16::from(p[c]) * u16::from(p[3]) + 127) / 255) as u8;
-                            original[c].abs_diff(p[c]) <= 17 || original[c].abs_diff(premult) <= 17
-                        })
-                });
-            same.then_some((s, img))
+            None
         })?;
         let scale = sprite.artwork.scale();
         if matches!(sprite.artwork, Artwork::HudSymbol | Artwork::TownTiles) {
             return Some((scale, sprite.artwork.immediate(image.pixels(), w, h)?));
         }
+        let (sw, sh) = sprite.size;
+        let upload = |hd: Vec<u8>| {
+            if sprite.size == size {
+                return (scale, hd);
+            }
+            // Keep the guest UVs, edge texels and padding on both cache paths.
+            let row_bytes = w * scale * 4;
+            let mut out = vec![0; row_bytes * h * scale];
+            for y in 0..h {
+                let inside = (top..top + sh).contains(&y);
+                let start = if inside { sw } else { 0 };
+                let row = y * scale * row_bytes;
+                for x in start..w {
+                    let color = pixel(y * w + x);
+                    let dst = row + x * scale * 4;
+                    for chunk in out[dst..dst + scale * 4].chunks_exact_mut(4) {
+                        chunk.copy_from_slice(&color);
+                    }
+                }
+                for dy in 0..scale {
+                    let dst = row + dy * row_bytes;
+                    if dy > 0 {
+                        out.copy_within(
+                            row + start * scale * 4..row + row_bytes,
+                            dst + start * scale * 4,
+                        );
+                    }
+                    if inside {
+                        let n = sw * scale * 4;
+                        let src = ((y - top) * scale + dy) * n;
+                        out[dst..dst + n].copy_from_slice(&hd[src..src + n]);
+                    }
+                }
+            }
+            (scale, out)
+        };
         let path = self.directory.join(&sprite.key);
-        if let Ok(bytes) = read_cache(&path, w * h * scale * scale * 4) {
-            return Some((scale, bytes));
+        if let Ok(bytes) = read_cache(&path, sw * sh * scale * scale * 4) {
+            return Some(upload(bytes));
         }
         if !self.pending.contains(&sprite.key) {
             let job = Job {
@@ -473,9 +541,6 @@ impl Cache {
                 self.pending.insert(sprite.key.clone());
             }
         }
-        sprite
-            .artwork
-            .immediate(image.pixels(), w, h)
-            .map(|pixels| (scale, pixels))
+        sprite.artwork.immediate(image.pixels(), sw, sh).map(upload)
     }
 }
